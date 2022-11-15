@@ -1,0 +1,55 @@
+/* atkinson-hyperlegible-regular - latin-ext_latin */
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  font-style: normal;
+  font-weight: 400;
+  src: local(""),
+    url("/fonts/atkinson/atkinson-hyperlegible-v10-latin-ext_latin-regular.woff2")
+      format("woff2"),
+    url("/fonts/atkinson/atkinson-hyperlegible-v10-latin-ext_latin-regular.woff")
+      format("woff");
+}
+/* atkinson-hyperlegible-italic - latin-ext_latin */
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  font-style: italic;
+  font-weight: 400;
+  src: local(""),
+    url("/fonts/atkinson-hyperlegible-v10-latin-ext_latin-italic.woff2")
+      format("woff2"),
+    url("/fonts/atkinson-hyperlegible-v10-latin-ext_latin-italic.woff")
+      format("woff");
+}
+/* atkinson-hyperlegible-700 - latin-ext_latin */
+
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  font-style: normal;
+  font-weight: 700;
+  src: local(""),
+    url("/fonts/atkinson-hyperlegible-v10-latin-ext_latin-700.woff2")
+      format("woff2"),
+    url("/fonts/atkinson-hyperlegible-v10-latin-ext_latin-700.woff")
+      format("woff");
+}
+
+/* OTHER GLOBAL*/
+/* .verse { */
+  /* color: red !important; */
+/* } */
+.menuNumberInput::-webkit-outer-spin-button,
+.menuNumberInput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+	
+  margin: 0;
+}
+.chaptermarker {
+  font-size: 1.5rem;
+}
+.verse {
+  font-size: 1.25rem;
+}
+.chapterlabel {
+  text-transform: capitalize;
+  font-size: 1.5rem;
+}
