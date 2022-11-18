@@ -1,24 +1,23 @@
-import {defineConfig} from "astro/config";
+import { defineConfig } from "astro/config"
 
 // https://astro.build/config
-import tailwind from "@astrojs/tailwind";
+import tailwind from "@astrojs/tailwind"
 
 // https://astro.build/config
-import cloudflare from "@astrojs/cloudflare";
+import cloudflare from "@astrojs/cloudflare"
 
 // https://astro.build/config
-import solidJs from "@astrojs/solid-js";
+import solidJs from "@astrojs/solid-js"
 // https://vite-pwa-org.netlify.app/frameworks/astro.html
-import AstroPWA from "@vite-pwa/astro";
-import {manifest} from "./manifest";
-import {visualizer} from "rollup-plugin-visualizer";
-
+import AstroPWA from "@vite-pwa/astro"
+import { manifest } from "./manifest"
+import { visualizer } from "rollup-plugin-visualizer"
 
 // https://astro.build/config
 export default defineConfig({
   output: "server",
   adapter: cloudflare({
-    mode: 'directory'
+    mode: "directory"
   }),
   integrations: [
     tailwind(),
@@ -26,11 +25,11 @@ export default defineConfig({
     AstroPWA({
       /* your pwa options */
 
-      base: "/",
-      scope: "/",
+      // base: "/",
+      // scope: "/",
       srcDir: "src",
       filename: "sw.js",
-      mode: import.meta.env.MODE,
+      // mode: import.meta.env.MODE,
       strategies: "injectManifest",
       // injectManifest: {
       // swDest: "dist/client/sw.js",
@@ -38,16 +37,21 @@ export default defineConfig({
       // globPatterns: ["**/*.{css,js,html,svg,png,ico,txt}"],
       // sourcemap: true,
       // },
-      registerType: "prompt",
+      registerType: "autoUpdate",
       manifest: manifest,
-    }),
+      devOptions: {
+        enabled: true,
+        type: "module"
+        /* other options */
+      }
+    })
   ],
   vite: {
     plugins: [
       visualizer({
         // open: true,
-        gzipSize: true,
-      }),
+        gzipSize: true
+      })
     ]
   }
-});
+})

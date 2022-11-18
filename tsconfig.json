@@ -5,12 +5,23 @@
     "allowJs": true,
     "jsxImportSource": "solid-js",
     "baseUrl": ".",
+    "moduleResolution": "node",
+    "target": "ESNext",
+    "module": "ESNext",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noErrorTruncation": true,
+    "types": ["astro/client", "@cloudflare/workers-types"],
     "paths": {
-      "@globals": ["src/components/global"],
-      "@component/*": ["src/components/*"],
+      // "@globals": ["src/components/global"],
+      "@components": ["src/components"],
+      "@components/*": ["src/components/*"],
+      "@layouts/*": ["src/layouts/*"],
       "@assets/*": ["src/assets/*"],
+      "@images/*": ["src/assets/images/*"],
       "@lib/*": ["src/lib/*"],
       "@types/*": ["src/types/*"]
     }
-  }
+  },
+  "include": ["./**/*", "node_modules/vite-plugin-pwa/client.d.ts", "src/**/*"]
 }

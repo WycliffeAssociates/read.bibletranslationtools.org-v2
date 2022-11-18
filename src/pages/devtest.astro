@@ -1,0 +1,71 @@
+---
+const date = new Date()
+---
+
+<div class="h-screen p-8">
+  The current date and time is {date}
+
+  <div class="my-4">
+    Current Strategy is
+    <div id="currentStrategy"></div>
+  </div>
+  <div class="flex p-4">
+    <button class="border border-black px-4 py-2" data-strategy="networkFirst"
+      >Network first</button
+    >
+    <button class="border border-black px-4 py-2" data-strategy="cacheFirst"
+      >Cache First</button
+    >
+    <button class="border border-black px-4 py-2" data-strategy="cacheOnly"
+      >cacheOnly</button
+    >
+  </div>
+  <a href="/devtest2">Go to other page</a>
+
+  <div id="questions">
+    <ol class="list-decimal">
+      <li>
+        Print Behavior? Current: Prints entire Book / Repo
+        <a href="https://read.bibletranslationtools.org/u/WA-Catalog/en_ulb/"
+          >Current Ulb Example</a
+        >
+      </li>
+      <li>Runtime Caching Behavior</li>
+    </ol>
+  </div>
+</div>
+
+<script>
+  import { get, set } from "idb-keyval"
+  let btns = document.querySelectorAll("[data-strategy]")
+  const runTimeDefault = "preferCache"
+  const cacheStrategyKey = "cacheStrategy"
+  const cacheStrategies = {
+    networkFirst: "networkFirst",
+    cacheFirst: "cacheFirst",
+    cacheOnly: "cacheOnly"
+  }
+  let currentDiv = document.querySelector("#currentStrategy") as HTMLDivElement
+
+  window.addEventListener("DOMContentLoaded", async () => {
+    const currentCacheStrategy = await get(cacheStrategyKey)
+
+    if (currentCacheStrategy === "networkFirst") {
+      btns[0].classList.add("bg-green-500")
+    } else if (currentCacheStrategy === "cacheFirst") {
+      btns[1].classList.add("bg-green-500")
+    } else if (currentCacheStrategy === "cacheOnly") {
+      btns[2].classList.add("bg-green-500")
+    }
+    currentDiv.innerText = currentCacheStrategy
+  })
+
+  btns.forEach((btn) =>
+    btn.addEventListener("click", async (e) => {
+      let target = e.target as HTMLButtonElement
+      let newStrat = target.dataset.strategy
+      await set(cacheStrategyKey, newStrat)
+      window.location.reload()
+    })
+  )
+</script>

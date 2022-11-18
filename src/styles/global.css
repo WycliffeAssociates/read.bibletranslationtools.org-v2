@@ -15,9 +15,9 @@
   font-style: italic;
   font-weight: 400;
   src: local(""),
-    url("/fonts/atkinson-hyperlegible-v10-latin-ext_latin-italic.woff2")
+    url("/fonts/atkinson/atkinson-hyperlegible-v10-latin-ext_latin-italic.woff2")
       format("woff2"),
-    url("/fonts/atkinson-hyperlegible-v10-latin-ext_latin-italic.woff")
+    url("/fonts/atkinson/atkinson-hyperlegible-v10-latin-ext_latin-italic.woff")
       format("woff");
 }
 /* atkinson-hyperlegible-700 - latin-ext_latin */
@@ -27,20 +27,20 @@
   font-style: normal;
   font-weight: 700;
   src: local(""),
-    url("/fonts/atkinson-hyperlegible-v10-latin-ext_latin-700.woff2")
+    url("/fonts/atkinson/atkinson-hyperlegible-v10-latin-ext_latin-700.woff2")
       format("woff2"),
-    url("/fonts/atkinson-hyperlegible-v10-latin-ext_latin-700.woff")
+    url("/fonts/atkinson/atkinson-hyperlegible-v10-latin-ext_latin-700.woff")
       format("woff");
 }
 
 /* OTHER GLOBAL*/
 /* .verse { */
-  /* color: red !important; */
+/* color: red !important; */
 /* } */
 .menuNumberInput::-webkit-outer-spin-button,
 .menuNumberInput::-webkit-inner-spin-button {
   -webkit-appearance: none;
-	
+
   margin: 0;
 }
 .chaptermarker {

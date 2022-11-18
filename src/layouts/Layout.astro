@@ -1,40 +1,60 @@
 ---
 export interface Props {
-  title: string;
+  title: string
+  use100vh?: boolean
 }
+// imports
+import { pwaInfo } from "virtual:pwa-info"
+import "../styles/global.css"
+import { Nav, ReloadPrompt } from "@components"
+import { getPreferredLangFromHeader } from "@lib/utils"
 
-const {title} = Astro.props;
+// data
+const { title, use100vh } = Astro.props
+
+const preferredLocale = getPreferredLangFromHeader(Astro.request)
 ---
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang={preferredLocale}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image" href="/favicon-32x32.png" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
+    <script src="/src/pwa.ts"></script>
+    {pwaInfo && <Fragment set:html={pwaInfo.webManifest.linkTag} />}
   </head>
   <body>
-    <slot />
+    <div
+      class={use100vh
+        ? "h-screen grid grid-rows-[minmax(100px,_15vh),_85vh]"
+        : ""}
+      id="pageWrapper"
+    >
+      <Nav preferredLocale={preferredLocale} />
+      <slot />
+      <!-- <ReloadPrompt /> -->
+    </div>
+    <style is:global>
+      :root {
+        --accent: 124, 58, 237;
+        --accent-gradient: linear-gradient(
+          45deg,
+          rgb(var(--accent)),
+          #da62c4 30%,
+          white 60%
+        );
+      }
+      html {
+        font-family: system-ui, sans-serif;
+        background-color: #f6f6f6;
+      }
+      code {
+        font-family: Menlo, Monaco, Lucida Console, Liberation Mono,
+          DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
+      }
+    </style>
   </body>
 </html>
-<style is:global>
-  :root {
-    --accent: 124, 58, 237;
-    --accent-gradient: linear-gradient(
-      45deg,
-      rgb(var(--accent)),
-      #da62c4 30%,
-      white 60%
-    );
-  }
-  html {
-    font-family: system-ui, sans-serif;
-    background-color: #f6f6f6;
-  }
-  code {
-    font-family: Menlo, Monaco, Lucida Console, Liberation Mono,
-      DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
-  }
-</style>

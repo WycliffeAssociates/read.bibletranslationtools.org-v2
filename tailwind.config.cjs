@@ -1,4 +1,4 @@
-const defaultTheme = require("tailwindcss/defaultTheme");
+const defaultTheme = require("tailwindcss/defaultTheme")
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -8,14 +8,15 @@ module.exports = {
       colors: {
         accent: "#015AD9",
         secondary: "#FAA83C",
+        darkAccent: "#001533"
       },
       maxWidth: {
-        container: '1400px'
+        container: "1400px"
       },
       fontFamily: {
-        sans: ["'Atkinson Hyperlegible'", ...defaultTheme.fontFamily.sans],
-      },
-    },
+        sans: ["'Atkinson Hyperlegible'", ...defaultTheme.fontFamily.sans]
+      }
+    }
   },
-  plugins: [],
-};
+  plugins: []
+}

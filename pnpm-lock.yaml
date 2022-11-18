@@ -4,6 +4,7 @@ specifiers:
   '@astrojs/cloudflare': ^4.0.1
   '@astrojs/solid-js': ^1.2.3
   '@astrojs/tailwind': ^2.1.2
+  '@cloudflare/workers-types': ^3.18.0
   '@solid-primitives/i18n': ^1.1.2
   '@typescript-eslint/eslint-plugin': ^5.38.0
   '@typescript-eslint/parser': ^5.38.0
@@ -42,6 +43,7 @@ dependencies:
   tailwindcss: 3.2.4_postcss@8.4.19
 
 devDependencies:
+  '@cloudflare/workers-types': 3.18.0
   '@typescript-eslint/eslint-plugin': 5.43.0_yy4vf4gcvxiubmg7fqa55dqe2i
   '@typescript-eslint/parser': 5.43.0_rmayb2veg2btbq6mbmnyivgasy
   '@vite-pwa/astro': 0.0.1
@@ -1376,6 +1378,10 @@ packages:
     resolution: {integrity: sha512-MVbXLbTcAotOPUj0pAMhVtJ+3/kFkwJqc5qNOleOZTv6QkZZABDMS21dSrSlVswEHwrpWC03e4fWytjqKvuE2A==}
     dependencies:
       mime: 3.0.0
+    dev: true
+
+  /@cloudflare/workers-types/3.18.0:
+    resolution: {integrity: sha512-ehKOJVLMeR+tZkYhWEaLYQxl0TaIZu/kE86HF3/RidR8Xv5LuQxpbh+XXAoKVqsaphWLhIgBhgnlN5HGdheXSQ==}
     dev: true
 
   /@emmetio/abbreviation/2.2.3:
