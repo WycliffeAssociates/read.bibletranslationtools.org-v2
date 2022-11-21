@@ -1,4 +1,5 @@
 import { FUNCTIONS_ROUTES } from "@lib/routes"
+import type { repoIndexObj } from "../types/types"
 
 interface baseApiInfo {
   user: string
@@ -29,7 +30,7 @@ export async function getChapterHtml({
 export async function getRepoIndex({
   user,
   repo
-}: baseApiInfo): Promise<{} | null> {
+}: baseApiInfo): Promise<repoIndexObj | null> {
   if (!user || !repo) return null
   let fetchUrl = FUNCTIONS_ROUTES.getRepoIndex({ user, repo })
   try {

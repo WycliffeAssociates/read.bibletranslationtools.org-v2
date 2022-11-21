@@ -29,7 +29,7 @@ const preferredLocale = getPreferredLangFromHeader(Astro.request)
   <body>
     <div
       class={use100vh
-        ? "h-screen grid grid-rows-[minmax(100px,_15vh),_85vh]"
+        ? "h-screen grid grid-rows-[minmax(100px),_calc(100vh_-_100px)]"
         : ""}
       id="pageWrapper"
     >

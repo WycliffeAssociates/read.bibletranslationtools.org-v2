@@ -1,11 +1,17 @@
 import { i18nDict, i18nDictKeysType } from "@lib/i18n"
 import { createI18nContext, I18nContext } from "@solid-primitives/i18n"
-import { createSignal, onMount, Show, createMemo, Accessor } from "solid-js"
+import { createSignal, onMount, Show, createMemo } from "solid-js"
 import type { JSX } from "solid-js"
 import { createStore, produce } from "solid-js/store"
 import { FUNCTIONS_ROUTES } from "@lib/routes"
 import { ReaderMenu, ReaderPane } from "@components"
 import type { StoreNode, Store, SetStoreFunction } from "solid-js/store"
+import type {
+  bibleChapObj,
+  bibleEntryObj,
+  repoIndexObj
+} from "../../types/types"
+import type { Accessor } from "solid-js"
 
 // types are a little verbose up here: See them as the bottom:
 
@@ -17,8 +23,18 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
     currentBook: props.firstBookKey,
     currentChapter: props.firstChapterToShow,
     menuBook: props.firstBookKey,
-    searchedBooks: Object.keys(props.repoData),
-    text: props.repoData
+    searchedBooks: props.repoData.bible.map((book) => {
+      return {
+        label: book.label,
+        slug: book.slug
+      }
+    }),
+    text: props.repoData.bible,
+    languageName: props.repoData.languageName,
+    languageCode: props.repoData.languageCode,
+    resourceType: props.repoData.resourceType,
+    textDirection: props.repoData.textDirection,
+    repoUrl: props.repoData.repoUrl
   }
 
   const [readerStore, setReaderStore] = createStore(defaultStore)
@@ -32,7 +48,15 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
       [K in keyof Source]: Source[K] extends Condition ? K : never
     }[keyof Source]
   >
-  type mutateSimple = FilterConditionally<typeof readerStore, string[] | string>
+  type mutateSimple = FilterConditionally<
+    typeof readerStore,
+    | string[]
+    | string
+    | {
+        label: string
+        slug: string
+      }[]
+  >
 
   function mutateStore<T extends keyof mutateSimple>(
     key: T,
@@ -48,40 +72,82 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
   function mutateStoreText({ book, chapter, val }: updateStoreTextParams) {
     setReaderStore(
       produce((currentStore) => {
-        currentStore.text[book][chapter] = val
+        let currentBook = currentStore.text.findIndex(
+          (storeBib) => storeBib.slug == book
+        )
+        let currentChap = currentStore.text[currentBook].chapters.findIndex(
+          (storeChap) => storeChap.label == chapter
+        )
+        currentStore.text[currentBook].chapters[currentChap].text = val
       })
     )
   }
   function getStoreVal<T>(key: keyof typeof readerStore) {
     return readerStore[key] as T
   }
-  const allBookObj = createMemo(() => {
+  const allBibArr = createMemo(() => {
     return readerStore.text
   })
+  const getMenuBook = createMemo(() => {
+    let menuBook = readerStore.text.find((storeBib) => {
+      return storeBib.slug == readerStore.menuBook
+    })
+
+    return menuBook
+  })
   const isOneBook = () => {
-    return Object.keys(readerStore.text).length === 1
+    return readerStore.text.length == 1
   }
   const currentBookObj = createMemo(() => {
-    return readerStore.text[readerStore.currentBook]
+    // return readerStore.text[readerStore.currentBook]
+    let currentBook = readerStore.text.find((storeBib) => {
+      return storeBib.slug == readerStore.currentBook
+    })
+    return currentBook
   })
-  const HTML = createMemo(() => {
+  const currentChapObj = createMemo(() => {
     const currentBook = currentBookObj()
-    const retVal = currentBook[readerStore.currentChapter]
-    return retVal
+    let currentChap = currentBook?.chapters.find(
+      (chap) => readerStore.currentChapter == chap.label
+    )
+    return currentChap
+  })
+  function getChapObjFromGivenBook(bookSlug: string, chap: number | string) {
+    let book = readerStore.text.find((storeBib) => {
+      return storeBib.slug == bookSlug
+    })
+    let chapter = book?.chapters.find((bookChap) => bookChap.label == chap)
+    return chapter
+  }
+  const HTML = createMemo(() => {
+    let currentChap = currentChapObj()
+    // const retVal = currentBook[readerStore.currentChapter]
+    return (currentChap && currentChap.text) || undefined
   })
   const maxChapter = createMemo(() => {
-    const bookObj = readerStore.text[readerStore.menuBook]
-    const vals = Object.keys(bookObj).map((val) => Number(val))
-    return Math.max(...vals)
+    const bookObj = readerStore.text.find((storeBook) => {
+      return storeBook.slug == readerStore.menuBook
+    })
+    // const bookObj = readerStore.text[readerStore.menuBook]
+    // const vals = Object.keys(bookObj).map((val) => Number(val))
+    // return Math.max(...vals)
+    let last = bookObj && bookObj.chapters.length
+    return last
   })
   const menuBookNames = createMemo(() => {
     return readerStore.searchedBooks
   })
   const possibleChapters = createMemo(() => {
-    const chapters = Object.keys(readerStore.text[readerStore.menuBook])
+    // const chapters = Object.keys(readerStore.text[readerStore.menuBook])
+    // debugger
+    const bookObj = readerStore.text.find((storeBook) => {
+      return storeBook.slug == readerStore.menuBook
+    })
+    const chapters = bookObj && bookObj.chapters
     return chapters
   })
 
+  // @ fetching html
   let controller //reuse btw invocations
   let signal
   const [isFetching, setIsFetching] = createSignal(false)
@@ -121,20 +187,23 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
     mutateStore,
     mutateStoreText,
     getStoreVal,
-    allBookObj,
+    allBibArr,
     isOneBook,
     currentBookObj,
+    currentChapObj,
+    getChapObjFromGivenBook,
     HTML,
     maxChapter,
     menuBookNames,
     possibleChapters,
-    fetchHtml
+    fetchHtml,
+    getMenuBook
   }
 
   return (
     <>
       <I18nProvider locale={props.preferredLocale}>
-        <div class="mx-auto grid max-h-full max-w-[1400px] grid-rows-[minmax(50px,_9%),_90%]">
+        <div class="creenHeightGrid mx-auto grid max-h-full max-w-[1400px]  grid-rows-[90px,_calc(100vh-190px)]">
           <ReaderMenu storeInterface={storeInterface} />
           <ReaderPane
             storeInterface={storeInterface}
@@ -182,19 +251,36 @@ export interface ReaderWrapperProps {
   preferredLocale: i18nDictKeysType
   firstBookKey: string
   firstChapterToShow: string
-  repoData: repoShape
+  repoData: repoIndexObj
 }
 export interface storeType {
   mutateStore<
-    T extends "currentBook" | "currentChapter" | "menuBook" | "searchedBooks"
+    T extends
+      | "currentBook"
+      | "currentChapter"
+      | "menuBook"
+      | "searchedBooks"
+      | "languageName"
+      | "languageCode"
+      | "resourceType"
+      | "textDirection"
+      | "repoUrl"
   >(
     key: T,
+
     val: {
       currentBook: string
       currentChapter: string
       menuBook: string
-      searchedBooks: string[]
-      text: repoShape
+      searchedBooks: {
+        label: string
+        slug: string
+      }[]
+      languageName: string
+      languageCode: string
+      resourceType: string
+      textDirection: string
+      repoUrl: string
     }[T]
   ): void
   mutateStoreText: ({ book, chapter, val }: updateStoreTextParams) => void
@@ -205,16 +291,31 @@ export interface storeType {
       | "menuBook"
       | "searchedBooks"
       | "text"
+      | "languageName"
+      | "languageCode"
+      | "resourceType"
+      | "textDirection"
+      | "repoUrl"
   ) => T
-  allBookObj: Accessor<repoShape>
+
+  allBibArr: Accessor<bibleEntryObj[]>
   isOneBook: () => boolean
-  currentBookObj: Accessor<{
-    [index: string]: string
-  }>
-  HTML: Accessor<string>
-  maxChapter: Accessor<number>
-  menuBookNames: Accessor<string[]>
-  possibleChapters: Accessor<string[]>
+  currentBookObj: Accessor<bibleEntryObj | undefined>
+  currentChapObj: Accessor<bibleChapObj | undefined>
+  getChapObjFromGivenBook(
+    bookSlug: string,
+    chap: number | string
+  ): bibleChapObj | undefined
+  HTML: Accessor<string | undefined>
+  maxChapter: Accessor<number | undefined>
+  menuBookNames: Accessor<
+    {
+      label: string
+      slug: string
+    }[]
+  >
+  getMenuBook: Accessor<bibleEntryObj | undefined>
+  possibleChapters: Accessor<bibleChapObj[] | undefined>
   fetchHtml: ({
     book,
     chapter

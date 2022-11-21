@@ -1,12 +1,13 @@
 ---
 import { FUNCTIONS_ROUTES } from "@lib/routes"
+
 import Layout from "@layouts/Layout.astro"
 import { ReaderWrapper } from "@components"
 import { getChapterHtml, getRepoIndex, isValidRepo } from "@lib/api"
 import {
   getBookAndChapterFromUrl,
   getPreferredLangFromHeader,
-  reshapeIndexWithInitialData,
+  seedAndMutateInitialDataRepoIndex,
   res404
 } from "@lib/utils"
 let { repo, user } = Astro.params
@@ -22,7 +23,7 @@ if (!isValid) res404("Invalid repo")
 
 // get of text and metadata
 const repoIndex = await getRepoIndex({ user, repo })
-if (!repoIndex) res404("Index fetch failed")
+if (!repoIndex) return res404("Index fetch failed")
 
 // grab query params (if present) for initial HTML
 const { book, chapter } = getBookAndChapterFromUrl({
@@ -32,11 +33,11 @@ const { book, chapter } = getBookAndChapterFromUrl({
 })
 //  intial props/data for page;
 const initialHtml = await getChapterHtml({ user, repo, book, chapter })
-const reshapedIndex = reshapeIndexWithInitialData({
+seedAndMutateInitialDataRepoIndex({
   repoIndex,
-  book,
+  book, //slug, not native label;
   chapter,
-  initialData: initialHtml
+  initialHtml: String(initialHtml)
 })
 const preferredLocale = getPreferredLangFromHeader(Astro.request)
 ---
@@ -48,7 +49,7 @@ const preferredLocale = getPreferredLangFromHeader(Astro.request)
       client:load
       firstBookKey={book}
       firstChapterToShow={chapter}
-      repoData={reshapedIndex}
+      repoData={repoIndex}
       user={user}
       repositoryName={repo}
       preferredLocale={preferredLocale}

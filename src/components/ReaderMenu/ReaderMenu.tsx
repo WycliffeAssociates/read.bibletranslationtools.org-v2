@@ -4,21 +4,8 @@ import { SvgDownload, SvgArrow, SvgSearch, SvgBook } from "@components"
 import { useI18n } from "@solid-primitives/i18n"
 import { get, set } from "idb-keyval"
 import type { JSX, ParentComponent, ParentProps, Component } from "solid-js"
-
-// todo: move this elsewhere?
-// https://github.com/solidjs/solid/issues/804
-
-// todo: move this elsewhere?
-// https://github.com/solidjs/solid/issues/804
-declare module "solid-js" {
-  namespace JSX {
-    interface CustomEvents {
-      changelanguage: (ev: CustomEvent) => void
-    }
-  }
-}
-
-// This create a tight coupling btw menu and parent, since the child is just accepting whatever comes its way,  But if the parent function signatures change, TS should complain there;
+import type { bibleEntryObj } from "../../types/types"
+// This create a tight coupling btw menu and parent, since the child is just accepting whatever comes its way,  But if the parent function signatures change, TS should complain there, and this will need refactoring regardless.
 import type { storeType } from "../ReaderWrapper/ReaderWrapper"
 interface MenuProps {
   storeInterface: storeType
@@ -52,22 +39,29 @@ const ReaderMenu: Component<MenuProps> = (props) => {
     if (
       !chapter ||
       chapter < 0 ||
-      chapter > props.storeInterface.maxChapter()
+      chapter > Number(props.storeInterface.maxChapter())
     ) {
       return
     }
-    chapter = String(chapter)
-    let existingData = props.storeInterface.allBookObj()
-    let existing = existingData[menuBook][chapter]
+
+    let currentBookObj = props.storeInterface.currentBookObj()
+    // handles index offset:
+    let existingChap = currentBookObj
+      ? props.storeInterface.getChapObjFromGivenBook(
+          currentBookObj.slug,
+          chapter
+        )
+      : null
+
     // go to in memory text
-    if (existing) {
-      storeInterface.mutateStore("currentChapter", chapter)
+    if (existingChap?.text) {
+      storeInterface.mutateStore("currentChapter", String(chapter))
     }
 
     // fetch new and nav
     let text = await storeInterface.fetchHtml({
       book: menuBook,
-      chapter: chapter
+      chapter: String(chapter)
     })
     // Early bail, no text given
     if (!text) return
@@ -116,11 +110,13 @@ const ReaderMenu: Component<MenuProps> = (props) => {
   }
 
   const searchBooks = debounce((): void => {
-    let allBooks = Object.keys(props.storeInterface.getStoreVal("text"))
+    let allBooks = props.storeInterface.getStoreVal<bibleEntryObj[]>("text")
     let search = searchQuery().toLowerCase()
     !search && props.storeInterface.mutateStore("searchedBooks", allBooks)
-    let filtered = allBooks.filter((book) =>
-      book.toLowerCase().includes(search)
+    let filtered = allBooks.filter(
+      (book) =>
+        book.label.toLowerCase().includes(search) ||
+        book.slug.toLowerCase().includes(search)
     )
     props.storeInterface.mutateStore("searchedBooks", filtered)
   }, 400)
@@ -132,21 +128,24 @@ const ReaderMenu: Component<MenuProps> = (props) => {
   return (
     <div
       class="print:hidden"
-      on:changelanguage={(e: any) => {
-        // todo: remove the ANY type for even and provide proper type of custom event;
-        const langCode = e.detail.language
-        locale(langCode)
+      on:changelanguage={(
+        e: CustomEvent<{
+          language: string
+        }>
+      ) => {
+        setLanguageFromCustomEvent(e.detail.language)
       }}
       id="menu"
     >
-      <div class=" mx-auto flex  w-full items-center px-4 py-2 ">
+      <div class=" mx-auto flex w-full flex-wrap items-center px-4 py-2 ">
         {/* "publication" */}
-        <div class="w-1/6 font-bold uppercase">
-          {props.storeInterface.getStoreVal("currentBook")}
+        <div class="w-full text-center font-bold uppercase sm:w-1/6">
+          {props.storeInterface.getStoreVal("languageName")}:{" "}
+          {props.storeInterface.currentBookObj()?.label}
         </div>
 
         {/* menu button / info */}
-        <div class="relative flex w-5/6  items-center">
+        <div class="relative flex w-full items-center justify-between  gap-3 sm:w-5/6">
           <div class="my-2 flex w-4/5 justify-between overflow-hidden  rounded-lg bg-neutral-200 outline outline-gray-300">
             <button
               class="flex w-full flex-grow items-center rounded-md pl-2"
@@ -154,7 +153,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
             >
               <SvgBook className="fill-dark-900 mr-2 inline-block fill-current" />
               <span class="text-xl capitalize">
-                {props.storeInterface.getStoreVal("currentBook")}
+                {props.storeInterface.currentBookObj()?.label}
               </span>
             </button>
 
@@ -170,7 +169,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
           </div>
           <Show when={menuIsOpen()}>
             {/*//! TABLET AND UP */}
-            <div class="sm:shadow-dark-300 z-10 hidden max-h-[70vh]  w-full  overflow-scroll   bg-white sm:absolute sm:top-full sm:block sm:rounded-xl sm:border sm:shadow-xl">
+            <div class="sm:shadow-dark-300 z-20 hidden max-h-[71vh]  w-full  overflow-scroll   bg-white sm:absolute sm:top-full sm:block sm:rounded-xl sm:border sm:shadow-xl">
               <div class="hidden sm:flex">
                 {/* Books */}
                 <div class="border-netural-200 w-2/5 border-r">
@@ -199,11 +198,13 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                                   classList={{
                                     " w-full text-xl py-2 text-left border-y border-gray-100 pl-4 hover:bg-accent/10 focus:bg-accent/10":
                                       true,
-                                    "font-bold text-accent": isActiveBook(book)
+                                    "font-bold text-accent": isActiveBook(
+                                      book.slug
+                                    )
                                   }}
-                                  onClick={(e) => switchBooks(book)}
+                                  onClick={(e) => switchBooks(book.slug)}
                                 >
-                                  {book}
+                                  {book.label}
                                 </button>
                               </li>
                             )}
@@ -235,7 +236,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                                     jumpToNewChapIdx(e, idx() + 1)
                                   }}
                                 >
-                                  {book}
+                                  {book.label}
                                 </button>
                               </li>
                             )}
@@ -268,7 +269,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
           </div>
         </div>
       </div>
-      <div class="relative z-10">
+      <div class="relative z-40">
         <Show when={menuIsOpen()}>
           <div
             id="mobileMenu"
@@ -320,22 +321,22 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                     value={searchQuery()}
                   />
                 </label>
-                <ul class="h-[70vh] overflow-y-scroll">
+                <ul class="h-[55vh] overflow-y-scroll pb-36">
                   <For each={props.storeInterface.menuBookNames()}>
-                    {(book: string) => (
+                    {(book) => (
                       <li class="w-full">
                         <button
                           classList={{
                             " w-full text-xl py-2 text-left border-y border-gray-100 pl-4 hover:bg-accent/10 focus:bg-accent/10":
                               true,
-                            "font-bold text-accent": isActiveBook(book)
+                            "font-bold text-accent": isActiveBook(book.slug)
                           }}
                           onClick={(e) => {
-                            switchBooks(book)
+                            switchBooks(book.slug)
                             setMobileTabOpen("chapter")
                           }}
                         >
-                          {book}
+                          {book.label}
                         </button>
                       </li>
                     )}
@@ -347,9 +348,9 @@ const ReaderMenu: Component<MenuProps> = (props) => {
             <Show when={mobileTabOpen() == "chapter"}>
               <div class="p-2">
                 <p class="py-2 pl-2 text-2xl ">
-                  {props.storeInterface.getStoreVal("menuBook")}
+                  {props.storeInterface.getMenuBook()?.label}
                 </p>
-                <ul class="grid  h-[65vh] grid-cols-6 place-content-start gap-2 overflow-y-scroll ">
+                <ul class="grid  h-[54vh] grid-cols-6 place-content-start gap-2 overflow-y-scroll pb-36 ">
                   <For each={props.storeInterface.possibleChapters()}>
                     {(book, idx) => (
                       <li class="w-full text-center text-xl">
@@ -362,7 +363,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                             jumpToNewChapIdx(e, idx() + 1)
                           }}
                         >
-                          {book}
+                          {book.label}
                         </button>
                       </li>
                     )}

@@ -1,4 +1,6 @@
 import { i18nDict, i18nDictKeysType } from "@lib/i18n"
+import type { repoIndexObj } from "../types/types"
+
 export function getPreferredLangFromHeader(request: Request): i18nDictKeysType {
   const defaultLocale = "en"
   if (!request) return defaultLocale
@@ -23,8 +25,9 @@ export function getPreferredLangFromHeader(request: Request): i18nDictKeysType {
 interface bookChapterRequest {
   book: string | null
   chapter: string | null
-  repoIndex: any //Todo: this is going to be an object, but don't know finale shape from Reuben. In end needs its own type shape from api;
+  repoIndex: repoIndexObj
 }
+
 export function getBookAndChapterFromUrl({
   book,
   chapter,
@@ -33,45 +36,47 @@ export function getBookAndChapterFromUrl({
   book: string
   chapter: string
 } {
-  if (!book || !repoIndex[book]) {
+  let matchingBook = repoIndex.bible.find(
+    (repoBook) => repoBook.slug == book || repoBook.label == book
+  )
+  let matchingChapter =
+    matchingBook &&
+    matchingBook.chapters.find((chapterObj) => chapterObj.label == chapter)
+  if (!book || !matchingBook) {
     book = null
     chapter = null
-  } else if (chapter && !repoIndex[book][chapter]) {
+  } else if (chapter && !matchingChapter) {
     // there is a book, and chap provided but this verfies that it is a a valid book/chap ;  Only set chap to null cause we can still use the book
     chapter = null
   }
   // todo: api signature from reuben will like change how to get this key
-  let firstBookToRender = book || Object.keys(repoIndex)[0] //use first Key;
-  let firstChapterToShow = chapter || repoIndex[firstBookToRender][0]
+  let firstBookToRender = matchingBook || repoIndex.bible[0] //use first Key;
+  let firstChapterToShow = matchingChapter || firstBookToRender.chapters[0]
 
-  return { book: firstBookToRender, chapter: firstChapterToShow }
+  return { book: firstBookToRender.slug, chapter: firstChapterToShow.label }
 }
 
+interface reshapeBibleIndexI {
+  repoIndex: repoIndexObj
+  book: string
+  chapter: string
+  initialHtml: string
+}
 // todo change this repoIndex type when finalize
-export function reshapeIndexWithInitialData({
+export function seedAndMutateInitialDataRepoIndex({
   repoIndex,
   book,
   chapter,
-  initialData
-}: any): any {
-  let copy = structuredClone(repoIndex)
-  // this restructuring is to reduce the off by 1 nature of Arrays since we can start the object with a key of '1'.  there are some other places that we still need to consider the array index, but I think a little simpler here as obj for access.  E.g. Object.Matthew.1,
-  type finalIndexType = {
-    [index: string]: {
-      [index: string]: string | null
-    }
-  }
-  let finalIndex: finalIndexType = {}
-  for (const property in copy) {
-    copy[property].forEach((ch: string) => {
-      if (!finalIndex[property]) {
-        finalIndex[property] = {}
+  initialHtml
+}: reshapeBibleIndexI): any {
+  repoIndex.bible.forEach((repoBook) => {
+    repoBook.chapters.forEach((repoChapter) => {
+      repoChapter.text = null
+      if (repoBook.slug == book && repoChapter.label == chapter) {
+        repoChapter.text = initialHtml
       }
-      finalIndex[property][ch] = null
     })
-  }
-  finalIndex[book][chapter] = initialData
-  return finalIndex
+  })
 }
 
 export function res404(reason: string) {

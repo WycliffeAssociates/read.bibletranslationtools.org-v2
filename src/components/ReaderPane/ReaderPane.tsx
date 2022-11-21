@@ -20,6 +20,7 @@ export default function ReaderPane(props: ReaderPaneProps) {
     hasNewerData: false,
     response: null
   })
+  let textRef: HTMLDivElement | undefined
 
   createEffect(
     on(
@@ -78,13 +79,21 @@ export default function ReaderPane(props: ReaderPaneProps) {
       nextCh = Number(currentChap) + 1
     }
     // validate chap is gettable;
-    if (nextCh > props.storeInterface.maxChapter() || nextCh <= 0) {
+    if (nextCh > Number(props.storeInterface.maxChapter()) || nextCh <= 0) {
       return
     }
     // Check for existing in memory;
     nextCh = String(nextCh) //all store keys are strings; Nums only for math
     let currentBookObj = props.storeInterface.currentBookObj()
-    let existingText = currentBookObj[nextCh] //html if put there;
+    // handles index offset:
+    let existingChap = currentBookObj
+      ? props.storeInterface.getChapObjFromGivenBook(
+          currentBookObj.slug,
+          nextCh
+        )
+      : null
+    let existingText = existingChap?.text //html if put there;
+    if (!existingChap) return
     if (existingText && navigate) {
       return props.storeInterface.mutateStore("currentChapter", nextCh)
     } else if (existingText) {
@@ -96,37 +105,23 @@ export default function ReaderPane(props: ReaderPaneProps) {
       book: currentBook,
       chapter: nextCh
     }
-    performance.mark("fetch start")
 
     let text = await props.storeInterface.fetchHtml(params)
     if (!text) return
-    performance.mark("fetch end")
 
     // Batch some state updates to notified memos at end of stateful updates
     batch(() => {
       props.storeInterface.mutateStoreText({
         book: currentBook,
-        chapter: String(nextCh),
+        chapter: String(existingChap?.label),
         val: String(text)
       })
       if (navigate) {
         props.storeInterface.mutateStore("currentChapter", String(nextCh))
-        // todo: change to a ref;
-        let el = document.querySelector(".theText")
-        if (el) el.scrollTop = 0
+        if (textRef) textRef.scrollTop = 0
       }
     })
 
-    // update state
-    performance.mark("all work done")
-    performance.measure("fetch time", "fetch start", "fetch end")
-    performance.measure("fetch end", "all work done")
-    // Pull out all of the measurements.
-    console.log(performance.getEntriesByType("measure"))
-
-    // Finally, clean up the entries.
-    performance.clearMarks()
-    performance.clearMeasures()
     return
   }
   return (
@@ -152,7 +147,8 @@ export default function ReaderPane(props: ReaderPaneProps) {
         <div id="portalLocation"></div>
         {/* HTML CONTENT */}
         <div
-          class="theText mx-auto  h-full max-w-[85ch] overflow-y-scroll bg-inherit pt-2 pb-24 leading-relaxed print:overflow-y-visible sm:px-4"
+          ref={textRef}
+          class="theText mx-auto h-full  max-w-[85ch] overflow-y-scroll bg-inherit pt-2 pb-24 text-lg leading-relaxed print:overflow-y-visible sm:px-8 md:w-[75ch] "
           innerHTML={props.storeInterface.HTML()}
         />
         {/* HTML CONTENT */}
@@ -169,9 +165,9 @@ export default function ReaderPane(props: ReaderPaneProps) {
             repo={props.repositoryName}
             book={props.firstBookKey}
             chapter={Number(props.firstChapterToShow) + 1}
-            onClick={(event: Event) =>
+            onClick={(event: Event) => {
               fetchReaderHtml({ event, navigate: true, dir: "FORWARD" })
-            }
+            }}
             icon={
               <SvgArrow className="color-inherit mx-auto rotate-180  fill-current stroke-current" />
             }

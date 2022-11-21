@@ -7,14 +7,14 @@ interface navProps {
   repo?: string
   book?: string
   chapter?: number
-  onClick?: any
+  onClick?: { (args?: any): any }
   icon?: JSXElement
   dir?: "BACK" | "FORWARD"
   // children: JSXElement
 }
 
 const mobileGradient =
-  "bg-gradient-to-b from-[rgba(0,0,0,0)] to-[rgba(255,255,255,.8)]"
+  "z-10 bg-gradient-to-b from-[rgba(0,0,0,0)] to-[rgba(255,255,255,.8)]"
 const backwardClassNamesDiv = `${mobileGradient} w-full p-4 sm:p-0 bottom-0 left-0 absolute print:hidden md:bg-none md:h-full md:w-16 md:static`
 const backwardClassA =
   "rounded-full bg-neutral-50 border-zinc-300 h-14 shadow-xl text-center grid shadow-dark-700 w-14 place-content-center md:bg-transparent md:border-none md:rounded-none md:h-full md:shadow-none md:w-16 text-slate-400 hover:text-accent focus:text-accent  cursor-pointer"
@@ -38,14 +38,11 @@ export default function NavButtonLinks(props: navProps) {
         props.dir == "BACK" ? backwardClassNamesDiv : forwardClassNamesDiv
       }`}
     >
-      {/* todo: chane localhost to a not hardcoded value */}
-      {/* todo: extract buttons */}
       <a
-        href={`http://localhost:3000/read/${props.user}/${props.repo}/?book=${
-          props.book
-        }&chapter=${Number(props.chapter)}`}
+        href={`${import.meta.env.PUBLIC_READER_URL}/${props.user}/${
+          props.repo
+        }/?book=${props.book}&chapter=${Number(props.chapter)}`}
         class={`${props.dir == "BACK" ? backwardClassA : forwardClassNamesA}`}
-        // onClick={(e) => handle()}
         onClick={props.onClick}
       >
         {props.icon}
