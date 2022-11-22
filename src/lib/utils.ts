@@ -49,7 +49,6 @@ export function getBookAndChapterFromUrl({
     // there is a book, and chap provided but this verfies that it is a a valid book/chap ;  Only set chap to null cause we can still use the book
     chapter = null
   }
-  // todo: api signature from reuben will like change how to get this key
   let firstBookToRender = matchingBook || repoIndex.bible[0] //use first Key;
   let firstChapterToShow = matchingChapter || firstBookToRender.chapters[0]
 
@@ -62,7 +61,7 @@ interface reshapeBibleIndexI {
   chapter: string
   initialHtml: string
 }
-// todo change this repoIndex type when finalize
+
 export function seedAndMutateInitialDataRepoIndex({
   repoIndex,
   book,
@@ -76,12 +75,5 @@ export function seedAndMutateInitialDataRepoIndex({
         repoChapter.text = initialHtml
       }
     })
-  })
-}
-
-export function res404(reason: string) {
-  return new Response(null, {
-    status: 404,
-    statusText: reason
   })
 }

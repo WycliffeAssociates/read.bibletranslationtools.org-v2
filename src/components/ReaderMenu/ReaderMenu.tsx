@@ -158,7 +158,12 @@ const ReaderMenu: Component<MenuProps> = (props) => {
             </button>
 
             {/* {props.storeInterface.getStoreVal("currentChapter")} */}
+            <label for="chapterNavigation" class="sr-only">
+              Quick Jump to Chapter By adjusting input
+            </label>
             <input
+              id="chapterNavigation"
+              name="chapterNavigation"
               class="menuNumberInput w-[4ch] bg-gray-50 py-1 text-center"
               value={props.storeInterface.getStoreVal("currentChapter")}
               onBlur={(e) => restoreNumber(e)}

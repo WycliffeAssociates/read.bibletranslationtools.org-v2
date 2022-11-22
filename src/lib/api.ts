@@ -35,8 +35,10 @@ export async function getRepoIndex({
   let fetchUrl = FUNCTIONS_ROUTES.getRepoIndex({ user, repo })
   try {
     const response = await fetch(fetchUrl)
-    // todo: provide proper typing for data instead of any
-    const data: any = await response.json()
+    const data: repoIndexObj = await response.json()
+    if (typeof data == "string") {
+      return null
+    }
     return data
   } catch (error) {
     console.error(error)

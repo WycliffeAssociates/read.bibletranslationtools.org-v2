@@ -38,7 +38,13 @@ export default function NavButtonLinks(props: navProps) {
         props.dir == "BACK" ? backwardClassNamesDiv : forwardClassNamesDiv
       }`}
     >
+      {/* todo: hook up aria label to locale */}
       <a
+        aria-label={
+          props.dir == "BACK"
+            ? "Navigate back one chapter"
+            : "Navigate forwards one chapter"
+        }
         href={`${import.meta.env.PUBLIC_READER_URL}/${props.user}/${
           props.repo
         }/?book=${props.book}&chapter=${Number(props.chapter)}`}

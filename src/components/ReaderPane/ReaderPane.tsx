@@ -20,7 +20,43 @@ export default function ReaderPane(props: ReaderPaneProps) {
     hasNewerData: false,
     response: null
   })
+  const [pos, setPos] = createSignal({
+    x: "500px",
+    y: "300px"
+  })
+  const [showFootnote, setShowFootnote] = createSignal(false)
+  const [footnoteText, setFootnoteText] = createSignal("")
   let textRef: HTMLDivElement | undefined
+
+  onMount(() => {
+    let footnotes = document.querySelectorAll('a[href*="footnote-target"]')
+    console.log({ footnotes })
+
+    footnotes.forEach((note) => {
+      note.addEventListener("mouseenter", (ev: any) => {
+        let target = ev.target as HTMLAnchorElement
+        let last = target.href.split("-").pop()
+        setShowFootnote(true)
+        setPos({
+          x: Number(ev.clientX) + 20 + "px",
+          y: Number(ev.clientY) - 80 + "px"
+        })
+        // footnote-caller-1
+        // footnote-target-1
+        let correspondingA: any = document.querySelector(
+          `a[href*="footnote-caller-${last}"]`
+        )
+        debugger
+        let parent = correspondingA.parentElement?.parentElement
+        let footnoteText = parent ? parent.innerHTML : ""
+        setFootnoteText(footnoteText)
+      })
+
+      note.addEventListener("mouseout", (ev: MouseEventInit) => {
+        setShowFootnote(false)
+      })
+    })
+  })
 
   createEffect(
     on(
@@ -37,7 +73,9 @@ export default function ReaderPane(props: ReaderPaneProps) {
     const prevCh = Number(currentChap) - 1
     await fetchReaderHtml({ chapNum: nextCh })
     await fetchReaderHtml({ chapNum: prevCh })
-    pushHistory(currentBook, currentChap)
+    let currentBookObj = props.storeInterface.currentBookObj()
+    let historyBook = currentBookObj?.label || currentBook
+    pushHistory(historyBook, currentChap)
   }
 
   function pushHistory(currentBook: string, currentChap: string) {
@@ -125,55 +163,67 @@ export default function ReaderPane(props: ReaderPaneProps) {
     return
   }
   return (
-    <div class="h-full px-4">
-      <div class="relative flex h-full content-center items-center justify-center gap-2 sm:pt-4">
-        <Show
-          when={props.storeInterface.getStoreVal("currentChapter") != 1}
-          fallback={<NavButtonLinks fallback={true} />}
-        >
-          <NavButtonLinks
-            dir={"BACK"}
-            user={props.user}
-            repo={props.repositoryName}
-            book={props.firstBookKey}
-            chapter={Number(props.firstChapterToShow) - 1}
-            onClick={(event: Event) =>
-              fetchReaderHtml({ event, navigate: true, dir: "BACK" })
-            }
-            icon={<SvgArrow className="color-inherit mx-auto fill-current " />}
-          />
-        </Show>
-
-        <div id="portalLocation"></div>
-        {/* HTML CONTENT */}
+    <>
+      {/* todo: show off as a proof of possiblity */}
+      <Show when={showFootnote()}>
         <div
-          ref={textRef}
-          class="theText mx-auto h-full  max-w-[85ch] overflow-y-scroll bg-inherit pt-2 pb-24 text-lg leading-relaxed print:overflow-y-visible sm:px-8 md:w-[75ch] "
-          innerHTML={props.storeInterface.HTML()}
-        />
-        {/* HTML CONTENT */}
-        <Show
-          when={
-            props.storeInterface.getStoreVal("currentChapter") !=
-            props.storeInterface.maxChapter()
-          }
-          fallback={<NavButtonLinks fallback={true} />}
-        >
-          <NavButtonLinks
-            dir={"FORWARD"}
-            user={props.user}
-            repo={props.repositoryName}
-            book={props.firstBookKey}
-            chapter={Number(props.firstChapterToShow) + 1}
-            onClick={(event: Event) => {
-              fetchReaderHtml({ event, navigate: true, dir: "FORWARD" })
-            }}
-            icon={
-              <SvgArrow className="color-inherit mx-auto rotate-180  fill-current stroke-current" />
-            }
+          class="findme absolute z-30 w-1/3 bg-green-100 p-8"
+          style={{ left: pos().x, top: pos().y }}
+          innerHTML={footnoteText()}
+        ></div>
+      </Show>
+      <div class="h-full px-4">
+        <div class="relative flex h-full content-center items-center justify-center gap-2 sm:pt-4">
+          <Show
+            when={props.storeInterface.getStoreVal("currentChapter") != 1}
+            fallback={<NavButtonLinks fallback={true} />}
+          >
+            <NavButtonLinks
+              dir={"BACK"}
+              user={props.user}
+              repo={props.repositoryName}
+              book={props.firstBookKey}
+              chapter={Number(props.firstChapterToShow) - 1}
+              onClick={(event: Event) =>
+                fetchReaderHtml({ event, navigate: true, dir: "BACK" })
+              }
+              icon={
+                <SvgArrow className="color-inherit mx-auto fill-current " />
+              }
+            />
+          </Show>
+
+          <div id="portalLocation"></div>
+          {/* HTML CONTENT */}
+          <div
+            ref={textRef}
+            class="theText mx-auto h-full  max-w-[85ch] overflow-y-scroll bg-inherit pt-2 pb-24 text-lg leading-relaxed print:overflow-y-visible sm:px-8 md:w-[75ch] "
+            innerHTML={props.storeInterface.HTML()}
           />
-        </Show>
+          {/* HTML CONTENT */}
+          <Show
+            when={
+              props.storeInterface.getStoreVal("currentChapter") !=
+              props.storeInterface.maxChapter()
+            }
+            fallback={<NavButtonLinks fallback={true} />}
+          >
+            <NavButtonLinks
+              dir={"FORWARD"}
+              user={props.user}
+              repo={props.repositoryName}
+              book={props.firstBookKey}
+              chapter={Number(props.firstChapterToShow) + 1}
+              onClick={(event: Event) => {
+                fetchReaderHtml({ event, navigate: true, dir: "FORWARD" })
+              }}
+              icon={
+                <SvgArrow className="color-inherit mx-auto rotate-180  fill-current stroke-current" />
+              }
+            />
+          </Show>
+        </div>
       </div>
-    </div>
+    </>
   )
 }

@@ -36,7 +36,6 @@ export const onRequestGet: PagesFunction = async (context) => {
 
   try {
     // http://localhost/u/WA-Catalog/en_ulb/index.json;
-    // todo: replace with real env driven url of azure api
     let baseUrl = env.HTML_API_URL_BASE
     let finalUrl = `${baseUrl}/${user}/${repo}/index.json`
     let response = await fetch(finalUrl)

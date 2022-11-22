@@ -27,6 +27,7 @@ export function UnwrappedHeader(props: HeaderProps) {
   function changeLanguage(lang: string): void {
     locale(lang)
 
+    // NOTE: in a different scenario, the reader pane and this menu would be wrapped in same context, but note that Astro's island architecture does not permit the use of traditional React/Solid context.  Each of these components is wrapped in their own context with the same dictonary, and this custom event call the corresponding locale function there.
     // notify Reader Pane localization event listener
     const changeLanguageEvent = new CustomEvent("changelanguage", {
       detail: {
@@ -37,8 +38,6 @@ export function UnwrappedHeader(props: HeaderProps) {
     menu && menu.dispatchEvent(changeLanguageEvent)
 
     setLanguagePickerOpen(false)
-
-    // todo: maybe this isn't the best way to internationalize, but you can't use context in an Astro file due to the way that that Astro treats each component as an island.  So this get's wrapped in its own context to use the i18n library.  The reader pane will also be wrapped in its own with the same dictionary and its own context.  So we can just fire a custom event over to the reader pane to call its locale function to keep them in sync;
   }
   function manageMobileMenu() {
     setMobileMenuOpen(!mobileMenuOpen())
@@ -54,7 +53,13 @@ export function UnwrappedHeader(props: HeaderProps) {
   return (
     <nav class="w-full bg-darkAccent pt-9 pb-5 font-sans print:hidden">
       <div class="relative mx-auto flex max-w-[1400px] items-center justify-between px-4 text-white">
-        <img src={props.logo} alt="WA Logo" />
+        <img
+          src={props.logo}
+          alt="WA Logo"
+          class="w-32"
+          width="618"
+          height="186"
+        />
         <button
           onClick={(e) => manageMobileMenu()}
           class="inline-flex  items-center rounded-md border border-solid border-gray-100 px-6 py-2 capitalize md:hidden"

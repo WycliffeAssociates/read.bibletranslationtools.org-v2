@@ -7,23 +7,23 @@ import { getChapterHtml, getRepoIndex, isValidRepo } from "@lib/api"
 import {
   getBookAndChapterFromUrl,
   getPreferredLangFromHeader,
-  seedAndMutateInitialDataRepoIndex,
-  res404
+  seedAndMutateInitialDataRepoIndex
 } from "@lib/utils"
 let { repo, user } = Astro.params
 
 // url routes validation check
-if (!repo || !user) res404("Not found")
+if (!repo || !user) return Astro.redirect("/404")
 
 repo = String(repo)
 user = String(user)
 // is current wacs repo check
 const isValid = isValidRepo({ user, repo })
-if (!isValid) res404("Invalid repo")
+if (!isValid) return Astro.redirect("/404")
 
 // get of text and metadata
 const repoIndex = await getRepoIndex({ user, repo })
-if (!repoIndex) return res404("Index fetch failed")
+
+if (!repoIndex) return Astro.redirect("/404")
 
 // grab query params (if present) for initial HTML
 const { book, chapter } = getBookAndChapterFromUrl({
@@ -44,9 +44,11 @@ const preferredLocale = getPreferredLangFromHeader(Astro.request)
 
 <Layout title={repo} use100vh={true}>
   <div class="font-sans h-full bg-neutral-50">
+    <!-- todo: remove noscript or edit -->
     <noscript> You get me if you don't have JS</noscript>
+    <!-- todo: decide on load vs. idle; I think load, but not sure -->
     <ReaderWrapper
-      client:load
+      client:idle
       firstBookKey={book}
       firstChapterToShow={chapter}
       repoData={repoIndex}

@@ -9,7 +9,9 @@
     "build": "astro build",
     "preview": "wrangler pages dev ./dist",
     "cf-dev": "wrangler pages dev -- pnpm run dev",
-    "astro": "astro"
+    "astro": "astro",
+    "test": "pnpm dlx playwright test",
+    "test-debug": "pnpm dlx playwright test --debug"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^4.0.1",
@@ -23,6 +25,7 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^3.18.0",
+    "@playwright/test": "^1.28.0",
     "@typescript-eslint/eslint-plugin": "^5.38.0",
     "@typescript-eslint/parser": "^5.38.0",
     "@vite-pwa/astro": "^0.0.1",
