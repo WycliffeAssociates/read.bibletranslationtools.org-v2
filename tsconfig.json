@@ -13,7 +13,6 @@
     "noErrorTruncation": true,
     "types": ["astro/client", "@cloudflare/workers-types"],
     "paths": {
-      // "@globals": ["src/components/global"],
       "@components": ["src/components"],
       "@components/*": ["src/components/*"],
       "@layouts/*": ["src/layouts/*"],

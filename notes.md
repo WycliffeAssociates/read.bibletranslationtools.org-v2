@@ -1,5 +1,0 @@
-<!-- testing -->
-
-Arrange
-Act
-Assert

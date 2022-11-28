@@ -231,7 +231,10 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                         <ul class="grid     max-h-[55vh] grid-cols-6 justify-start  gap-2 overflow-scroll  ">
                           <For each={props.storeInterface.possibleChapters()}>
                             {(book, idx) => (
-                              <li class="w-full text-center text-xl">
+                              <li
+                                class="w-full text-center text-xl"
+                                data-testid="menuChapter"
+                              >
                                 <button
                                   classList={{
                                     "w-full p-3 hover:bg-accent/10": true,

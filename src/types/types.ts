@@ -9,6 +9,8 @@ declare module "solid-js" {
   }
 }
 
+// declare modu;
+
 export interface bibleChapObj {
   [index: string]: string | number | null
   number: number

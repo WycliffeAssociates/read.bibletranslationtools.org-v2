@@ -50,6 +50,7 @@ export default defineConfig({
     plugins: [
       visualizer({
         // open: true,
+        
         gzipSize: true
       })
     ]
