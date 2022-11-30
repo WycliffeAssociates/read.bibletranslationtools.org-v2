@@ -4,6 +4,9 @@ declare module "solid-js" {
     interface CustomEvents {
       changelanguage: CustomEvent<{
         language: string
+        newDict: any
+        newDictCode: string
+        addToOtherDict: boolean
       }>
     }
   }

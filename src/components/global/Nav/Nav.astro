@@ -3,9 +3,10 @@ const linkBase = "https://bibleineverylanguage.org"
 import type { i18nDictKeysType } from "@lib/i18n"
 export interface Props {
   preferredLocale: i18nDictKeysType
+  initialDict: any
 }
 const menu = ["processes", "resources", "translations", "tools", "support"]
-const { preferredLocale } = Astro.props
+const { preferredLocale, initialDict } = Astro.props
 import Logo from "@images/logo.png"
 import LogoWebP from "@images/logo.webp"
 import { Header } from "./Header"
@@ -20,6 +21,7 @@ import { Header } from "./Header"
     menuItems={menu}
     preferredLocale={preferredLocale}
     linkBase={linkBase}
+    initialDict={initialDict}
   />
 </div>
 

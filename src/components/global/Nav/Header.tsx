@@ -1,13 +1,10 @@
-import {
-  i18nDictMeta,
-  i18nDict,
-  i18nDictKeysType,
-  i18nDictSubKeysType
-} from "@lib/i18n"
+import type { i18nDictKeysType, i18nDictSubKeysType } from "@lib/i18n"
 import { useI18n } from "@solid-primitives/i18n"
 import { MobileMenuOpen, HamburgerSvg } from "./MenuButtons"
-import { Index, createSignal, Show } from "solid-js"
-import { I18nProvider } from "./I18nContext"
+import { LoadingSpinner } from "@components"
+import { Index, createSignal, Show, lazy, Suspense } from "solid-js"
+import { I18nProvider, addDict } from "./I18nContext"
+const LanguageChoices = lazy(() => import("./LanguageChoices"))
 
 interface HeaderProps {
   menuItems: string[]
@@ -15,6 +12,7 @@ interface HeaderProps {
   logoWebP: string
   preferredLocale: i18nDictKeysType
   linkBase: string
+  initialDict: any
   // children: JSX.Element
 }
 
@@ -26,7 +24,18 @@ export function UnwrappedHeader(props: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = createSignal(false)
   const [languagePickerOpen, setLanguagePickerOpen] = createSignal(false)
 
-  function changeLanguage(lang: string): void {
+  async function changeLanguage(lang: string): Promise<void> {
+    debugger
+    let newDict, newDictCode
+    let addToOtherDict = false
+    if (lang !== props.preferredLocale) {
+      let dictCodeAndVal = await addDict(lang)
+      newDict = dictCodeAndVal.newDict
+      newDictCode = dictCodeAndVal.newDictCode
+      add(newDictCode, newDict)
+      addToOtherDict = true
+    }
+
     locale(lang)
     setFlagShowing(lang)
 
@@ -34,7 +43,10 @@ export function UnwrappedHeader(props: HeaderProps) {
     // notify Reader Pane localization event listener
     const changeLanguageEvent = new CustomEvent("changelanguage", {
       detail: {
-        language: lang
+        language: lang,
+        newDict: newDict,
+        newDictCode,
+        addToOtherDict
       }
     })
     let menu = document.querySelector("#menu")
@@ -120,35 +132,15 @@ export function UnwrappedHeader(props: HeaderProps) {
             </button>
             {/* OFFERED LANGUAGES */}
             <Show when={languagePickerOpen()}>
-              <div
-                class="absolute left-0 top-full z-20  w-full bg-darkAccent py-2 pr-2 text-right md:right-[-1rem] md:left-auto md:mt-5 md:w-52 "
-                data-js="languagePickerPane"
+              <Suspense
+                fallback={
+                  <div class="absolute left-0 top-full z-20  grid w-full place-content-center bg-darkAccent  py-2 pr-2 text-center md:right-[-1rem] md:left-auto md:mt-5 md:w-52">
+                    <LoadingSpinner />
+                  </div>
+                }
               >
-                <ul class="flex flex-col pr-2 text-right">
-                  <Index each={i18nDictMeta}>
-                    {(lang, idx) => {
-                      return (
-                        <li class={`${idx > 0 ? "mt-1" : ""}`}>
-                          <button
-                            onClick={(e) => {
-                              changeLanguage(lang().code)
-                            }}
-                            class="changeLangBtn capitalize hover:text-secondary focus:text-secondary"
-                            data-lang={lang().code}
-                          >
-                            <img
-                              class="mr-2 inline-block w-4 "
-                              src={`/flags/${lang().code}.svg`}
-                              alt=""
-                            />
-                            {lang().name}
-                          </button>
-                        </li>
-                      )
-                    }}
-                  </Index>
-                </ul>
-              </div>
+                <LanguageChoices onClick={changeLanguage} />
+              </Suspense>
             </Show>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { i18nDict, i18nDictKeysType } from "@lib/i18n"
+import type { i18nDictKeysType } from "@lib/i18n"
 import { createI18nContext, I18nContext } from "@solid-primitives/i18n"
 import { createSignal, onMount, Show, createMemo } from "solid-js"
 import type { JSX } from "solid-js"
@@ -146,7 +146,6 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
   })
   const possibleChapters = createMemo(() => {
     // const chapters = Object.keys(readerStore.text[readerStore.menuBook])
-    // debugger
     const bookObj = readerStore.text.find((storeBook) => {
       return storeBook.slug == readerStore.menuBook
     })
@@ -211,7 +210,10 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
 
   return (
     <>
-      <I18nProvider locale={props.preferredLocale}>
+      <I18nProvider
+        locale={props.preferredLocale}
+        initialDict={props.initialDict}
+      >
         <div class=" mx-auto grid max-h-full grid-rows-[90px,_calc(100vh-190px)] print:block md:grid-rows-[70px,_calc(100vh-170px)] md:justify-center">
           <div class=" w-screen border-b border-b-neutral-200">
             <ReaderMenu
@@ -238,9 +240,11 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
 interface i18Props {
   locale: i18nDictKeysType
   children: JSX.Element
+  initialDict: any
 }
 function I18nProvider(props: i18Props) {
-  const value = createI18nContext(i18nDict, props.locale)
+  const value = createI18nContext(props.initialDict, props.locale)
+
   return (
     <I18nContext.Provider value={value}>{props.children}</I18nContext.Provider>
   )
@@ -270,6 +274,7 @@ export interface ReaderWrapperProps {
   firstBookKey: string
   firstChapterToShow: string
   repoData: repoIndexObj
+  initialDict: any /* todo change all initial dict types */
 }
 export interface storeType {
   mutateStore<

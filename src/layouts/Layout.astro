@@ -13,6 +13,10 @@ import { getPreferredLangFromHeader } from "@lib/utils"
 const { title, use100vh } = Astro.props
 
 const preferredLocale = getPreferredLangFromHeader(Astro.request)
+let initialDictModule = await import(`../translations/${preferredLocale}.json`)
+const initialDict = {
+  [preferredLocale]: initialDictModule.default
+}
 ---
 
 <!DOCTYPE html>
@@ -25,7 +29,7 @@ const preferredLocale = getPreferredLangFromHeader(Astro.request)
       rel="preload"
       as="font"
       type="font/woff2"
-      href="fonts/atkinson/atkinson-hyperlegible-v10-latin-ext_latin-regular.woff2"
+      href="/fonts/atkinson/atkinson-hyperlegible-v10-latin-ext_latin-regular.woff2"
       crossorigin
     />
     <link
@@ -48,7 +52,7 @@ const preferredLocale = getPreferredLangFromHeader(Astro.request)
         : ""}
       id="pageWrapper"
     >
-      <Nav preferredLocale={preferredLocale} />
+      <Nav preferredLocale={preferredLocale} initialDict={initialDict} />
       <slot />
       <!-- <ReloadPrompt /> -->
     </div>

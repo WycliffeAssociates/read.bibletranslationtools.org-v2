@@ -1,6 +1,5 @@
 // import ReloadPrompt from "./serviceWorker/ReloadPrompt"
 import { SvgBook } from "./Icons/Icons"
-import Settings from "./Settings/Settings"
 
 // export { default as Card } from "./Card.astro"
 
@@ -13,9 +12,10 @@ export {
   SvgArrow,
   SvgSearch,
   SvgBook,
-  SvgSettings
+  SvgSettings,
+  LoadingSpinner
 } from "./Icons/Icons"
 export { default as ReaderMenu } from "./ReaderMenu/ReaderMenu"
 export { default as ReaderPane } from "./ReaderPane/ReaderPane"
 export { default as ReaderWrapper } from "./ReaderWrapper/ReaderWrapper"
-export { default as Settings } from "./Settings/Settings"
+// settings Component is lazy loaded

@@ -1,4 +1,4 @@
-import { i18nDict, i18nDictKeysType } from "@lib/i18n"
+import { i18nDictKeysType, i18nDictMeta } from "@lib/i18n"
 import type { repoIndexObj } from "../types/types"
 
 export function getPreferredLangFromHeader(request: Request): i18nDictKeysType {
@@ -14,7 +14,7 @@ export function getPreferredLangFromHeader(request: Request): i18nDictKeysType {
   for (let i = 0; i < langsArr.length; i++) {
     //   let val = item() as i18nDictSubKeysType
     const langKey = langsArr[i] as i18nDictKeysType
-    if (i18nDict[langKey]) {
+    if (i18nDictMeta[langKey]) {
       preferredLocale = langKey
       break
     } else continue

@@ -5,17 +5,25 @@ import {
   batch,
   For,
   Setter,
-  lazy
+  lazy,
+  Suspense
 } from "solid-js"
 import type { Accessor } from "solid-js"
-import { SvgSettings, SvgBook } from "@components"
-const Settings = lazy(() => import("../Settings/Settings"))
+import { SvgSettings, SvgBook, LoadingSpinner } from "@components"
+// const Settings = lazy(() => {
+//   import("../Settings/Settings")
+// })
+const Settings = lazy(async () => {
+  // simulate delay
+  // await new Promise((r) => setTimeout(r, 3000))
+  console.log("IMPORTING!")
+  return import("../Settings/Settings")
+})
 
 import { useI18n } from "@solid-primitives/i18n"
 import { get, set } from "idb-keyval"
 import type { JSX, ParentComponent, ParentProps, Component } from "solid-js"
 import type { bibleEntryObj } from "../../types/types"
-// This create a tight coupling btw menu and parent, since the child is just accepting whatever comes its way,  But if the parent function signatures change, TS should complain there, and this will need refactoring regardless.
 import type { storeType } from "../ReaderWrapper/ReaderWrapper"
 interface MenuProps {
   storeInterface: storeType
@@ -24,7 +32,7 @@ interface MenuProps {
   repositoryName: string
 }
 const ReaderMenu: Component<MenuProps> = (props) => {
-  const [t, { locale }] = useI18n()
+  const [t, { add, locale }] = useI18n()
   const [menuIsOpen, setMenuIsOpen] = createSignal(false)
   const [mobileTabOpen, setMobileTabOpen] = createSignal(
     props.storeInterface.isOneBook() ? "chapter" : "book"
@@ -134,7 +142,15 @@ const ReaderMenu: Component<MenuProps> = (props) => {
     props.storeInterface.mutateStore("searchedBooks", filtered)
   }, 400)
 
-  function setLanguageFromCustomEvent(langCode: string) {
+  function setLanguageFromCustomEvent(
+    langCode: string,
+    newDict: any,
+    newDictCode: string,
+    addToOtherDict: boolean
+  ) {
+    if (addToOtherDict) {
+      add(newDictCode, newDict)
+    }
     locale(langCode)
   }
 
@@ -144,9 +160,17 @@ const ReaderMenu: Component<MenuProps> = (props) => {
       on:changelanguage={(
         e: CustomEvent<{
           language: string
+          newDict: any
+          newDictCode: string
+          addToOtherDict: boolean
         }>
       ) => {
-        setLanguageFromCustomEvent(e.detail.language)
+        setLanguageFromCustomEvent(
+          e.detail.language,
+          e.detail.newDict,
+          e.detail.newDictCode,
+          e.detail.addToOtherDict
+        )
       }}
       id="menu"
     >
@@ -291,14 +315,16 @@ const ReaderMenu: Component<MenuProps> = (props) => {
               </button>
               <Show when={settingsAreOpen()}>
                 <div class="shadow-dark-700 absolute right-0 z-20 w-72 bg-neutral-100 p-4 text-right shadow-xl">
-                  <Settings
-                    fetchHtml={props.storeInterface.fetchHtml}
-                    mutateStoreText={props.storeInterface.mutateStoreText}
-                    currentBookObj={props.storeInterface.currentBookObj}
-                    setPrintWholeBook={props.setPrintWholeBook}
-                    user={props.user}
-                    repo={props.repositoryName}
-                  />
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <Settings
+                      fetchHtml={props.storeInterface.fetchHtml}
+                      mutateStoreText={props.storeInterface.mutateStoreText}
+                      currentBookObj={props.storeInterface.currentBookObj}
+                      setPrintWholeBook={props.setPrintWholeBook}
+                      user={props.user}
+                      repo={props.repositoryName}
+                    />
+                  </Suspense>
                 </div>
               </Show>
             </div>

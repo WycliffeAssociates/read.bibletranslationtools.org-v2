@@ -40,6 +40,13 @@ seedAndMutateInitialDataRepoIndex({
   initialHtml: String(initialHtml)
 })
 const preferredLocale = getPreferredLangFromHeader(Astro.request)
+const initialDictModule = await import(
+  `../../../translations/${preferredLocale}.json`
+)
+const initialDict = {
+  [preferredLocale]: initialDictModule.default
+}
+console.log(initialDict)
 ---
 
 <Layout title={repo} use100vh={true}>
@@ -52,6 +59,7 @@ const preferredLocale = getPreferredLangFromHeader(Astro.request)
       user={user}
       repositoryName={repo}
       preferredLocale={preferredLocale}
+      initialDict={initialDict}
     />
   </div>
 </Layout>

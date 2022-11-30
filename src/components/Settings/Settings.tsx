@@ -60,7 +60,6 @@ export default function Settings(props: settingsProps) {
     setPreparingPrint(true)
     // get current book
     let currentBookObj = props.currentBookObj()
-    debugger
     let promises: Array<Promise<string>> = []
     currentBookObj?.chapters.forEach((bibleChapObj) => {
       const promisedFetch = new Promise<string>(async (res, rej) => {
@@ -86,6 +85,8 @@ export default function Settings(props: settingsProps) {
       props.setPrintWholeBook(true)
       setPreparingPrint(false)
       window.print()
+      // print pauses execution of js in window while print dialog is open: If closed/canceled, then this will resume
+      props.setPrintWholeBook(false)
     })
     // fetch request for every chapter in current book
   }
