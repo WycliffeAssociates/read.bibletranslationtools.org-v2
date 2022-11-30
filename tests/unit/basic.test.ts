@@ -13,7 +13,7 @@ test("default accept language fallback", () => {
   expect(locale).toBe("en")
   // @ts-expect-error: No arg passed on purpose
   const withNullVal = getPreferredLangFromHeader()
-  expect(locale).toBe("en")
+  expect(withNullVal).toBe("en")
 })
 
 test("uses accept-language header of lang with translations", () => {

@@ -1,6 +1,16 @@
-import { createSignal, Show, createMemo, batch, For } from "solid-js"
+import {
+  createSignal,
+  Show,
+  createMemo,
+  batch,
+  For,
+  Setter,
+  lazy
+} from "solid-js"
 import type { Accessor } from "solid-js"
-import { SvgDownload, SvgArrow, SvgSearch, SvgBook } from "@components"
+import { SvgSettings, SvgBook } from "@components"
+const Settings = lazy(() => import("../Settings/Settings"))
+
 import { useI18n } from "@solid-primitives/i18n"
 import { get, set } from "idb-keyval"
 import type { JSX, ParentComponent, ParentProps, Component } from "solid-js"
@@ -9,6 +19,9 @@ import type { bibleEntryObj } from "../../types/types"
 import type { storeType } from "../ReaderWrapper/ReaderWrapper"
 interface MenuProps {
   storeInterface: storeType
+  setPrintWholeBook: Setter<boolean>
+  user: string
+  repositoryName: string
 }
 const ReaderMenu: Component<MenuProps> = (props) => {
   const [t, { locale }] = useI18n()
@@ -127,7 +140,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
 
   return (
     <div
-      class="print:hidden"
+      class="mx-auto max-w-[1400px]"
       on:changelanguage={(
         e: CustomEvent<{
           language: string
@@ -139,13 +152,16 @@ const ReaderMenu: Component<MenuProps> = (props) => {
     >
       <div class=" mx-auto flex w-full flex-wrap items-center px-4 py-2 ">
         {/* "publication" */}
-        <div class="w-full text-center font-bold uppercase sm:w-1/6">
+        <div
+          class="w-full text-center font-bold uppercase print:block sm:w-1/6"
+          data-testid="menuLangBookDisplay"
+        >
           {props.storeInterface.getStoreVal("languageName")}:{" "}
           {props.storeInterface.currentBookObj()?.label}
         </div>
 
         {/* menu button / info */}
-        <div class="relative flex w-full items-center justify-between  gap-3 sm:w-5/6">
+        <div class="relative flex w-full items-center justify-between gap-3  print:hidden sm:ml-auto sm:w-3/4">
           <div class="my-2 flex w-4/5 justify-between overflow-hidden  rounded-lg bg-neutral-200 outline outline-gray-300">
             <button
               class="flex w-full flex-grow items-center rounded-md pl-2"
@@ -158,7 +174,11 @@ const ReaderMenu: Component<MenuProps> = (props) => {
             </button>
 
             {/* {props.storeInterface.getStoreVal("currentChapter")} */}
-            <label for="chapterNavigation" class="sr-only">
+            <label
+              for="chapterNavigation"
+              class="sr-only"
+              data-testid="chapterNavigation"
+            >
               Quick Jump to Chapter By adjusting input
             </label>
             <input
@@ -258,19 +278,27 @@ const ReaderMenu: Component<MenuProps> = (props) => {
             </div>
             {/* //!END table and up menu */}
           </Show>
-          <div class="w-1/5">
-            <div class="border-bg-neutral-200 relative ml-auto w-max rounded-md border px-6 py-2">
+          <div class="w-1/5 print:hidden">
+            <div class=" relative ml-auto w-max rounded-md  ">
               <button
-                class=" "
+                class="border-bg-neutral-300 rounded-md  border p-3"
                 onClick={() => {
                   setSettingsAreOpen(!settingsAreOpen())
+                  props.setPrintWholeBook(false)
                 }}
               >
-                <SvgDownload className="" />
+                <SvgSettings className="" />
               </button>
               <Show when={settingsAreOpen()}>
-                <div class="shadow-dark-700 absolute right-0 z-10 w-60 bg-neutral-100 p-4 text-right shadow-xl">
-                  {/* todo: Settings  */}
+                <div class="shadow-dark-700 absolute right-0 z-20 w-72 bg-neutral-100 p-4 text-right shadow-xl">
+                  <Settings
+                    fetchHtml={props.storeInterface.fetchHtml}
+                    mutateStoreText={props.storeInterface.mutateStoreText}
+                    currentBookObj={props.storeInterface.currentBookObj}
+                    setPrintWholeBook={props.setPrintWholeBook}
+                    user={props.user}
+                    repo={props.repositoryName}
+                  />
                 </div>
               </Show>
             </div>
@@ -329,7 +357,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                     value={searchQuery()}
                   />
                 </label>
-                <ul class="h-[55vh] overflow-y-scroll pb-36">
+                <ul class="h-[95vh] overflow-y-scroll pb-36">
                   <For each={props.storeInterface.menuBookNames()}>
                     {(book) => (
                       <li class="w-full">

@@ -6,8 +6,9 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 const srcDir = resolve(__dirname, "./src")
 const componentsDir = `${srcDir}/components`
-console.log({ componentsDir })
-console.log("directory-name 👉️", __dirname)
+// todo: remove
+// console.log({ componentsDir })
+// console.log("directory-name 👉️", __dirname)
 
 /**
  * See https://playwright.dev/docs/test-configuration.

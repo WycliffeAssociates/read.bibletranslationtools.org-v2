@@ -50,7 +50,7 @@ export default defineConfig({
     plugins: [
       visualizer({
         // open: true,
-        
+        // goal:  ~100kib of HTML/CSS/Fonts (e.g. check network tab for amount loaded), and then ~300-350kib JS gzipped:
         gzipSize: true
       })
     ]

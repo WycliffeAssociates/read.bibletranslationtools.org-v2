@@ -6,7 +6,7 @@ export interface Props {
 // imports
 import { pwaInfo } from "virtual:pwa-info"
 import "../styles/global.css"
-import { Nav, ReloadPrompt } from "@components"
+import { Nav } from "@components"
 import { getPreferredLangFromHeader } from "@lib/utils"
 
 // data
@@ -21,6 +21,20 @@ const preferredLocale = getPreferredLangFromHeader(Astro.request)
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image" href="/favicon-32x32.png" />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="fonts/atkinson/atkinson-hyperlegible-v10-latin-ext_latin-regular.woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/fonts/atkinson/atkinson-hyperlegible-v10-latin-ext_latin-700.woff2"
+      crossorigin
+    />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     <meta name="description" content="A site to read rendered USFM" />
@@ -30,7 +44,7 @@ const preferredLocale = getPreferredLangFromHeader(Astro.request)
   <body>
     <div
       class={use100vh
-        ? "h-screen grid grid-rows-[100px,_calc(100vh_-_100px)]"
+        ? "h-screen grid grid-rows-[100px,_calc(100vh_-_100px)] print:block print:pb-20"
         : ""}
       id="pageWrapper"
     >
@@ -38,24 +52,5 @@ const preferredLocale = getPreferredLangFromHeader(Astro.request)
       <slot />
       <!-- <ReloadPrompt /> -->
     </div>
-    <style is:global>
-      :root {
-        --accent: 124, 58, 237;
-        --accent-gradient: linear-gradient(
-          45deg,
-          rgb(var(--accent)),
-          #da62c4 30%,
-          white 60%
-        );
-      }
-      html {
-        font-family: system-ui, sans-serif;
-        background-color: #f6f6f6;
-      }
-      code {
-        font-family: Menlo, Monaco, Lucida Console, Liberation Mono,
-          DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
-      }
-    </style>
   </body>
 </html>

@@ -1,13 +1,19 @@
 import * as translations from "../translations/index"
-import metaInfo from "../translations/metaInfo"
 export interface i18nDictType {
   readonly [index: string]: {
     readonly [index: string]: string
   }
 }
 
-const i18nDict = { ...translations } as const
+const i18nDict = { ...translations } as i18nDictType
+console.log(translations)
+let metaInfo = Object.keys(i18nDict).map((key) => {
+  return {
+    code: key,
+    name: i18nDict[key].thisLanguage
+  }
+})
 const i18nDictMeta = metaInfo
-export type i18nDictKeysType = keyof typeof i18nDict
-export type i18nDictSubKeysType = keyof typeof i18nDict[i18nDictKeysType]
+export type i18nDictKeysType = string
+export type i18nDictSubKeysType = string
 export { i18nDict, i18nDictMeta }

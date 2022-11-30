@@ -67,7 +67,7 @@ export function seedAndMutateInitialDataRepoIndex({
   book,
   chapter,
   initialHtml
-}: reshapeBibleIndexI): any {
+}: reshapeBibleIndexI): void {
   repoIndex.bible.forEach((repoBook) => {
     repoBook.chapters.forEach((repoChapter) => {
       repoChapter.text = null

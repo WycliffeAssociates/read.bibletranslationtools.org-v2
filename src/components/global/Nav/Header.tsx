@@ -12,6 +12,7 @@ import { I18nProvider } from "./I18nContext"
 interface HeaderProps {
   menuItems: string[]
   logo: string
+  logoWebP: string
   preferredLocale: i18nDictKeysType
   linkBase: string
   // children: JSX.Element
@@ -20,12 +21,14 @@ interface HeaderProps {
 export function UnwrappedHeader(props: HeaderProps) {
   // full signature
   const [t, { add, locale, dict }] = useI18n()
+  const [flagShowing, setFlagShowing] = createSignal(props.preferredLocale)
 
   const [mobileMenuOpen, setMobileMenuOpen] = createSignal(false)
   const [languagePickerOpen, setLanguagePickerOpen] = createSignal(false)
 
   function changeLanguage(lang: string): void {
     locale(lang)
+    setFlagShowing(lang)
 
     // NOTE: in a different scenario, the reader pane and this menu would be wrapped in same context, but note that Astro's island architecture does not permit the use of traditional React/Solid context.  Each of these components is wrapped in their own context with the same dictonary, and this custom event call the corresponding locale function there.
     // notify Reader Pane localization event listener
@@ -53,13 +56,18 @@ export function UnwrappedHeader(props: HeaderProps) {
   return (
     <nav class="w-full bg-darkAccent pt-9 pb-5 font-sans print:hidden">
       <div class="relative mx-auto flex max-w-[1400px] items-center justify-between px-4 text-white">
-        <img
-          src={props.logo}
-          alt="WA Logo"
-          class="w-32"
-          width="618"
-          height="186"
-        />
+        <picture>
+          <source srcset={props.logoWebP} type="image/webp" />
+          <source srcset={props.logo} type="image/jpeg" />
+          <img
+            src={props.logo}
+            alt="WA Logo"
+            class="w-32"
+            width="618"
+            height="186"
+          />
+        </picture>
+
         <button
           onClick={(e) => manageMobileMenu()}
           class="inline-flex  items-center rounded-md border border-solid border-gray-100 px-6 py-2 capitalize md:hidden"
@@ -85,7 +93,7 @@ export function UnwrappedHeader(props: HeaderProps) {
                 let val = item() as i18nDictSubKeysType
                 return (
                   <li class="my-2 capitalize hover:text-secondary focus:text-secondary md:mx-4 md:my-0">
-                    <a href={`${props.linkBase}/${val}`}>{t(val)}</a>
+                    <a href={`${props.linkBase}/${val}`}>{t(String(val))}</a>
                   </li>
                 )
               }}
@@ -93,16 +101,21 @@ export function UnwrappedHeader(props: HeaderProps) {
           </ul>
 
           {/* LANGUAGE PICKER PART OF MENU BUT ADJACENT TO THE NAV PARTS */}
-          <div class="relative my-2 pl-4 md:my-0 md:pl-0">
+          <div class="relative my-2 pl-4 md:my-0 md:ml-4 md:pl-0">
             <button
               onClick={(e) => manageLanguagePickerToggle()}
               data-js="languagePicker"
-              class={`languagePicker relative grid place-content-center ${
+              class={`languagePicker relative inline-flex place-content-center  ${
                 languagePickerOpen() ? "open" : ""
               }`}
               data-i18nkey={"thisLanguage"}
               data-localizable={true}
             >
+              <img
+                class="mr-2 w-4"
+                src={`/flags/${flagShowing()}.svg`}
+                alt=""
+              />
               {t("thisLanguage", undefined, "English")}
             </button>
             {/* OFFERED LANGUAGES */}
@@ -123,6 +136,11 @@ export function UnwrappedHeader(props: HeaderProps) {
                             class="changeLangBtn capitalize hover:text-secondary focus:text-secondary"
                             data-lang={lang().code}
                           >
+                            <img
+                              class="mr-2 inline-block w-4 "
+                              src={`/flags/${lang().code}.svg`}
+                              alt=""
+                            />
                             {lang().name}
                           </button>
                         </li>

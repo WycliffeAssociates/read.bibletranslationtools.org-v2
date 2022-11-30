@@ -1,3 +1,8 @@
+:root {
+  --color-accent: #015ad9;
+  --color-secondary: #faa83c;
+  --color-darkAccent: #001533;
+}
 /* atkinson-hyperlegible-regular - latin-ext_latin */
 @font-face {
   font-family: "Atkinson Hyperlegible";
@@ -37,19 +42,46 @@
 /* .verse { */
 /* color: red !important; */
 /* } */
+
+/* =============== scrollbar   ============= */
+html {
+  --scrollbarBG: rgb(242, 242, 242);
+  --thumbBG: var(--color-accent);
+}
+.theText::-webkit-scrollbar {
+  width: 12px;
+}
+.theText {
+  scrollbar-width: thin;
+  scrollbar-color: var(--thumbBG) var(--scrollbarBG);
+}
+.theText::-webkit-scrollbar-track {
+  background: var(--scrollbarBG);
+}
+.theText::-webkit-scrollbar-thumb {
+  background-color: var(--thumbBG);
+  border-radius: 6px;
+  border: 3px solid var(--scrollbarBG);
+}
+/* =============== scrollbar   ============= */
+
+/* =============== addl utils   ============= */
+.sentenceCase {
+  text-transform: lowercase;
+}
+.sentenceCase::first-letter {
+  text-transform: capitalize;
+}
 .menuNumberInput::-webkit-outer-spin-button,
 .menuNumberInput::-webkit-inner-spin-button {
   -webkit-appearance: none;
 
   margin: 0;
 }
-:root {
-  --menuRow: minmax(100px, 15vh);
-  --rowTwo: minmax(90px, calc(9% * var(--menuRow)));
-}
+/* =============== !addl utils   ============= */
 
-/* Marker Specific Styling */
-
+/* =============== Text/Marker styles   ============= */
+/* Note, mostly copied from old reader for poetry, some margin stuff */
 /* Header */
 .header {
   margin-top: 1em;
@@ -87,10 +119,9 @@
   font-size: 0.5rem;
   vertical-align: top;
 }
-/* todo: undo */
 a[href*="footnote-target"] {
-  color: blue;
-  padding: 0.5rem;
+  color: var(--color-accent);
+  padding: 0.5rem; /* these have a hover popup on them.  It makes the popup hover target a little bigger */
   margin: -0.5rem;
 }
 .footnotes {
@@ -274,25 +305,14 @@ a[href*="footnote-target"] {
   visibility: hidden;
 }
 
-/* Table Markers */
-.table-block {
-  width: 50%;
+@media print {
+  .chapterlabel {
+    font-size: 20px;
+    font-weight: 700;
+    text-decoration: underline;
+  }
 }
 
-.table-head {
-  font-style: italic;
-}
-
-.table-head-right {
-  font-style: italic;
-  text-align: right;
-}
-
-.table-cell-right {
-  text-align: right;
-}
-
-/* } */
 /* html[dir="rtl"] {
   body.bible{
     .chaptermarker {

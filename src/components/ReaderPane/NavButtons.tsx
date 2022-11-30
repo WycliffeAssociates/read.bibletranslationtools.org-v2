@@ -1,4 +1,5 @@
 import type { JSXElement } from "solid-js"
+import { useI18n } from "@solid-primitives/i18n"
 
 interface navProps {
   classNames?: string
@@ -7,7 +8,7 @@ interface navProps {
   repo?: string
   book?: string
   chapter?: number
-  onClick?: { (args?: any): any }
+  onClick?: (...args: any[]) => any
   icon?: JSXElement
   dir?: "BACK" | "FORWARD"
   // children: JSXElement
@@ -25,6 +26,8 @@ const forwardClassNamesA =
   "border border-solid rounded-full ml-auto  bg-neutral-50 border-zinc-300 h-14 shadow-xl text-center grid shadow-dark-700 w-14 place-content-center md:border-none md:rounded-none md:h-full md:bg-zinc-200 md:shadow-none md:w-16 hover:text-accent focus:text-accent md:text-slate-800 cursor-pointer"
 
 export default function NavButtonLinks(props: navProps) {
+  const [t] = useI18n()
+
   if (props.fallback) {
     return (
       <div class="hidden h-full  w-16 flex-shrink-0 print:hidden sm:block">
@@ -38,12 +41,12 @@ export default function NavButtonLinks(props: navProps) {
         props.dir == "BACK" ? backwardClassNamesDiv : forwardClassNamesDiv
       }`}
     >
-      {/* todo: hook up aria label to locale */}
       <a
+        data-testid={props.dir !== "BACK" ? "NavForwardBtn" : "NavBackBtn"}
         aria-label={
-          props.dir == "BACK"
-            ? "Navigate back one chapter"
-            : "Navigate forwards one chapter"
+          props.dir !== "BACK"
+            ? t("ariaNavigateForwardsOneChapter")
+            : t("ariaNavigateBackwardsOneChapter")
         }
         href={`${import.meta.env.PUBLIC_READER_URL}/${props.user}/${
           props.repo

@@ -44,11 +44,8 @@ const preferredLocale = getPreferredLangFromHeader(Astro.request)
 
 <Layout title={repo} use100vh={true}>
   <div class="font-sans h-full bg-neutral-50">
-    <!-- todo: remove noscript or edit -->
-    <noscript> You get me if you don't have JS</noscript>
-    <!-- todo: decide on load vs. idle; I think load, but not sure -->
     <ReaderWrapper
-      client:idle
+      client:load
       firstBookKey={book}
       firstChapterToShow={chapter}
       repoData={repoIndex}

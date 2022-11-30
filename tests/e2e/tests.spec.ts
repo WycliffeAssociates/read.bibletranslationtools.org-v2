@@ -2,22 +2,18 @@ import { test, expect } from "@playwright/test"
 
 test("test page titles; ", async ({ page }) => {
   await page.goto(
-    "http://localhost:3000/read/WA-Catalog/ru_ulb/?book=%D0%91%D1%8B%D1%82%D0%B8%D0%B5&chapter=1"
+    "/read/WA-Catalog/ru_ulb/?book=%D0%91%D1%8B%D1%82%D0%B8%D0%B5&chapter=1"
   )
 
   // // Expect a title "to contain" a substring.
   await expect(page).toHaveTitle(/ru_ulb/)
 
-  await page.goto(
-    "http://localhost:3000/read/WycliffeAssociates/en_ulb/?book=Genesis&chapter=1"
-  )
+  await page.goto("/read/WycliffeAssociates/en_ulb/?book=Genesis&chapter=1")
   await expect(page).toHaveTitle(/en_ulb/)
 })
 
 test("Menu chapter input updates on nav", async ({ page }) => {
-  await page.goto(
-    "http://localhost:3000/read/WycliffeAssociates/en_ulb/?book=Genesis&chapter=1"
-  )
+  await page.goto("/read/WycliffeAssociates/en_ulb/?book=Genesis&chapter=1")
   await page.waitForLoadState("networkidle") //JS has evaluated maybe? I think that's why I have this here
 
   await Promise.all([
@@ -39,9 +35,7 @@ test("Menu chapter input updates on nav", async ({ page }) => {
 })
 
 test("Count Chapters On Book Changes", async ({ page }) => {
-  await page.goto(
-    "http://localhost:3000/read/WycliffeAssociates/en_ulb/?book=Genesis&chapter=1"
-  )
+  await page.goto("/read/WycliffeAssociates/en_ulb/?book=Genesis&chapter=1")
   await page.waitForLoadState("networkidle") //JS has evaluated maybe? I think that's why I have this here
   await page.getByRole("button", { name: "Genesis" }).click()
   await page.getByRole("button", { name: "Exodus" }).click()
@@ -59,15 +53,13 @@ test("fallback to default locale", async ({ page, context }) => {
       }
     })
   })
-  await page.goto(
-    "http://localhost:3000/read/WycliffeAssociates/en_ulb/?book=Genesis&chapter=1"
-  )
+  await page.goto("/read/WycliffeAssociates/en_ulb/?book=Genesis&chapter=1")
   const currentLanguage = page.locator("[data-js=languagePicker]")
   await expect(currentLanguage).toContainText("Español")
 })
 
 test("history url updating on ajax nav", async ({ page }) => {
-  await page.goto("http://localhost:3000/read/WycliffeAssociates/en_ulb/")
+  await page.goto("/read/WycliffeAssociates/en_ulb/")
   await page.waitForLoadState("networkidle")
   await Promise.all([
     page.waitForResponse(/api/), //prefetch on page load calls the api or button click will.  Await either on click
@@ -76,6 +68,40 @@ test("history url updating on ajax nav", async ({ page }) => {
   await page.waitForSelector("#ch-2") //ensure chapter 2 of ulb loaded after button click above
 
   expect(page.url()).toBe(
-    "http://localhost:3000/read/WycliffeAssociates/en_ulb/?book=Genesis&chapter=2"
+    "/read/WycliffeAssociates/en_ulb/?book=Genesis&chapter=2"
   )
+})
+
+test("navigate previous button hidden on first chapter", async ({ page }) => {
+  await page.goto("/read/WycliffeAssociates/en_ulb/?book=Genesis&chapter=1")
+
+  const placeholderBtn = page.getByTestId("NavBackBtn") //ensure chapter 2 of ulb loaded after button click above
+
+  await expect(placeholderBtn).toHaveCount(0)
+})
+test("navigate next button hidden on last chapter", async ({ page }) => {
+  await page.goto("/read/WycliffeAssociates/en_ulb/?book=Genesis&chapter=50")
+
+  const placeholderBtn = page.getByTestId("NavForwardBtn") //ensure chapter 2 of ulb loaded after button click above
+
+  await expect(placeholderBtn).toHaveCount(0)
+})
+
+test("book and chapter query params work", async ({ page }) => {
+  await page.goto("/read/WycliffeAssociates/en_ulb/?book=John&chapter=3")
+  const display = page.getByTestId("menuLangBookDisplay")
+  const menuNumInputChapDisplay = page.getByTestId("chapterNavigation")
+  await expect(display).toContainText("English: John")
+  await expect(menuNumInputChapDisplay).toHaveValue("3")
+})
+
+test("Test language change in header", async ({ page }) => {
+  await page.goto(
+    "http://localhost:3000/read/WycliffeAssociates/en_ulb/?book=John&chapter=3"
+  )
+  const currentLanguageBtn = page.locator("[data-js=languagePicker]")
+  await currentLanguageBtn.click()
+  const spBtn = page.locator('[data-lang="es"]')
+  await spBtn.click()
+  await expect(currentLanguageBtn).toContainText("Español")
 })

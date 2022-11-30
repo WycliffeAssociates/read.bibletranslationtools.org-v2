@@ -7,6 +7,7 @@ export interface Props {
 const menu = ["processes", "resources", "translations", "tools", "support"]
 const { preferredLocale } = Astro.props
 import Logo from "@images/logo.png"
+import LogoWebP from "@images/logo.webp"
 import { Header } from "./Header"
 ---
 
@@ -15,6 +16,7 @@ import { Header } from "./Header"
   <Header
     client:load
     logo={Logo}
+    logoWebP={LogoWebP}
     menuItems={menu}
     preferredLocale={preferredLocale}
     linkBase={linkBase}

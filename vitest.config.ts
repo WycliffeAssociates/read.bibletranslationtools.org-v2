@@ -5,13 +5,13 @@ export default getViteConfig({
   test: {
     /* for example, use global to avoid globals imports (describe, test, expect): */
     // globals: true,
-    environment: "jsdom",
-    transformMode: {
-      web: [/\.jsx?$/]
-    },
-    deps: {
-      inline: [/solid-js/]
-    },
+    // environment: "jsdom",
+    // transformMode: {
+    //   web: [/\.jsx?$/]
+    // },
+    // deps: {
+    //   inline: [/solid-js/]
+    // },
     include: ["./tests/unit/*"]
   }
 })

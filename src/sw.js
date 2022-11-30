@@ -1,6 +1,6 @@
 import { precacheAndRoute, cleanupOutdatedCaches } from "workbox-precaching"
 import { clientsClaim } from "workbox-core"
-import { registerRoute } from "workbox-routing"
+import { registerRoute, setCatchHandler } from "workbox-routing"
 import {
   NetworkFirst,
   StaleWhileRevalidate,
@@ -10,9 +10,10 @@ import {
 } from "workbox-strategies"
 import { CacheableResponsePlugin } from "workbox-cacheable-response"
 import { ExpirationPlugin } from "workbox-expiration"
+import { warmStrategyCache } from "workbox-recipes"
+
 import { get, set } from "idb-keyval"
 
-console.log("FIND ME")
 // Adds an activate event listener which will clean up incompatible precaches that were created by older versions of Workbox.
 self.skipWaiting()
 clientsClaim()
@@ -35,7 +36,7 @@ class variableCacheOrNetworkdevtest extends Strategy {
     // https://developer.chrome.com/docs/workbox/modules/workbox-strategies/
     return new Promise(async (res, rej) => {
       const cacheStrategy = await get("cacheStrategy")
-      console.log({ cacheStrategy })
+      // console.log({ cacheStrategy })
       if (cacheStrategy === "networkFirst") {
         try {
           // try network
@@ -57,9 +58,6 @@ class variableCacheOrNetworkdevtest extends Strategy {
             res(handler.fetchAndCachePut(request))
           } else {
             let clone = response.clone()
-            // let data = await response.text();
-            // console.log(data);
-            console.log("handler cache match")
             res(clone)
           }
         } catch (error) {
@@ -86,7 +84,7 @@ class variableCacheOrNetwork extends Strategy {
     // https://developer.chrome.com/docs/workbox/modules/workbox-strategies/
     return new Promise(async (res, rej) => {
       const cacheStrategy = await get("cacheStrategy")
-      if (cacheStrategy === "networkFirst") {
+      if (cacheStrategy === "networkFirst" || !cacheStrategy) {
         try {
           // try network
           let response = await handler.fetch(request)
@@ -98,7 +96,7 @@ class variableCacheOrNetwork extends Strategy {
         } catch (error) {
           rej(error)
         }
-      } else if (cacheStrategy === "cacheFirst" || !cacheStrategy) {
+      } else if (cacheStrategy === "cacheFirst") {
         try {
           // cache first
           let response = await handler.cacheMatch(request)
@@ -107,9 +105,7 @@ class variableCacheOrNetwork extends Strategy {
             res(handler.fetchAndCachePut(request))
           } else {
             let clone = response.clone()
-            // let data = await response.text();
-            // console.log(data);
-            console.log("handler cache match")
+
             res(clone)
           }
         } catch (error) {
@@ -181,7 +177,6 @@ if (import.meta.env.DEV) {
   registerRoute(
     ({ request, url }) => {
       if (url.href.includes("/api/")) {
-        console.log("api request!")
         return true
       }
     },
@@ -195,32 +190,27 @@ if (import.meta.env.DEV) {
 
 // @ PROD ROUTES
 if (import.meta.env.PROD) {
-  // // todo:   remove test:  This is just to log out the manifest and see what it is:
-
-  let test = self.__WB_MANIFEST
-  console.log({ test })
-  // todo: see about this 404 needing a revision?
+  let precacheUrls = self.__WB_MANIFEST
   let route404 = location.origin.concat("/404")
-  let page404 = { url: route404 }
-  precacheAndRoute([...test, page404])
+  const FALLBACK_STRATEGY = new CacheFirst()
+
+  precacheAndRoute(precacheUrls)
+  warmStrategyCache({
+    urls: [route404],
+    strategy: FALLBACK_STRATEGY
+  })
 
   //----- HTML DOCS
   registerRoute(
     ({ request, url }) => {
       const isSameOrigin = self.origin === url.origin
       const isDoc = request.destination === "document"
-
-      // request.headers.forEach(function (val, key) {
-      //   console.log(key + " -> " + val);
-      // });
-
       if (isSameOrigin && isDoc) {
         return true
       }
-      // return request.mode === "navigate";
       return false
     },
-    new NetworkFirst({
+    new variableCacheOrNetwork({
       cacheName: "lr-pages",
       plugins: [
         new CacheableResponsePlugin({
@@ -228,7 +218,7 @@ if (import.meta.env.PROD) {
         }),
         new ExpirationPlugin({
           purgeOnQuotaError: true,
-          maxEntries: 500
+          maxEntries: 1000
         })
       ]
     })
@@ -240,12 +230,17 @@ if (import.meta.env.PROD) {
         return true
       }
     },
-    // new NetworkFirst({
-    //   cacheName: "all-dev-api",
-    //   // plugins: [new CacheableResponsePlugin({statuses: [-1]})],
-    // })
     new variableCacheOrNetwork({
-      cacheName: "live-reader-api"
+      cacheName: "live-reader-api",
+      plugins: [
+        new CacheableResponsePlugin({
+          statuses: [200]
+        }),
+        new ExpirationPlugin({
+          purgeOnQuotaError: true,
+          maxEntries: 1000
+        })
+      ]
     })
   )
 
@@ -272,28 +267,20 @@ if (import.meta.env.PROD) {
       ]
     })
   )
+  setCatchHandler(async ({ request }) => {
+    // The warmStrategyCache recipe is used to add the fallback assets ahead of
+    // time to the runtime cache, and are served in the event of an error below.
+    // Use `event`, `request`, and `url` to figure out how to respond, or
+    // use request.destination to match requests for specific resource types.
+    switch (request.destination) {
+      case "document":
+        return FALLBACK_STRATEGY.handle({ event, request: route404 })
 
-  // 404 page:
-  registerRoute(
-    ({ request, url }) => {
-      const isSameOrigin = self.origin === url.origin
-      const is404 = url.href === location.origin.concat("/404")
-      if (isSameOrigin && is404) {
-        console.log("caching 404!")
-        return true
-      }
-      // return request.mode === "navigate";
-      return false
-    },
-    new StaleWhileRevalidate({
-      cacheName: "astro-pages-404",
-      plugins: [
-        new CacheableResponsePlugin({
-          statuses: [200]
-        })
-      ]
-    })
-  )
+      default:
+        // If we don't have a fallback, return an error response.
+        return Response.error()
+    }
+  })
 }
 // SKIP WAITING prompt comes from the sw update process; Used for updating SW between builds
 self.addEventListener("message", (event) => {

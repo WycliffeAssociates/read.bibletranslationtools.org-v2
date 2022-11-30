@@ -10,7 +10,7 @@ const preferredLocale = getPreferredLangFromHeader(Astro.request)
 
 <Layout title="Read on Web">
   <main>
-    <div class="relative">
+    <!-- <div class="relative">
       <img src={homePageBg} alt="" />
       <span
         class="absolute w-full top-0 bottom-0 bg-black/30 z-10"
@@ -113,6 +113,17 @@ const preferredLocale = getPreferredLangFromHeader(Astro.request)
           >. Original work available at http://door43.org.
         </p>
       </div>
-    </div>
-  </footer>
+    </div> -->
+  </main>
 </Layout>
+
+<script>
+  import { get } from "idb-keyval"
+  async function goToLastVisted() {
+    let lastVisted = await get("lastPageVisited")
+    window.location.href = lastVisted
+      ? lastVisted
+      : "/read/WycliffeAssociates/en_ulb/?book=John&chapter=1"
+  }
+  goToLastVisted()
+</script>

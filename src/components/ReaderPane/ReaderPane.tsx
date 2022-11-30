@@ -1,4 +1,12 @@
-import { createSignal, onMount, Show, createEffect, on, batch } from "solid-js"
+import {
+  createSignal,
+  onMount,
+  Show,
+  createEffect,
+  on,
+  batch,
+  Accessor
+} from "solid-js"
 import { SvgDownload, SvgArrow, SvgSearch, SvgBook } from "@components"
 import NavButtonLinks from "./NavButtons"
 import { FUNCTIONS_ROUTES } from "@lib/routes"
@@ -12,6 +20,7 @@ interface ReaderPaneProps {
   repositoryName: string
   firstBookKey: string
   firstChapterToShow: string
+  printWholeBook: Accessor<boolean>
 }
 
 export default function ReaderPane(props: ReaderPaneProps) {
@@ -20,48 +29,63 @@ export default function ReaderPane(props: ReaderPaneProps) {
     hasNewerData: false,
     response: null
   })
+  // for footnote
   const [pos, setPos] = createSignal({
-    x: "500px",
-    y: "300px"
+    x: "0px",
+    y: "0px"
   })
   const [showFootnote, setShowFootnote] = createSignal(false)
   const [footnoteText, setFootnoteText] = createSignal("")
   let textRef: HTMLDivElement | undefined
 
-  onMount(() => {
-    let footnotes = document.querySelectorAll('a[href*="footnote-target"]')
-    console.log({ footnotes })
+  function setLastPageVisited() {
+    return set("lastPageVisited", location.href)
+  }
+  function hoverOnFootnotes() {
+    let footnotes: NodeListOf<HTMLAnchorElement> = document.querySelectorAll(
+      'a[href*="footnote-target"]'
+    )
+
+    function manageNote(ev: MouseEvent | FocusEvent) {
+      let target = ev.target as HTMLAnchorElement
+      let rect = target.getBoundingClientRect()
+      let last = target.href.split("-").pop()
+      setShowFootnote(true)
+      setPos({
+        x: rect.x + 30 + "px",
+        y: rect.y - 80 + "px"
+      })
+      // footnote-caller-1
+      // footnote-target-1
+      let correspondingA = document.querySelector(
+        `a[href*="footnote-caller-${last}"]`
+      )
+      if (!correspondingA) return
+      let parent = correspondingA.parentElement?.parentElement
+      let footnoteText = parent ? parent.innerText : ""
+      setFootnoteText(footnoteText)
+    }
 
     footnotes.forEach((note) => {
-      note.addEventListener("mouseenter", (ev: any) => {
-        let target = ev.target as HTMLAnchorElement
-        let last = target.href.split("-").pop()
-        setShowFootnote(true)
-        setPos({
-          x: Number(ev.clientX) + 20 + "px",
-          y: Number(ev.clientY) - 80 + "px"
-        })
-        // footnote-caller-1
-        // footnote-target-1
-        let correspondingA: any = document.querySelector(
-          `a[href*="footnote-caller-${last}"]`
-        )
-        debugger
-        let parent = correspondingA.parentElement?.parentElement
-        let footnoteText = parent ? parent.innerHTML : ""
-        setFootnoteText(footnoteText)
-      })
+      note.addEventListener("mouseenter", manageNote)
+      note.addEventListener("focus", manageNote)
 
-      note.addEventListener("mouseout", (ev: MouseEventInit) => {
+      note.addEventListener("mouseout", () => {
+        setShowFootnote(false)
+      })
+      note.addEventListener("focusout", () => {
         setShowFootnote(false)
       })
     })
-  })
+  }
 
   createEffect(
     on(
       () => props.storeInterface.getStoreVal("currentChapter"),
-      preFetchAdjacent
+      () => {
+        preFetchAdjacent()
+        hoverOnFootnotes()
+      }
     )
   )
 
@@ -87,6 +111,7 @@ export default function ReaderPane(props: ReaderPaneProps) {
         window.location.pathname + "?" + searchParams.toString()
       history.pushState(null, "", newRelativePathQuery)
     }
+    setLastPageVisited()
   }
 
   type fetchReaderParams = {
@@ -133,6 +158,8 @@ export default function ReaderPane(props: ReaderPaneProps) {
     let existingText = existingChap?.text //html if put there;
     if (!existingChap) return
     if (existingText && navigate) {
+      if (textRef) textRef.scrollTop = 0
+
       return props.storeInterface.mutateStore("currentChapter", nextCh)
     } else if (existingText) {
       return
@@ -156,6 +183,7 @@ export default function ReaderPane(props: ReaderPaneProps) {
       })
       if (navigate) {
         props.storeInterface.mutateStore("currentChapter", String(nextCh))
+
         if (textRef) textRef.scrollTop = 0
       }
     })
@@ -164,66 +192,77 @@ export default function ReaderPane(props: ReaderPaneProps) {
   }
   return (
     <>
-      {/* todo: show off as a proof of possiblity */}
-      <Show when={showFootnote()}>
-        <div
-          class="findme absolute z-30 w-1/3 bg-green-100 p-8"
-          style={{ left: pos().x, top: pos().y }}
-          innerHTML={footnoteText()}
-        ></div>
-      </Show>
-      <div class="h-full px-4">
-        <div class="relative flex h-full content-center items-center justify-center gap-2 sm:pt-4">
-          <Show
-            when={props.storeInterface.getStoreVal("currentChapter") != 1}
-            fallback={<NavButtonLinks fallback={true} />}
-          >
-            <NavButtonLinks
-              dir={"BACK"}
-              user={props.user}
-              repo={props.repositoryName}
-              book={props.firstBookKey}
-              chapter={Number(props.firstChapterToShow) - 1}
-              onClick={(event: Event) =>
-                fetchReaderHtml({ event, navigate: true, dir: "BACK" })
-              }
-              icon={
-                <SvgArrow className="color-inherit mx-auto fill-current " />
-              }
-            />
-          </Show>
-
-          <div id="portalLocation"></div>
-          {/* HTML CONTENT */}
+      {/* HTML CONTENT */}
+      <Show when={!props.printWholeBook()}>
+        <Show when={showFootnote()}>
           <div
-            ref={textRef}
-            class="theText mx-auto h-full  max-w-[85ch] overflow-y-scroll bg-inherit pt-2 pb-24 text-lg leading-relaxed print:overflow-y-visible sm:px-8 md:w-[75ch] "
-            innerHTML={props.storeInterface.HTML()}
-          />
-          {/* HTML CONTENT */}
-          <Show
-            when={
-              props.storeInterface.getStoreVal("currentChapter") !=
-              props.storeInterface.maxChapter()
-            }
-            fallback={<NavButtonLinks fallback={true} />}
-          >
-            <NavButtonLinks
-              dir={"FORWARD"}
-              user={props.user}
-              repo={props.repositoryName}
-              book={props.firstBookKey}
-              chapter={Number(props.firstChapterToShow) + 1}
-              onClick={(event: Event) => {
-                fetchReaderHtml({ event, navigate: true, dir: "FORWARD" })
-              }}
-              icon={
-                <SvgArrow className="color-inherit mx-auto rotate-180  fill-current stroke-current" />
-              }
+            class="absolute z-30 mx-auto w-1/3  border border-accent bg-white p-8 shadow shadow-neutral-500"
+            style={{ left: pos().x, top: pos().y }}
+            innerHTML={footnoteText()}
+          ></div>
+        </Show>
+        <div class="mx-auto h-full max-w-[1400px] px-4">
+          <div class="relative flex h-full content-center items-center justify-center gap-2 ">
+            <Show
+              when={props.storeInterface.getStoreVal("currentChapter") != 1}
+              fallback={<NavButtonLinks fallback={true} />}
+            >
+              <NavButtonLinks
+                dir={"BACK"}
+                user={props.user}
+                repo={props.repositoryName}
+                book={props.firstBookKey}
+                chapter={Number(props.firstChapterToShow) - 1}
+                onClick={(event: Event) =>
+                  fetchReaderHtml({ event, navigate: true, dir: "BACK" })
+                }
+                icon={
+                  <SvgArrow className="color-inherit mx-auto fill-current " />
+                }
+              />
+            </Show>
+            {/* top buttons */}
+            <div
+              ref={textRef}
+              class="theText mx-auto h-full max-w-[85ch]  overflow-y-scroll bg-inherit pr-1 pt-2 pb-24 text-lg leading-relaxed print:h-min print:break-inside-avoid print:overflow-y-visible  print:pb-4 sm:px-8 md:w-[75ch] "
+              innerHTML={props.storeInterface.HTML()}
             />
-          </Show>
+
+            {/* lower stuff */}
+            <Show
+              when={
+                props.storeInterface.getStoreVal("currentChapter") !=
+                props.storeInterface.maxChapter()
+              }
+              fallback={<NavButtonLinks fallback={true} />}
+            >
+              <NavButtonLinks
+                dir={"FORWARD"}
+                user={props.user}
+                repo={props.repositoryName}
+                book={props.firstBookKey}
+                chapter={Number(props.firstChapterToShow) + 1}
+                onClick={(event: Event) => {
+                  fetchReaderHtml({ event, navigate: true, dir: "FORWARD" })
+                }}
+                icon={
+                  <SvgArrow className="color-inherit mx-auto rotate-180  fill-current stroke-current" />
+                }
+              />
+            </Show>
+          </div>
         </div>
-      </div>
+        {/* lower stuff */}
+      </Show>
+
+      {/* whole book gets own pane*/}
+      <Show when={props.printWholeBook()}>
+        <div
+          id="wholeBook"
+          innerHTML={props.storeInterface.wholeBookHtml()}
+          class=" mx-auto  max-w-[85ch]  bg-inherit text-lg leading-relaxed print:pb-4 sm:px-8 md:w-[75ch]"
+        />
+      </Show>
     </>
   )
 }

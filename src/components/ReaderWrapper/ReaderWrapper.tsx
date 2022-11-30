@@ -5,7 +5,7 @@ import type { JSX } from "solid-js"
 import { createStore, produce } from "solid-js/store"
 import { FUNCTIONS_ROUTES } from "@lib/routes"
 import { ReaderMenu, ReaderPane } from "@components"
-import type { StoreNode, Store, SetStoreFunction } from "solid-js/store"
+
 import type {
   bibleChapObj,
   bibleEntryObj,
@@ -38,7 +38,7 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
   }
 
   const [readerStore, setReaderStore] = createStore(defaultStore)
-
+  const [printWholeBook, setPrintWholeBook] = createSignal(false)
   // Wrappers and predefined functions for reading and mutating store;
   // # Limit to the non object keys: E.g. string or string[]
   // https://javascript.plainenglish.io/typescript-essentials-conditionally-filter-types-488705bfbf56
@@ -85,6 +85,7 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
   function getStoreVal<T>(key: keyof typeof readerStore) {
     return readerStore[key] as T
   }
+
   const allBibArr = createMemo(() => {
     return readerStore.text
   })
@@ -105,6 +106,7 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
     })
     return currentBook
   })
+
   const currentChapObj = createMemo(() => {
     const currentBook = currentBookObj()
     let currentChap = currentBook?.chapters.find(
@@ -119,6 +121,11 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
     let chapter = book?.chapters.find((bookChap) => bookChap.label == chap)
     return chapter
   }
+  const wholeBookHtml = createMemo(() => {
+    let currentBook = currentBookObj()
+    let html = currentBook?.chapters.map((chap) => chap.text).join("")
+    return html || undefined
+  })
   const HTML = createMemo(() => {
     let currentChap = currentChapObj()
     // const retVal = currentBook[readerStore.currentChapter]
@@ -153,12 +160,13 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
   const [isFetching, setIsFetching] = createSignal(false)
   async function fetchHtml({
     book = readerStore.currentBook,
-    chapter
+    chapter,
+    skipAbort = false
   }: fetchHtmlParms): Promise<string | false | void> {
     controller = new AbortController()
     signal = controller.signal
 
-    if (isFetching()) {
+    if (isFetching() && !skipAbort) {
       return controller.abort()
     }
     setIsFetching(true)
@@ -193,6 +201,7 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
     currentChapObj,
     getChapObjFromGivenBook,
     HTML,
+    wholeBookHtml,
     maxChapter,
     menuBookNames,
     possibleChapters,
@@ -203,14 +212,22 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
   return (
     <>
       <I18nProvider locale={props.preferredLocale}>
-        <div class="creenHeightGrid mx-auto grid max-h-full max-w-[1400px]  grid-rows-[90px,_calc(100vh-190px)]">
-          <ReaderMenu storeInterface={storeInterface} />
+        <div class=" mx-auto grid max-h-full grid-rows-[90px,_calc(100vh-190px)] print:block md:grid-rows-[70px,_calc(100vh-170px)] md:justify-center">
+          <div class=" w-screen border-b border-b-neutral-200">
+            <ReaderMenu
+              storeInterface={storeInterface}
+              setPrintWholeBook={setPrintWholeBook}
+              user={props.user}
+              repositoryName={props.repositoryName}
+            />
+          </div>
           <ReaderPane
             storeInterface={storeInterface}
             user={props.user}
             repositoryName={props.repositoryName}
             firstBookKey={props.firstBookKey}
             firstChapterToShow={props.firstChapterToShow}
+            printWholeBook={printWholeBook}
           />
         </div>
       </I18nProvider>
@@ -243,6 +260,7 @@ export type updateStoreTextParams = {
 export type fetchHtmlParms = {
   book: string
   chapter: string
+  skipAbort?: boolean
 }
 
 export interface ReaderWrapperProps {
@@ -320,4 +338,5 @@ export interface storeType {
     book,
     chapter
   }: fetchHtmlParms) => Promise<string | false | void>
+  wholeBookHtml: Accessor<string | undefined>
 }
