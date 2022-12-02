@@ -5,7 +5,8 @@ import {
   createEffect,
   on,
   batch,
-  Accessor
+  Accessor,
+  onCleanup
 } from "solid-js"
 import { SvgDownload, SvgArrow, SvgSearch, SvgBook } from "@components"
 import NavButtonLinks from "./NavButtons"
@@ -85,21 +86,83 @@ export default function ReaderPane(props: ReaderPaneProps) {
       () => {
         preFetchAdjacent()
         hoverOnFootnotes()
+        hoverOnCrossReferences()
       }
     )
   )
+  // todo: see with Reuben about making this cleaner or? Would it be better to wait on this sort of functionality until graphql api and we know relationships or? Or yagni?
+  function hoverOnCrossReferences() {
+    let crossReferences = document.querySelectorAll("a[href*='tn-chunk-'")
+
+    crossReferences.forEach((ref) => {
+      ref.addEventListener("mouseover", async (e) => {
+        let target = e.target as HTMLAnchorElement
+        let rect = target.getBoundingClientRect()
+        let href = target.href
+        let url = new URL(href)
+        let hashWithoutHashTag = url.hash?.slice(1)
+        let parts = url.hash?.split("-")
+        let book = parts[2]
+        let chapter = parts[3]
+        debugger
+        let response = await fetch(`?book=${book}&chapter=${chapter}`)
+        let text = await response.text()
+        const newDom = document.createElement("html")
+        newDom.innerHTML = text
+        // '[id="#tn-chunk-gen-22-01"] not valid
+        let corresponding = newDom.querySelector(`[id="${hashWithoutHashTag}"]`)
+        let htmlContainer: any[] = [corresponding]
+
+        let firstSib = corresponding && corresponding.nextElementSibling
+        getSiblingsUntil(firstSib, "tn-chunk")
+
+        function getSiblingsUntil(node, idToSearch) {
+          if (node.id && node.id.includes(idToSearch)) {
+            return false
+          } else {
+            htmlContainer.push(node)
+            getSiblingsUntil(node.nextElementSibling, idToSearch)
+          }
+        }
+
+        let html = htmlContainer.map((el) => el.outerHTML).join("")
+        setShowFootnote(true)
+        setPos({
+          x: rect.x + 30 + "px",
+          y: rect.y - 80 + "px"
+        })
+        setFootnoteText(html)
+        console.log({ corresponding })
+      })
+    })
+    console.log({ crossReferences })
+  }
+  onMount(() => {
+    window.addEventListener("popstate", (e) => {
+      console.log(location)
+      console.log(e)
+      let params = new URLSearchParams(location.search)
+      let chapter = params.get("chapter")
+      if (chapter) {
+        fetchReaderHtml({
+          navigate: true,
+          chapNum: chapter
+        })
+      }
+    })
+  })
+  // onCleanup(() => {
+
+  // })
 
   async function preFetchAdjacent() {
     const currentChap =
       props.storeInterface.getStoreVal<string>("currentChapter")
-    const currentBook = props.storeInterface.getStoreVal<string>("currentBook")
+
     const nextCh = Number(currentChap) + 1
     const prevCh = Number(currentChap) - 1
     await fetchReaderHtml({ chapNum: nextCh })
     await fetchReaderHtml({ chapNum: prevCh })
-    let currentBookObj = props.storeInterface.currentBookObj()
-    let historyBook = currentBookObj?.label || currentBook
-    pushHistory(historyBook, currentChap)
   }
 
   function pushHistory(currentBook: string, currentChap: string) {
@@ -109,16 +172,24 @@ export default function ReaderPane(props: ReaderPaneProps) {
       searchParams.set("chapter", currentChap)
       let newRelativePathQuery =
         window.location.pathname + "?" + searchParams.toString()
+      debugger
+      document.title = `${props.repositoryName}-${currentBook}-${currentChap}`
       history.pushState(null, "", newRelativePathQuery)
     }
     setLastPageVisited()
   }
 
+  /* // if (!location.)
+    pushHistory(historyBook, currentChap)
+
+    // adjust doc title for history
+    document.title = `${props.repositoryName}-${currentBook}-${currentChap}` */
+
   type fetchReaderParams = {
     event?: Event
     navigate?: boolean
     dir?: "BACK" | "FORWARD"
-    chapNum?: number
+    chapNum?: number | string
   }
   async function fetchReaderHtml({
     event,
@@ -132,17 +203,17 @@ export default function ReaderPane(props: ReaderPaneProps) {
       props.storeInterface.getStoreVal<string>("currentChapter")
 
     if (chapNum && chapNum <= 0 && !dir) return
-    let nextCh: number | string
+    let nextCh: number | string | undefined
     // Decide next chapter, whether given or sequential;
-    if (Number(chapNum)) {
-      nextCh = Number(chapNum)
+    if (chapNum) {
+      nextCh = chapNum
     } else if (dir === "BACK") {
-      nextCh = Number(currentChap) - 1
+      nextCh = props.storeInterface.navLinks()?.prev
     } else {
-      nextCh = Number(currentChap) + 1
+      nextCh = props.storeInterface.navLinks()?.next
     }
-    // validate chap is gettable;
-    if (nextCh > Number(props.storeInterface.maxChapter()) || nextCh <= 0) {
+    // return if navLinks didn't return a valid nextCh
+    if (!nextCh) {
       return
     }
     // Check for existing in memory;
@@ -159,7 +230,7 @@ export default function ReaderPane(props: ReaderPaneProps) {
     if (!existingChap) return
     if (existingText && navigate) {
       if (textRef) textRef.scrollTop = 0
-
+      pushHistory(currentBook, nextCh)
       return props.storeInterface.mutateStore("currentChapter", nextCh)
     } else if (existingText) {
       return
@@ -183,28 +254,29 @@ export default function ReaderPane(props: ReaderPaneProps) {
       })
       if (navigate) {
         props.storeInterface.mutateStore("currentChapter", String(nextCh))
-
         if (textRef) textRef.scrollTop = 0
+        pushHistory(currentBook, String(nextCh))
       }
     })
 
     return
   }
+
   return (
     <>
       {/* HTML CONTENT */}
       <Show when={!props.printWholeBook()}>
         <Show when={showFootnote()}>
           <div
-            class="absolute z-30 mx-auto w-1/3  border border-accent bg-white p-8 shadow shadow-neutral-500"
+            class="theText absolute z-30 mx-auto  max-h-[50vh] w-1/3 overflow-y-scroll border border-accent bg-white p-8 shadow shadow-neutral-500"
             style={{ left: pos().x, top: pos().y }}
             innerHTML={footnoteText()}
           ></div>
         </Show>
-        <div class="mx-auto h-full max-w-[1400px] px-4">
+        <div class="mx-auto h-full w-full max-w-[1400px] px-4">
           <div class="relative flex h-full content-center items-center justify-center gap-2 ">
             <Show
-              when={props.storeInterface.getStoreVal("currentChapter") != 1}
+              when={props.storeInterface.navLinks()?.prev}
               fallback={<NavButtonLinks fallback={true} />}
             >
               <NavButtonLinks
@@ -212,28 +284,26 @@ export default function ReaderPane(props: ReaderPaneProps) {
                 user={props.user}
                 repo={props.repositoryName}
                 book={props.firstBookKey}
-                chapter={Number(props.firstChapterToShow) - 1}
-                onClick={(event: Event) =>
+                // chapter={ Number(props.firstChapterToShow) - 1}
+                chapter={props.storeInterface.navLinks()?.prev}
+                onClick={(event: Event) => {
                   fetchReaderHtml({ event, navigate: true, dir: "BACK" })
-                }
+                }}
                 icon={
-                  <SvgArrow className="color-inherit mx-auto fill-current " />
+                  <SvgArrow className="color-inherit mx-auto fill-current ltr:rotate-0 rtl:rotate-180" />
                 }
               />
             </Show>
             {/* top buttons */}
             <div
               ref={textRef}
-              class="theText mx-auto h-full max-w-[85ch]  overflow-y-scroll bg-inherit pr-1 pt-2 pb-24 text-lg leading-relaxed print:h-min print:break-inside-avoid print:overflow-y-visible  print:pb-4 sm:px-8 md:w-[75ch] "
+              class="theText mx-auto h-full max-w-[85ch]  overflow-y-scroll bg-inherit pr-1 pt-2 pb-24 text-lg leading-relaxed print:h-min print:break-inside-avoid print:overflow-y-visible  print:pb-4 sm:px-8 md:max-w-[75ch] "
               innerHTML={props.storeInterface.HTML()}
             />
 
             {/* lower stuff */}
             <Show
-              when={
-                props.storeInterface.getStoreVal("currentChapter") !=
-                props.storeInterface.maxChapter()
-              }
+              when={props.storeInterface.navLinks()?.next}
               fallback={<NavButtonLinks fallback={true} />}
             >
               <NavButtonLinks
@@ -241,12 +311,12 @@ export default function ReaderPane(props: ReaderPaneProps) {
                 user={props.user}
                 repo={props.repositoryName}
                 book={props.firstBookKey}
-                chapter={Number(props.firstChapterToShow) + 1}
+                chapter={props.storeInterface.navLinks()?.next}
                 onClick={(event: Event) => {
                   fetchReaderHtml({ event, navigate: true, dir: "FORWARD" })
                 }}
                 icon={
-                  <SvgArrow className="color-inherit mx-auto rotate-180  fill-current stroke-current" />
+                  <SvgArrow className="color-inherit mx-auto fill-current stroke-current ltr:rotate-180 rtl:rotate-0" />
                 }
               />
             </Show>
@@ -260,7 +330,7 @@ export default function ReaderPane(props: ReaderPaneProps) {
         <div
           id="wholeBook"
           innerHTML={props.storeInterface.wholeBookHtml()}
-          class=" mx-auto  max-w-[85ch]  bg-inherit text-lg leading-relaxed print:pb-4 sm:px-8 md:w-[75ch]"
+          class=" mx-auto  max-w-[85ch]  bg-inherit text-lg leading-relaxed print:pb-4 sm:px-8 md:max-w-[75ch]"
         />
       </Show>
     </>

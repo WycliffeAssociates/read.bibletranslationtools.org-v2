@@ -8,10 +8,10 @@ interface LanguageChoicesI {
 export default function LanguageChoices(props: LanguageChoicesI) {
   return (
     <div
-      class="absolute left-0 top-full z-20  w-full bg-darkAccent py-2 pr-2 text-right md:right-[-1rem] md:left-auto md:mt-5 md:w-52 "
+      class="absolute left-0 top-full z-20  w-full bg-darkAccent py-2 pr-2 text-right  md:right-[-1rem] md:left-auto md:mt-5 md:w-52 rtl:md:-right-full"
       data-js="languagePickerPane"
     >
-      <ul class="flex flex-col pr-2 text-right">
+      <ul class="flex flex-col  text-left rtl:text-right">
         <Index each={i18nDictMeta}>
           {(lang, idx) => {
             return (
@@ -20,11 +20,11 @@ export default function LanguageChoices(props: LanguageChoicesI) {
                   onClick={(e) => {
                     props.onClick(lang().code)
                   }}
-                  class="changeLangBtn capitalize hover:text-secondary focus:text-secondary"
+                  class="changeLangBtn capitalize hover:text-secondary focus:text-secondary ltr:pl-6 rtl:pr-6"
                   data-lang={lang().code}
                 >
                   <img
-                    class="mr-2 inline-block w-4 "
+                    class="inline-block w-4 ltr:mr-2 rtl:ml-2 "
                     src={`/flags/${lang().code}.svg`}
                     alt=""
                   />

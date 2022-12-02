@@ -16,7 +16,7 @@ declare module "solid-js" {
 
 export interface bibleChapObj {
   [index: string]: string | number | null
-  number: number
+  number: string
   label: string
   text: null | string
 }

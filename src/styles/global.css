@@ -1,9 +1,50 @@
+/* CSS Vars (colors also in tailwind config ) */
+/* Being used cause a lot of html is not in components, so have to write a bit of css in this traditional manner */
 :root {
   --color-accent: #015ad9;
   --color-secondary: #faa83c;
   --color-darkAccent: #001533;
+  --scrollbarBG: rgb(242, 242, 242);
+  --thumbBG: var(--color-accent);
 }
-/* atkinson-hyperlegible-regular - latin-ext_latin */
+/* Fluid font size variables, for browsers that support clamp */
+/* link */ /* https://www.fluid-type-scale.com/calculate?minFontSize=18&minWidth=300&minRatio=1.067&maxFontSize=18&maxWidth=1200&maxRatio=1.2&steps=sm%2Cbase%2Cmd%2Clg%2Cxl%2Cxxl%2Cxxxl&baseStep=base&prefix=font-size&decimals=2&includeFallbacks=on&useRems=on&remValue=16&previewFont=Inter */
+@supports (font-size: clamp(1rem, 1vw, 1rem)) {
+  :root {
+    --font-size-sm: clamp(1.05rem, -0.21vw + 1.09rem, 0.94rem);
+    --font-size-base: clamp(1.13rem, 0vw + 1.13rem, 1.13rem);
+    --font-size-md: clamp(1.2rem, 0.27vw + 1.15rem, 1.35rem);
+    --font-size-lg: clamp(1.28rem, 0.6vw + 1.17rem, 1.62rem);
+    --font-size-xl: clamp(1.37rem, 1.03vw + 1.17rem, 1.94rem);
+    --font-size-xxl: clamp(1.46rem, 1.55vw + 1.17rem, 2.33rem);
+    --font-size-xxxl: clamp(1.56rem, 2.21vw + 1.14rem, 2.8rem);
+  }
+}
+/* Fallback variables for browsers that don't support clamp */
+@supports not (font-size: clamp(1rem, 1vw, 1rem)) {
+  :root {
+    --font-size-sm: 1.05rem;
+    --font-size-base: 1.13rem;
+    --font-size-md: 1.2rem;
+    --font-size-lg: 1.28rem;
+    --font-size-xl: 1.37rem;
+    --font-size-xxl: 1.46rem;
+    --font-size-xxxl: 1.56rem;
+  }
+  @media screen and (min-width: 1200px) {
+    :root {
+      --font-size-sm: 0.94rem;
+      --font-size-base: 1.13rem;
+      --font-size-md: 1.35rem;
+      --font-size-lg: 1.62rem;
+      --font-size-xl: 1.94rem;
+      --font-size-xxl: 2.33rem;
+      --font-size-xxxl: 2.8rem;
+    }
+  }
+}
+
+/* @===============  FONT FACE   =============   */
 @font-face {
   font-family: "Atkinson Hyperlegible";
   font-style: normal;
@@ -25,7 +66,6 @@
     url("/fonts/atkinson/atkinson-hyperlegible-v10-latin-ext_latin-italic.woff")
       format("woff");
 }
-/* atkinson-hyperlegible-700 - latin-ext_latin */
 
 @font-face {
   font-family: "Atkinson Hyperlegible";
@@ -37,17 +77,9 @@
     url("/fonts/atkinson/atkinson-hyperlegible-v10-latin-ext_latin-700.woff")
       format("woff");
 }
+/* #===============  FONT FACE   =============   */
 
-/* OTHER GLOBAL*/
-/* .verse { */
-/* color: red !important; */
-/* } */
-
-/* =============== scrollbar   ============= */
-html {
-  --scrollbarBG: rgb(242, 242, 242);
-  --thumbBG: var(--color-accent);
-}
+/* @=============== scrollbar   ============= */
 .theText::-webkit-scrollbar {
   width: 12px;
 }
@@ -63,9 +95,9 @@ html {
   border-radius: 6px;
   border: 3px solid var(--scrollbarBG);
 }
-/* =============== scrollbar   ============= */
+/*# =============== scrollbar   ============= */
 
-/* =============== addl utils   ============= */
+/* @ =============== addl utils   ============= */
 .sentenceCase {
   text-transform: lowercase;
 }
@@ -75,14 +107,50 @@ html {
 .menuNumberInput::-webkit-outer-spin-button,
 .menuNumberInput::-webkit-inner-spin-button {
   -webkit-appearance: none;
-
   margin: 0;
 }
-/* =============== !addl utils   ============= */
+/*# =============== !addl utils   ============= */
 
 /* =============== Text/Marker styles   ============= */
 /* Note, mostly copied from old reader for poetry, some margin stuff */
-/* Header */
+
+.theText h1 {
+  font-size: var(--font-size-xxl);
+}
+.theText h2 {
+  font-size: var(--font-size-md);
+}
+.theText h3 {
+  font-size: var(--font-size-md);
+}
+.theText h4 {
+  font-size: var(--font-size-base);
+}
+.theText p {
+  font-size: var(--font-size-base);
+}
+.theText h1,
+.theText h2,
+.theText h3,
+.theText h4 {
+  margin-top: 0.5rem;
+  font-weight: 700;
+}
+.theText h1 + h2 {
+  margin: 0;
+}
+.theText h1:has(+ h2) {
+  margin-top: 0.5em;
+  margin-bottom: 0;
+}
+.theText a {
+  color: var(--color-accent);
+  text-decoration: underline;
+}
+/* .theText h2:has(~ h1) {
+  font-size: var(--font-size-xl);
+} */
+
 .header {
   margin-top: 1em;
   font-size: 1.5rem;
@@ -189,7 +257,7 @@ a[href*="footnote-target"] {
 
 /* Verse */
 .verse {
-  font-size: inherit;
+  font-size: var(--font-size-base);
   font-weight: normal;
 }
 
@@ -312,15 +380,10 @@ a[href*="footnote-target"] {
     text-decoration: underline;
   }
 }
-
-/* html[dir="rtl"] {
-  body.bible{
-    .chaptermarker {
-      float: right;
-    }
-    [class^="poetry-"] .versemarker {
-      right: 0;
-      left: unset;
-    }
-  }
-} */
+html[dir="rtl"] .chaptermarker {
+  float: right;
+}
+html[dir="rtl"] [class^="poetry-"] .versemarker {
+  right: 0;
+  left: unset;
+}

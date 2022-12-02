@@ -116,7 +116,7 @@ export default function Settings(props: settingsProps) {
                           cacheStrategy() == key
                             ? "border-accent bg-accent/70 text-accent"
                             : "border-gray-400"
-                        } ml-2 inline-block rounded-full border  p-2`}
+                        } inline-block rounded-full border p-2 ltr:ml-2  rtl:mr-2`}
                       />
                     </button>
                   </li>

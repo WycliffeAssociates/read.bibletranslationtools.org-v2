@@ -114,6 +114,31 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
     )
     return currentChap
   })
+  const navLinks = createMemo(() => {
+    const currentBook = currentBookObj()
+    if (!currentBook) return
+
+    const currentChapIdx = currentBook?.chapters.findIndex(
+      (chap) => readerStore.currentChapter == chap.label
+    )
+
+    const isFirstChapter = currentChapIdx && currentChapIdx === 0
+    const isLastChapter =
+      currentChapIdx && currentChapIdx == currentBook?.chapters.length - 1
+
+    let prevChapObj = isFirstChapter
+      ? null
+      : currentBook.chapters[currentChapIdx - 1]
+    let nextChapObj = isLastChapter
+      ? null
+      : currentBook.chapters[currentChapIdx + 1]
+    let navParam = {
+      prev: prevChapObj?.label,
+      next: nextChapObj?.label
+    }
+    return navParam
+  })
+
   function getChapObjFromGivenBook(bookSlug: string, chap: number | string) {
     let book = readerStore.text.find((storeBib) => {
       return storeBib.slug == bookSlug
@@ -205,7 +230,8 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
     menuBookNames,
     possibleChapters,
     fetchHtml,
-    getMenuBook
+    getMenuBook,
+    navLinks
   }
 
   return (
@@ -344,4 +370,11 @@ export interface storeType {
     chapter
   }: fetchHtmlParms) => Promise<string | false | void>
   wholeBookHtml: Accessor<string | undefined>
+  navLinks: Accessor<
+    | {
+        prev: string | undefined
+        next: string | undefined
+      }
+    | undefined
+  >
 }

@@ -2,6 +2,7 @@
 export interface Props {
   title: string
   use100vh?: boolean
+  textDir: string
 }
 // imports
 import { pwaInfo } from "virtual:pwa-info"
@@ -10,7 +11,7 @@ import { Nav } from "@components"
 import { getPreferredLangFromHeader } from "@lib/utils"
 
 // data
-const { title, use100vh } = Astro.props
+const { title, use100vh, textDir } = Astro.props
 
 const preferredLocale = getPreferredLangFromHeader(Astro.request)
 let initialDictModule = await import(`../translations/${preferredLocale}.json`)
@@ -20,7 +21,7 @@ const initialDict = {
 ---
 
 <!DOCTYPE html>
-<html lang={preferredLocale}>
+<html lang={preferredLocale} dir={textDir}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />

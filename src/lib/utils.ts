@@ -1,6 +1,10 @@
 import { i18nDictKeysType, i18nDictMeta } from "@lib/i18n"
 import type { repoIndexObj } from "../types/types"
 
+/**
+ * @param request an Astro request. The accepts language header will be referenced against existing locales
+ * @returns The first locale in header for which a translation exists, or the default
+ */
 export function getPreferredLangFromHeader(request: Request): i18nDictKeysType {
   const defaultLocale = "en"
   if (!request) return defaultLocale
@@ -14,7 +18,8 @@ export function getPreferredLangFromHeader(request: Request): i18nDictKeysType {
   for (let i = 0; i < langsArr.length; i++) {
     //   let val = item() as i18nDictSubKeysType
     const langKey = langsArr[i] as i18nDictKeysType
-    if (i18nDictMeta[langKey]) {
+    let matchedLocale = i18nDictMeta.find((locale) => locale.code === langKey)
+    if (matchedLocale) {
       preferredLocale = langKey
       break
     } else continue

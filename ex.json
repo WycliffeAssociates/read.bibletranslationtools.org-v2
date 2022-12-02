@@ -1,0 +1,25 @@
+// todo: TW schema decide w/ reuben
+{
+  "languageName": "English",
+  "languageCode": "en",
+  "resourceType": "tw",
+  "resourceTitle": "English: translationWords",
+  "textDirection": "ltr",
+  "navigation": [
+    {
+      "htmlLink": "kt.html",
+      "label": "Key terms",
+      "contents": {
+        "abomination": "abomination",
+        "adoption": "adopt",
+        "adultery": "adultery",
+        "almighty": "Almighty"
+      }
+    },
+    {
+      "htmlLink": "others.html",
+      "label": "Other",
+      "contents": {}
+    }
+  ]
+}
