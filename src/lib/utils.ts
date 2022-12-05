@@ -1,5 +1,6 @@
 import { i18nDictKeysType, i18nDictMeta } from "@lib/i18n"
-import type { repoIndexObj } from "../types/types"
+import { onCleanup } from "solid-js"
+import type { repoIndexObj } from "../customTypes/types"
 
 /**
  * @param request an Astro request. The accepts language header will be referenced against existing locales
@@ -41,7 +42,7 @@ export function getBookAndChapterFromUrl({
   book: string
   chapter: string
 } {
-  let matchingBook = repoIndex.bible.find(
+  let matchingBook = repoIndex.bible?.find(
     (repoBook) => repoBook.slug == book || repoBook.label == book
   )
   let matchingChapter =
@@ -58,6 +59,25 @@ export function getBookAndChapterFromUrl({
   let firstChapterToShow = matchingChapter || firstBookToRender.chapters[0]
 
   return { book: firstBookToRender.slug, chapter: firstChapterToShow.label }
+}
+
+interface nonBibSchemaI {
+  navParam: string | null
+  repoIndex: repoIndexObj
+}
+
+export function getNonBibleSchemaNavFromUrl({
+  navParam,
+  repoIndex
+}: nonBibSchemaI): string {
+  let defaultNavParam = repoIndex.words[0].slug
+  if (!repoIndex || !navParam) return defaultNavParam
+  let match = repoIndex.words.find((wordObj) => wordObj.slug === navParam)
+  if (match) {
+    return match.slug
+  } else {
+    return defaultNavParam
+  }
 }
 
 interface reshapeBibleIndexI {
@@ -81,4 +101,20 @@ export function seedAndMutateInitialDataRepoIndex({
       }
     })
   })
+}
+
+// todo: MAYBE move to a different UI utils file?
+/* @===============  UI UTILS   =============   */
+export function clickOutside(el: Element, accessor: () => any) {
+  const onClick = (e: Event) => !el.contains(e.target as Node) && accessor()?.()
+  document.body.addEventListener("click", onClick)
+  onCleanup(() => document.body.removeEventListener("click", onClick))
+}
+
+export function escapeOut(el: Element, accessor: () => any) {
+  const onKeypress = (e: KeyboardEvent) => {
+    e.key === "Escape" && accessor()?.()
+  }
+  document.body.addEventListener("keyup", onKeypress)
+  onCleanup(() => document.body.removeEventListener("keyup", onKeypress))
 }

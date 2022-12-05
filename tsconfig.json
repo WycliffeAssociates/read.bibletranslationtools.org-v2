@@ -19,7 +19,8 @@
       "@assets/*": ["src/assets/*"],
       "@images/*": ["src/assets/images/*"],
       "@lib/*": ["src/lib/*"],
-      "@types/*": ["src/types/*"]
+      "@types/*": ["src/customTypes/*"],
+      "@src/*": ["src/*"]
     }
   },
   "include": ["./**/*", "node_modules/vite-plugin-pwa/client.d.ts", "src/**/*"]

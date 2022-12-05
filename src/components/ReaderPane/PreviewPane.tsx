@@ -9,6 +9,7 @@ import {
   onCleanup,
   Signal
 } from "solid-js"
+import { clickOutside, escapeOut } from "@lib/utils"
 
 const [pos, setPos] = createSignal({
   x: "0px",
@@ -20,18 +21,6 @@ const [lastFocused, setLastFocused] =
   createSignal() as Signal<HTMLElement | null>
 let previewCloseButton: HTMLButtonElement //ref
 
-function clickOutside(el: Element, accessor: () => any) {
-  const onClick = (e: Event) => !el.contains(e.target as Node) && accessor()?.()
-  document.body.addEventListener("click", onClick)
-  onCleanup(() => document.body.removeEventListener("click", onClick))
-}
-function escapeOut(el: Element, accessor: () => any) {
-  const onKeypress = (e: KeyboardEvent) => {
-    e.key === "Escape" && accessor()?.()
-  }
-  document.body.addEventListener("keyup", onKeypress)
-  onCleanup(() => document.body.removeEventListener("keyup", onKeypress))
-}
 function closeModal() {
   setShowFootnote(false)
   lastFocused()?.focus()
@@ -48,11 +37,14 @@ function focusWithinClose(ev: FocusEvent) {
 }
 
 export function PreviewPane() {
+  // these are hacks to keep typescript from stripping away "unused imports"
+  const clickout = clickOutside
+  const escape = escapeOut
   return (
     <Show when={showFootnote()}>
       <div
-        use:clickOutside={closeModal}
-        use:escapeOut={closeModal}
+        use:clickOutside={() => closeModal()}
+        use:escapeOut={() => closeModal()}
         onFocusOut={focusWithinClose}
         style={{ left: pos().x, top: pos().y }}
         id="previewPane"

@@ -30,6 +30,15 @@ export interface bibleEntryObj {
   label: string
   chapters: bibleChapObj[]
 }
+
+export interface wordsEntryObj {
+  slug: string
+  label: string
+  words: Array<{
+    slug: string
+    label: string
+  }>
+}
 export interface repoIndexObj {
   languageName: string
   languageCode: string
@@ -37,5 +46,18 @@ export interface repoIndexObj {
   resourceTitle: string | null
   textDirection: string
   bible: Array<bibleEntryObj>
+  words: Array<wordsEntryObj>
   repoUrl: string
+}
+
+export interface bibleSchemaPropsType {
+  book: string
+  chapter: string
+  initialHtml: null | string
+  title: null | string
+}
+export interface nonBibleSchemaPropsType {
+  navSection: string
+  initialHtml: null | string
+  repoIndex: repoIndexObj
 }

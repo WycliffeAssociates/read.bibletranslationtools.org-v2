@@ -10,6 +10,13 @@ import {
 } from "solid-js"
 import type { Accessor } from "solid-js"
 import { SvgSettings, SvgBook, LoadingSpinner } from "@components"
+import { clickOutside, escapeOut } from "@lib/utils"
+
+// https://github.com/solidjs/solid/discussions/845
+// these are hacks (name doesn't matter) to keep typescript from stripping away "unused imports", but these are used directives below:
+const clickout = clickOutside
+const escape = escapeOut
+
 // const Settings = lazy(() => {
 //   import("../Settings/Settings")
 // })
@@ -23,7 +30,7 @@ const Settings = lazy(async () => {
 import { useI18n } from "@solid-primitives/i18n"
 import { get, set } from "idb-keyval"
 import type { JSX, ParentComponent, ParentProps, Component } from "solid-js"
-import type { bibleEntryObj } from "../../types/types"
+import type { bibleEntryObj } from "../../customTypes/types"
 import type { storeType } from "../ReaderWrapper/ReaderWrapper"
 interface MenuProps {
   storeInterface: storeType
@@ -172,7 +179,12 @@ const ReaderMenu: Component<MenuProps> = (props) => {
       }}
       id="menu"
     >
-      <div class=" mx-auto flex w-full flex-wrap items-center px-4 py-2 ">
+      <div
+        // use:clickOutside={setMenuIsOpen(false)}
+        use:clickOutside={() => setMenuIsOpen(false)}
+        use:escapeOut={() => setMenuIsOpen(false)}
+        class=" mx-auto flex w-full flex-wrap items-center px-4 py-2 "
+      >
         {/* "publication" */}
         <div
           class="w-full text-center text-sm font-bold uppercase print:block sm:w-1/6"
@@ -184,7 +196,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
         </div>
 
         {/* menu button / info */}
-        <div class="relative flex w-full items-center justify-between gap-3  print:hidden sm:w-3/4 ltr:sm:ml-auto rtl:sm:mr-auto">
+        <div class="relative flex w-full items-center justify-between gap-3  print:hidden sm:w-5/6 ltr:sm:ml-auto rtl:sm:mr-auto">
           <div class="my-2 flex w-4/5 justify-between overflow-hidden  rounded-lg bg-neutral-200 outline outline-gray-300">
             <button
               class="flex w-full flex-grow items-center rounded-md pl-2"
@@ -428,7 +440,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                         <button
                           classList={{
                             "w-full p-3 hover:bg-accent/10": true,
-                            "text-blue-400": isActiveBookAndChap(idx)
+                            "text-blue-400": isActiveBookAndChap(book.label)
                           }}
                           onClick={(e) => {
                             jumpToNewChapIdx(e, idx() + 1)

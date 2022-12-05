@@ -10,7 +10,7 @@ import type {
   bibleChapObj,
   bibleEntryObj,
   repoIndexObj
-} from "../../types/types"
+} from "@src/customTypes/types"
 import type { Accessor } from "solid-js"
 
 // types are a little verbose up here: See them as the bottom:

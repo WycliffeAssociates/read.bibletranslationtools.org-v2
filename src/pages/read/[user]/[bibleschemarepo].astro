@@ -1,0 +1,162 @@
+---
+import { FUNCTIONS_ROUTES } from "@lib/routes"
+
+import Layout from "@layouts/Layout.astro"
+import { ReaderWrapper } from "@components"
+import {
+  getChapterHtml,
+  getNonBibleSchemaHtml,
+  getRepoIndex,
+  isValidRepo
+} from "@lib/api"
+import {
+  getBookAndChapterFromUrl,
+  getNonBibleSchemaNavFromUrl,
+  getPreferredLangFromHeader,
+  seedAndMutateInitialDataRepoIndex
+} from "@lib/utils"
+import type {
+  bibleSchemaPropsType,
+  nonBibleSchemaPropsType
+} from "@src/customTypes/types"
+import { setCacheNameDetails } from "workbox-core"
+
+let { bibleschemarepo: repo, user } = Astro.params
+
+const res404 = new Response(null, {
+  status: 404
+})
+
+// url routes validation check
+if (!repo || !user) return res404
+
+repo = String(repo)
+user = String(user)
+// is current wacs repo check
+const isValid = isValidRepo({ user, repo })
+if (!isValid) return res404
+
+// get of text and metadata
+const repoIndex = await getRepoIndex({ user, repo })
+
+if (!repoIndex) return res404
+// if (repoIndex.resourceType === "tw")
+//   return Astro.redirect(`/read/${user}/${repo}/tw`)
+
+// grab query params (if present) for initial HTML
+
+let bibleSchemaProps: bibleSchemaPropsType = {
+  book: "",
+  chapter: "",
+  initialHtml: null,
+  title: null
+}
+let nonBibleSchemaProps: nonBibleSchemaPropsType = {
+  navSection: "",
+  initialHtml: null,
+  repoIndex: repoIndex
+}
+if (repoIndex.resourceType === "tw") {
+  // initial NAV
+  const section = getNonBibleSchemaNavFromUrl({
+    navParam: Astro.url.searchParams.get("section"),
+    repoIndex
+  })
+  nonBibleSchemaProps.navSection = section
+
+  // Initial HTML for no bible schema:
+  const intialHTML = await getNonBibleSchemaHtml({
+    navSection: section,
+    user,
+    repo
+  })
+  if (!intialHTML) return Astro.redirect("/404")
+  nonBibleSchemaProps.initialHtml = intialHTML
+}
+//# BIBLE SCHEMA PAGE PROPS
+else {
+  const { book, chapter } = getBookAndChapterFromUrl({
+    book: Astro.url.searchParams.get("book"),
+    chapter: Astro.url.searchParams.get("chapter"),
+    repoIndex
+  })
+  bibleSchemaProps.book = book
+  bibleSchemaProps.chapter = chapter
+  //  intial props/data for page;
+  const initialHtml = await getChapterHtml({ user, repo, book, chapter })
+  if (!initialHtml) return Astro.redirect("/404")
+  bibleSchemaProps.initialHtml = initialHtml
+  seedAndMutateInitialDataRepoIndex({
+    repoIndex,
+    book, //slug, not native label;
+    chapter,
+    initialHtml: initialHtml
+  })
+  bibleSchemaProps.title = `${repo}-${bibleSchemaProps.book}-${bibleSchemaProps.chapter}`
+}
+const preferredLocale = getPreferredLangFromHeader(Astro.request)
+const initialDictModule = await import(
+  `../../../translations/${preferredLocale}.json`
+)
+const initialDict = {
+  [preferredLocale]: initialDictModule.default
+}
+---
+
+<Layout
+  title={` ${bibleSchemaProps.title}`}
+  use100vh={true}
+  textDir={repoIndex.textDirection}
+>
+  <div
+    class={`font-sans h-full bg-neutral-50 resourceType-${repoIndex.resourceType}`}
+  >
+    {
+      repoIndex.resourceType !== "tw" ? (
+        <ReaderWrapper
+          client:load
+          firstBookKey={bibleSchemaProps.book}
+          firstChapterToShow={bibleSchemaProps.chapter}
+          repoData={repoIndex}
+          user={user}
+          repositoryName={repo}
+          preferredLocale={preferredLocale}
+          initialDict={initialDict}
+        />
+      ) : (
+        <div class="theText tw-theText relative flex max-h-[80vh] overflow-y-scroll px-8">
+          <div class="w-2/3" set:html={nonBibleSchemaProps.initialHtml} />
+          <div class="sticky top-0 right-0 w-1/3">
+            {" "}
+            {repoIndex.words?.map((word) => {
+              return (
+                <div>
+                  <details>
+                    <summary>{word.label}</summary>
+                    <ul>
+                      {word.words.map((single) => {
+                        return (
+                          <li>
+                            <a href={`?section=${word.slug}#${single.slug}`}>
+                              {single.label}
+                            </a>
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  </details>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )
+    }
+  </div>
+</Layout>
+
+<script>
+  window.addEventListener("popstate", (event) => {
+    console.log(event)
+  })
+</script>

@@ -10,6 +10,12 @@ interface getRepoHtmlType {
   book: string
   chapter: string
 }
+interface getNonBibleRepoHtmlType {
+  user: string
+  repo: string
+  navSection: string
+}
+
 interface repo {
   user: string
   repo: string
@@ -21,7 +27,14 @@ const FUNCTIONS_ROUTES = {
     `${base}/repoIndex?user=${user}&repo=${repo}`,
   getRepoHtml: ({ user, repo, book, chapter }: getRepoHtmlType) =>
     `${base}/getHtmlForChap?user=${user}&repo=${repo}&book=${book}&chapter=${chapter}`,
+  getHtmlForNonBibleSchema: ({
+    user,
+    repo,
+    navSection
+  }: getNonBibleRepoHtmlType) =>
+    `${base}/getHtmlForNonBibleSchema?user=${user}&repo=${repo}&navSection=${navSection}`,
   isValidRepo: ({ user, repo }: repo) =>
     `${base}/isValidRepo?user=${user}&repo=${repo}`
 }
+
 export { FUNCTIONS_ROUTES }

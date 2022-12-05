@@ -1,5 +1,5 @@
 import { FUNCTIONS_ROUTES } from "@lib/routes"
-import type { repoIndexObj } from "../types/types"
+import type { repoIndexObj } from "../customTypes/types"
 
 interface baseApiInfo {
   user: string
@@ -8,6 +8,7 @@ interface baseApiInfo {
 interface getRepoInfo extends baseApiInfo {
   book: string
   chapter: string
+  navSection?: string
 }
 export async function getChapterHtml({
   user,
@@ -17,6 +18,31 @@ export async function getChapterHtml({
 }: getRepoInfo): Promise<string | undefined> {
   if (!repo) return
   let fetchUrl = FUNCTIONS_ROUTES.getRepoHtml({ user, repo, book, chapter })
+  try {
+    const response = await fetch(fetchUrl)
+    const data = await response.text()
+    return data
+  } catch (error) {
+    console.error(error)
+    return
+  }
+}
+interface getNonBibleSchemaHtmlParams {
+  navSection: string
+  user: string
+  repo: string
+}
+export async function getNonBibleSchemaHtml({
+  navSection,
+  user,
+  repo
+}: getNonBibleSchemaHtmlParams): Promise<string | undefined> {
+  if (!repo || !user || !navSection) return
+  let fetchUrl = FUNCTIONS_ROUTES.getHtmlForNonBibleSchema({
+    user,
+    repo,
+    navSection
+  })
   try {
     const response = await fetch(fetchUrl)
     const data = await response.text()

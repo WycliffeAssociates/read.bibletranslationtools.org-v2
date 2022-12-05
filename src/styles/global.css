@@ -132,7 +132,8 @@
 .theText h1,
 .theText h2,
 .theText h3,
-.theText h4 {
+.theText h4,
+.theText h5 {
   margin-top: 0.5rem;
   font-weight: 700;
 }
