@@ -9,6 +9,10 @@ declare module "solid-js" {
         addToOtherDict: boolean
       }>
     }
+    interface Directives {
+      clickOutside(el: HTMLElement, accessor: any): void
+      escapeOut(el: HTMLElement, accessor: any): void
+    }
   }
 }
 

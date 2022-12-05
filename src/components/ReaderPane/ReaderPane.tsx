@@ -14,6 +14,11 @@ import { FUNCTIONS_ROUTES } from "@lib/routes"
 import { get, set } from "idb-keyval"
 import type { storeType } from "../ReaderWrapper/ReaderWrapper"
 import type { i18nDictKeysType } from "@lib/i18n"
+import {
+  PreviewPane,
+  hoverOnCrossReferences,
+  hoverOnFootnotes
+} from "./PreviewPane"
 
 interface ReaderPaneProps {
   storeInterface: storeType
@@ -42,43 +47,6 @@ export default function ReaderPane(props: ReaderPaneProps) {
   function setLastPageVisited() {
     return set("lastPageVisited", location.href)
   }
-  function hoverOnFootnotes() {
-    let footnotes: NodeListOf<HTMLAnchorElement> = document.querySelectorAll(
-      'a[href*="footnote-target"]'
-    )
-
-    function manageNote(ev: MouseEvent | FocusEvent) {
-      let target = ev.target as HTMLAnchorElement
-      let rect = target.getBoundingClientRect()
-      let last = target.href.split("-").pop()
-      setShowFootnote(true)
-      setPos({
-        x: rect.x + 30 + "px",
-        y: rect.y - 80 + "px"
-      })
-      // footnote-caller-1
-      // footnote-target-1
-      let correspondingA = document.querySelector(
-        `a[href*="footnote-caller-${last}"]`
-      )
-      if (!correspondingA) return
-      let parent = correspondingA.parentElement?.parentElement
-      let footnoteText = parent ? parent.innerText : ""
-      setFootnoteText(footnoteText)
-    }
-
-    footnotes.forEach((note) => {
-      note.addEventListener("mouseenter", manageNote)
-      note.addEventListener("focus", manageNote)
-
-      note.addEventListener("mouseout", () => {
-        setShowFootnote(false)
-      })
-      note.addEventListener("focusout", () => {
-        setShowFootnote(false)
-      })
-    })
-  }
 
   createEffect(
     on(
@@ -91,12 +59,15 @@ export default function ReaderPane(props: ReaderPaneProps) {
     )
   )
   // todo: see with Reuben about making this cleaner or? Would it be better to wait on this sort of functionality until graphql api and we know relationships or? Or yagni?
+
+  /* 
   function hoverOnCrossReferences() {
     let crossReferences = document.querySelectorAll("a[href*='tn-chunk-'")
 
     crossReferences.forEach((ref) => {
       ref.addEventListener("mouseover", async (e) => {
         let target = e.target as HTMLAnchorElement
+        target.focus()
         let rect = target.getBoundingClientRect()
         let href = target.href
         let url = new URL(href)
@@ -134,9 +105,14 @@ export default function ReaderPane(props: ReaderPaneProps) {
         setFootnoteText(html)
         console.log({ corresponding })
       })
+      ref.addEventListener("focusout", () => {
+        setShowFootnote(false)
+      })
     })
     console.log({ crossReferences })
   }
+
+   */
   onMount(() => {
     window.addEventListener("popstate", (e) => {
       console.log(location)
@@ -266,13 +242,7 @@ export default function ReaderPane(props: ReaderPaneProps) {
     <>
       {/* HTML CONTENT */}
       <Show when={!props.printWholeBook()}>
-        <Show when={showFootnote()}>
-          <div
-            class="theText absolute z-30 mx-auto  max-h-[50vh] w-1/3 overflow-y-scroll border border-accent bg-white p-8 shadow shadow-neutral-500"
-            style={{ left: pos().x, top: pos().y }}
-            innerHTML={footnoteText()}
-          ></div>
-        </Show>
+        <PreviewPane />
         <div class="mx-auto h-full w-full max-w-[1400px] px-4">
           <div class="relative flex h-full content-center items-center justify-center gap-2 ">
             <Show
