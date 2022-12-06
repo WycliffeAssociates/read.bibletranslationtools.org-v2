@@ -58,6 +58,8 @@ export interface bibleSchemaPropsType {
 }
 export interface nonBibleSchemaPropsType {
   navSection: string
-  initialHtml: null | string
+  initialHtml: undefined | string
   repoIndex: repoIndexObj
+  user: string
+  repo: string
 }

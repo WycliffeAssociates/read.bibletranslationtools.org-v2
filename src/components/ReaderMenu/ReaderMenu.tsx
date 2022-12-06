@@ -10,7 +10,7 @@ import {
 } from "solid-js"
 import type { Accessor } from "solid-js"
 import { SvgSettings, SvgBook, LoadingSpinner } from "@components"
-import { clickOutside, escapeOut } from "@lib/utils"
+import { clickOutside, escapeOut } from "@lib/utils-ui"
 
 // https://github.com/solidjs/solid/discussions/845
 // these are hacks (name doesn't matter) to keep typescript from stripping away "unused imports", but these are used directives below:

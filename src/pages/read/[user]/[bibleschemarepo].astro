@@ -2,7 +2,7 @@
 import { FUNCTIONS_ROUTES } from "@lib/routes"
 
 import Layout from "@layouts/Layout.astro"
-import { ReaderWrapper } from "@components"
+import { ReaderWrapper, TranslationWords } from "@components"
 import {
   getChapterHtml,
   getNonBibleSchemaHtml,
@@ -40,6 +40,7 @@ if (!isValid) return res404
 const repoIndex = await getRepoIndex({ user, repo })
 
 if (!repoIndex) return res404
+const isTw = repoIndex.resourceType === "tw"
 // if (repoIndex.resourceType === "tw")
 //   return Astro.redirect(`/read/${user}/${repo}/tw`)
 
@@ -53,16 +54,20 @@ let bibleSchemaProps: bibleSchemaPropsType = {
 }
 let nonBibleSchemaProps: nonBibleSchemaPropsType = {
   navSection: "",
-  initialHtml: null,
-  repoIndex: repoIndex
+  initialHtml: undefined,
+  repoIndex: repoIndex,
+  user: "",
+  repo: ""
 }
-if (repoIndex.resourceType === "tw") {
+if (isTw) {
   // initial NAV
   const section = getNonBibleSchemaNavFromUrl({
     navParam: Astro.url.searchParams.get("section"),
     repoIndex
   })
   nonBibleSchemaProps.navSection = section
+  nonBibleSchemaProps.user = user
+  nonBibleSchemaProps.repo = repo
 
   // Initial HTML for no bible schema:
   const intialHTML = await getNonBibleSchemaHtml({
@@ -92,7 +97,6 @@ else {
     chapter,
     initialHtml: initialHtml
   })
-  bibleSchemaProps.title = `${repo}-${bibleSchemaProps.book}-${bibleSchemaProps.chapter}`
 }
 const preferredLocale = getPreferredLangFromHeader(Astro.request)
 const initialDictModule = await import(
@@ -101,13 +105,12 @@ const initialDictModule = await import(
 const initialDict = {
   [preferredLocale]: initialDictModule.default
 }
+const pageTitle = !isTw
+  ? `${repo}-${bibleSchemaProps.book}-${bibleSchemaProps.chapter}`
+  : `${user}-${repo}`
 ---
 
-<Layout
-  title={` ${bibleSchemaProps.title}`}
-  use100vh={true}
-  textDir={repoIndex.textDirection}
->
+<Layout title={pageTitle} use100vh={true} textDir={repoIndex.textDirection}>
   <div
     class={`font-sans h-full bg-neutral-50 resourceType-${repoIndex.resourceType}`}
   >
@@ -124,32 +127,7 @@ const initialDict = {
           initialDict={initialDict}
         />
       ) : (
-        <div class="theText tw-theText relative flex max-h-[80vh] overflow-y-scroll px-8">
-          <div class="w-2/3" set:html={nonBibleSchemaProps.initialHtml} />
-          <div class="sticky top-0 right-0 w-1/3">
-            {" "}
-            {repoIndex.words?.map((word) => {
-              return (
-                <div>
-                  <details>
-                    <summary>{word.label}</summary>
-                    <ul>
-                      {word.words.map((single) => {
-                        return (
-                          <li>
-                            <a href={`?section=${word.slug}#${single.slug}`}>
-                              {single.label}
-                            </a>
-                          </li>
-                        )
-                      })}
-                    </ul>
-                  </details>
-                </div>
-              )
-            })}
-          </div>
-        </div>
+        <TranslationWords client:load {...nonBibleSchemaProps} />
       )
     }
   </div>

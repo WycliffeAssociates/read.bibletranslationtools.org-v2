@@ -36,30 +36,26 @@ export const onRequestGet: PagesFunction = async (context) => {
     headers["Access-Control-Allow-Origin"] = "*"
   }
 
-  class ElementHandler {
+  class aTagHandler {
     element(element: Element) {
-      // An incoming element, such as `div`
-      // console.log(`Incoming element: ${element.tagName}`)
-      console.dir(element.getAttribute("href"))
       let href = element.getAttribute("href")
       if (!href) return
       if (href && href.includes("/u/")) return
       let rep = href.replace(".html", "")
       console.log({ rep })
       let parts = rep.split("#")
-      let newUrl = `?section=${parts[0]}#${parts[1]}`
-      console.log({ newUrl })
+      let section = parts[0]
+      let hash = parts[1]
+      let newUrl = `?section=${section}#${parts[1]}`
       element.setAttribute("href", newUrl)
-      element.setAttribute("data-section", parts[0])
-      element.setAttribute("data-hash", parts[1])
+      element.setAttribute("data-section", section)
+      element.setAttribute("data-hash", hash)
+      element.setAttribute("data-crossref", "true")
     }
-
-    comments(comment) {
-      // An incoming comment
-    }
-
-    text(text) {
-      // An incoming piece of text
+  }
+  class imgTagHandler {
+    element(element: Element) {
+      element.setAttribute("loading", "lazy")
     }
   }
 
@@ -73,7 +69,8 @@ export const onRequestGet: PagesFunction = async (context) => {
       headers
     })
     return new HTMLRewriter()
-      .on("a[href*='html']", new ElementHandler())
+      .on("a[href*='html']", new aTagHandler())
+      .on("img[src*='content.bibletranslationtools.org'", new imgTagHandler())
       .transform(newResp)
   } catch (error) {
     console.error(error)

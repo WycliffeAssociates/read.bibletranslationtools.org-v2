@@ -35,15 +35,44 @@ export const onRequestGet: PagesFunction = async (context) => {
     headers["Access-Control-Allow-Origin"] = "*"
   }
 
+  class aTagHandler {
+    element(element: Element) {
+      console.log(element)
+      let href = element.getAttribute("href")
+      if (!href) return
+      if (href && href.includes("/u/")) return
+      //
+      console.log(href)
+
+      let hashWithoutHashTag = href.split("#")[1]
+      //
+      let parts = hashWithoutHashTag.split("-")
+      let book = parts[2]
+      let chapter = parts[3]
+      console.log({ book, chapter, hashWithoutHashTag })
+
+      let newUrl = `?book=${book}&chapter=${chapter}#${hashWithoutHashTag}`
+      element.setAttribute("href", newUrl)
+      element.setAttribute("data-chapter", chapter)
+      element.setAttribute("data-book", book)
+      element.setAttribute("data-hash", hashWithoutHashTag)
+      element.setAttribute("data-crossref", "true")
+    }
+  }
+
   try {
     // http://localhost/u/WA-Catalog/en_ulb/index.json;
     let baseUrl = env.HTML_API_URL_BASE
     let finalUrl = `${baseUrl}/${user}/${repo}/${bookKey}/${chapter}.html`
     let response = await fetch(finalUrl)
 
-    return new Response(response.body, {
+    let newResp = new Response(response.body, {
       headers
     })
+    return new HTMLRewriter()
+      .on("a[href*='tn-chunk-'", new aTagHandler())
+      .transform(newResp)
+    return newResp
   } catch (error) {
     console.error(error)
     return new Response(null, {

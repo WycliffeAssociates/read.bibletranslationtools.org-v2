@@ -102,19 +102,3 @@ export function seedAndMutateInitialDataRepoIndex({
     })
   })
 }
-
-// todo: MAYBE move to a different UI utils file?
-/* @===============  UI UTILS   =============   */
-export function clickOutside(el: Element, accessor: () => any) {
-  const onClick = (e: Event) => !el.contains(e.target as Node) && accessor()?.()
-  document.body.addEventListener("click", onClick)
-  onCleanup(() => document.body.removeEventListener("click", onClick))
-}
-
-export function escapeOut(el: Element, accessor: () => any) {
-  const onKeypress = (e: KeyboardEvent) => {
-    e.key === "Escape" && accessor()?.()
-  }
-  document.body.addEventListener("keyup", onKeypress)
-  onCleanup(() => document.body.removeEventListener("keyup", onKeypress))
-}

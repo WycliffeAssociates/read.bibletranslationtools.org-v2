@@ -18,4 +18,5 @@ export {
 export { default as ReaderMenu } from "./ReaderMenu/ReaderMenu"
 export { default as ReaderPane } from "./ReaderPane/ReaderPane"
 export { default as ReaderWrapper } from "./ReaderWrapper/ReaderWrapper"
+export { default as TranslationWords } from "./TranslationWords/Tw"
 // settings Component is lazy loaded

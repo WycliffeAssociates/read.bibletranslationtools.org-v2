@@ -9,7 +9,12 @@ import {
   onCleanup,
   Signal
 } from "solid-js"
-import { clickOutside, escapeOut } from "@lib/utils"
+import {
+  clickOutside,
+  escapeOut,
+  positionPreviewPane,
+  getHtmlWithinSpan
+} from "@lib/utils-ui"
 
 const [pos, setPos] = createSignal({
   x: "0px",
@@ -79,17 +84,14 @@ export function PreviewPane() {
 }
 
 export function hoverOnCrossReferences() {
-  let crossReferences = document.querySelectorAll("a[href*='tn-chunk-'")
+  let crossReferences = document.querySelectorAll("a[data-crossref='true']")
 
   async function populatePreviewPane(e: Event) {
     let target = e.target as HTMLAnchorElement
     let rect = target.getBoundingClientRect()
-    let href = target.href
-    let url = new URL(href)
-    let hashWithoutHashTag = url.hash?.slice(1)
-    let parts = url.hash?.split("-")
-    let book = parts[2]
-    let chapter = parts[3]
+    let hashWithoutHashTag = target.dataset.hash
+    let book = target.dataset.book
+    let chapter = target.dataset.chapter
     let response: Response
     let text: string
 
@@ -105,41 +107,29 @@ export function hoverOnCrossReferences() {
     newDom.innerHTML = text
     // '[id="#tn-chunk-gen-22-01"] not valid
     let corresponding = newDom.querySelector(`[id="${hashWithoutHashTag}"]`)
-    let htmlContainer: any[] = [corresponding]
+    if (!corresponding) return
+    // let htmlContainer: any[] = [corresponding]
 
-    let firstSib = corresponding && corresponding.nextElementSibling
-    if (!firstSib) return
-    getSiblingsUntil(firstSib, "tn-chunk")
-
-    function getSiblingsUntil(node: Element, idToSearch: string) {
-      if (node.id && node.id.includes(idToSearch)) {
-        return false
-      } else {
-        htmlContainer.push(node)
-        if (!node.nextElementSibling) return
-        getSiblingsUntil(node.nextElementSibling, idToSearch)
-      }
+    function truthyFunction(node: Element) {
+      return (
+        !!node.id &&
+        node.id !== hashWithoutHashTag &&
+        node.id.includes("tn-chunk")
+      )
     }
-
-    let html = htmlContainer.map((el) => el.outerHTML).join("")
-
-    let windowMidPoint = window.innerWidth / 2
-    console.log({ rect })
-    setShowFootnote(true)
-    let previewPane = document.querySelector("#previewPane") //stick in DOM to measure it's vh client height. This runs quickly enough that you won't get some flashing before we position it;
-    if (!previewPane) return
-    let posX = rect.x > windowMidPoint ? rect.x - 50 + "px" : rect.x + 50 + "px"
-    let posY =
-      rect.y > window.innerHeight / 2
-        ? rect.y - previewPane.clientHeight
-        : rect.y + 30
-    setPos({
-      x: posX,
-      y: posY + "px"
-    })
-    setFootnoteText(html)
-    console.log({ corresponding })
     // debugger
+    let html = getHtmlWithinSpan(corresponding, truthyFunction)
+    setFootnoteText(html)
+
+    // positionion logic:
+    positionPreviewPane({
+      target,
+      previewPaneSelector: "#previewPane",
+      previewPaneSetter: setShowFootnote,
+      setPos
+    })
+
+    // manage focus
     setLastFocused(document.activeElement as HTMLElement)
     previewCloseButton.focus()
   }
