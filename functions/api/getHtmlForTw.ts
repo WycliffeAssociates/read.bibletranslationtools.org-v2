@@ -1,3 +1,5 @@
+import { getHeaders } from "functions/shared"
+
 export const onRequestGet: PagesFunction = async (context) => {
   // Contents of context object
   // const {
@@ -23,17 +25,6 @@ export const onRequestGet: PagesFunction = async (context) => {
       status: 400,
       statusText: "Missing parameters"
     })
-  }
-  type headersType = {
-    "Content-Type": string
-    "Access-Control-Allow-Origin"?: string
-  }
-  let headers: headersType = {
-    "Content-Type": "text/html"
-  }
-  const allowedOrigins = ["localhost", "http://127.0.0.1"]
-  if (allowedOrigins.some((origin) => url.origin.includes(origin))) {
-    headers["Access-Control-Allow-Origin"] = "*"
   }
 
   class aTagHandler {
@@ -66,7 +57,7 @@ export const onRequestGet: PagesFunction = async (context) => {
     let response = await fetch(finalUrl)
     // E[foo*="bar"]
     let newResp = new Response(response.body, {
-      headers
+      headers: getHeaders(url)
     })
     return new HTMLRewriter()
       .on("a[href*='html']", new aTagHandler())

@@ -84,7 +84,7 @@ export function UnwrappedHeader(props: HeaderProps) {
           class="inline-flex items-center rounded-md border border-solid border-gray-100 px-6 py-2 capitalize rtl:flex-row-reverse md:hidden"
         >
           <Show when={!mobileMenuOpen()}>
-            <HamburgerSvg classNames="inline-block mr-2 w-6 h-6" />
+            <HamburgerSvg classNames="inline-block mr-2 w-6 h-6 fill-white" />
           </Show>
           <Show when={mobileMenuOpen()}>
             <MobileMenuOpen classNames="inline-block mr-2 w-6 h-6" />

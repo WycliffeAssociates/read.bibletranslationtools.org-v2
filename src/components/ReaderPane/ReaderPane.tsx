@@ -148,7 +148,6 @@ export default function ReaderPane(props: ReaderPaneProps) {
       searchParams.set("chapter", currentChap)
       let newRelativePathQuery =
         window.location.pathname + "?" + searchParams.toString()
-      debugger
       document.title = `${props.repositoryName}-${currentBook}-${currentChap}`
       history.pushState(null, "", newRelativePathQuery)
     }

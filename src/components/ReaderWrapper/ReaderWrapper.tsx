@@ -18,6 +18,7 @@ import type { Accessor } from "solid-js"
 export default function ReaderWrapper(props: ReaderWrapperProps) {
   //======= Reader App state =============
   // ideally, context is a more native fit than this prop passing for something that is only rendering children, but not possible with Astro and the way islands are implmented.  Just a tradeoff.
+  if (!props.repoData.bible?.length) return null //can't do anything without bible, and to satisfy TS narrowing
 
   let defaultStore = {
     currentBook: props.firstBookKey,

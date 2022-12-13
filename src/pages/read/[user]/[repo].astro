@@ -1,0 +1,180 @@
+---
+import { FUNCTIONS_ROUTES } from "@lib/routes"
+
+import Layout from "@layouts/Layout.astro"
+import { ReaderWrapper, TranslationWords, TranslationManual } from "@components"
+import {
+  getChapterHtml,
+  getTwSchemaHtml,
+  getRepoIndex,
+  isValidRepo,
+  getTmSchemaHtml
+} from "@lib/api"
+import {
+  getBookAndChapterFromUrl,
+  getTwQueryParamOrDefault,
+  getPreferredLangFromHeader,
+  seedAndMutateInitialDataRepoIndex,
+  getTmQueryParamOrDefault
+} from "@lib/utils"
+import type { tmProps, twProps, bibleSchemaProps } from "@src/customTypes/types"
+let { repo, user } = Astro.params
+const res404 = new Response(null, {
+  status: 404
+})
+// url routes validation check
+if (!repo || !user) {
+  return res404
+}
+
+repo = String(repo)
+user = String(user)
+// is current wacs repo check
+const isValid = isValidRepo({ user, repo })
+if (!isValid) {
+  return res404
+}
+
+// get of text and metadata
+const repoIndex = await getRepoIndex({ user, repo })
+
+if (!repoIndex) return res404
+
+const isBibleSchema = ["bible", "tn", "tq"].includes(repoIndex.resourceType)
+const isTw = repoIndex.resourceType === "tw"
+const isTM = repoIndex.resourceType === "tm"
+
+// grab query params (if present) for initial HTML
+let repoProps: tmProps | twProps | bibleSchemaProps = {
+  repoIndex: repoIndex,
+  templateType: isBibleSchema ? "BIBLE" : isTw ? "TW" : "TM"
+} as any
+
+if (repoProps.templateType === "TW") {
+  // initial NAV
+  const section = getTwQueryParamOrDefault({
+    navParam: Astro.url.searchParams.get("section"),
+    repoIndex
+  })
+  if (!section) return res404
+
+  // Initial HTML for no bible schema:
+  const intialHTML = await getTwSchemaHtml({
+    navSection: section,
+    user,
+    repo
+  })
+  if (!intialHTML) return res404
+  // ADD PROPS FOR TW PAGES
+  repoProps.initialHtml = intialHTML
+  repoProps.initialPage = section
+  repoProps.pageTitle = `${user}-${repo}`
+  repoProps.user = user
+  repoProps.repo = repo
+}
+//# BIBLE SCHEMA PAGE PROPS
+else if (repoProps.templateType === "BIBLE") {
+  const { book, chapter } = getBookAndChapterFromUrl({
+    book: Astro.url.searchParams.get("book"),
+    chapter: Astro.url.searchParams.get("chapter"),
+    repoIndex
+  })
+
+  //  intial props/data for page;
+  const initialHtml = await getChapterHtml({ user, repo, book, chapter })
+  if (!initialHtml) return res404
+
+  seedAndMutateInitialDataRepoIndex({
+    repoIndex,
+    book, //slug, not native label;
+    chapter,
+    initialHtml: initialHtml
+  })
+  repoProps.initialHtml = initialHtml
+  repoProps.pageTitle = `${user}-${repo}-${book}-${chapter}`
+  repoProps.book = book
+  repoProps.chapter = chapter
+} else if (repoProps.templateType === "TM") {
+  // initial section of TM
+  const initialPage = getTmQueryParamOrDefault({
+    navParam: Astro.url.searchParams.get("section"),
+    repoIndex
+  })
+  if (!initialPage) return res404
+
+  // Initial HTML for no bible schema:
+  const intialHTML = await getTmSchemaHtml({
+    navSection: initialPage,
+    user,
+    repo
+  })
+  if (!intialHTML) return res404
+
+  // ADD PROPS FOR TW PAGES
+  repoProps.pageTitle = "TM PAGE"
+  repoProps.initialPage = initialPage
+  repoProps.initialHtml = intialHTML
+}
+
+// Set props common to all pages:
+const preferredLocale = getPreferredLangFromHeader(Astro.request)
+const initialDictModule = await import(
+  `../../../translations/${preferredLocale}.json`
+)
+const initialDict = {
+  [preferredLocale]: initialDictModule.default
+}
+---
+
+<Layout
+  title={repoProps.pageTitle}
+  use100vh={true}
+  textDir={repoIndex.textDirection}
+>
+  <div
+    class={`font-sans h-full bg-neutral-50 resourceType-${repoIndex.resourceType}`}
+  >
+    <!-- #=============== BIBLE SCHEMA  ============= -->
+    {
+      repoProps.templateType === "BIBLE" && (
+        <ReaderWrapper
+          client:load
+          firstBookKey={repoProps.book}
+          firstChapterToShow={repoProps.chapter}
+          repoData={repoIndex}
+          user={user}
+          repositoryName={repo}
+          preferredLocale={preferredLocale}
+          initialDict={initialDict}
+        />
+      )
+    }
+    <!-- #=============== TW TEMPLATE  ============= -->
+    {
+      repoProps.templateType === "TW" && (
+        <TranslationWords client:load {...repoProps} repoIndex={repoIndex} />
+      )
+    }
+    <!-- #=============== TM TEMPLATE  ============= -->
+    {
+      repoProps.templateType === "TM" && (
+        <div class="tm-wrapper px- mx-auto h-full  max-w-[1400px] ">
+          <TranslationManual
+            client:load
+            initialHtml={repoProps.initialHtml}
+            templateType={repoProps.templateType}
+            initialPage={repoProps.initialPage}
+            repoIndex={repoProps.repoIndex}
+            pageTitle={repoProps.pageTitle}
+          />
+        </div>
+      )
+    }
+  </div>
+</Layout>
+
+<script>
+  window.addEventListener("popstate", (event) => {
+    console.log(event)
+  })
+</script>

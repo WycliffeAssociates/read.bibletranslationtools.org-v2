@@ -1,3 +1,5 @@
+import { getHeaders } from "functions/shared"
+
 export const onRequestGet: PagesFunction = async (context) => {
   // Contents of context object
   // Contents of context object
@@ -22,17 +24,6 @@ export const onRequestGet: PagesFunction = async (context) => {
       statusText: "Missing parameters"
     })
   }
-  type headersType = {
-    "Content-Type": string
-    "Access-Control-Allow-Origin"?: string
-  }
-  let headers: headersType = {
-    "Content-Type": "text/html"
-  }
-  const allowedOrigins = ["localhost", "http://127.0.0.1"]
-  if (allowedOrigins.some((origin) => url.origin.includes(origin))) {
-    headers["Access-Control-Allow-Origin"] = "*"
-  }
 
   try {
     // http://localhost/u/WA-Catalog/en_ulb/index.json;
@@ -40,7 +31,7 @@ export const onRequestGet: PagesFunction = async (context) => {
     let finalUrl = `${baseUrl}/${user}/${repo}`
     let response = await fetch(finalUrl)
     return new Response(response.body, {
-      headers
+      headers: getHeaders(url)
     })
   } catch (error) {
     console.error(error)

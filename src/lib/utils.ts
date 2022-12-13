@@ -66,10 +66,11 @@ interface nonBibSchemaI {
   repoIndex: repoIndexObj
 }
 
-export function getNonBibleSchemaNavFromUrl({
+export function getTwQueryParamOrDefault({
   navParam,
   repoIndex
-}: nonBibSchemaI): string {
+}: nonBibSchemaI): string | void {
+  if (!repoIndex.words?.length) return
   let defaultNavParam = repoIndex.words[0].slug
   if (!repoIndex || !navParam) return defaultNavParam
   let match = repoIndex.words.find((wordObj) => wordObj.slug === navParam)
@@ -78,6 +79,19 @@ export function getNonBibleSchemaNavFromUrl({
   } else {
     return defaultNavParam
   }
+}
+export function getTmQueryParamOrDefault({
+  navParam,
+  repoIndex
+}: nonBibSchemaI): string | void {
+  if (!repoIndex.navigation?.length) return
+  let defaultNavParam = repoIndex.navigation[0].File?.replace(".html", "")
+  let matchingObj = repoIndex.navigation.find((topLevelNavObj) => {
+    return topLevelNavObj.File.replace(".html", "") == navParam
+  })
+  return matchingObj && matchingObj.File
+    ? matchingObj.File.replace(".html", "")
+    : defaultNavParam
 }
 
 interface reshapeBibleIndexI {
@@ -93,6 +107,7 @@ export function seedAndMutateInitialDataRepoIndex({
   chapter,
   initialHtml
 }: reshapeBibleIndexI): void {
+  if (!repoIndex.bible) return
   repoIndex.bible.forEach((repoBook) => {
     repoBook.chapters.forEach((repoChapter) => {
       repoChapter.text = null

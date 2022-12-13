@@ -27,12 +27,10 @@ const FUNCTIONS_ROUTES = {
     `${base}/repoIndex?user=${user}&repo=${repo}`,
   getRepoHtml: ({ user, repo, book, chapter }: getRepoHtmlType) =>
     `${base}/getHtmlForChap?user=${user}&repo=${repo}&book=${book}&chapter=${chapter}`,
-  getHtmlForNonBibleSchema: ({
-    user,
-    repo,
-    navSection
-  }: getNonBibleRepoHtmlType) =>
-    `${base}/getHtmlForNonBibleSchema?user=${user}&repo=${repo}&navSection=${navSection}`,
+  getHtmlForTw: ({ user, repo, navSection }: getNonBibleRepoHtmlType) =>
+    `${base}/getHtmlForTw?user=${user}&repo=${repo}&navSection=${navSection}`,
+  getHtmlForTm: ({ user, repo, navSection }: getNonBibleRepoHtmlType) =>
+    `${base}/getHtmlForTm?user=${user}&repo=${repo}&navSection=${navSection}`,
   isValidRepo: ({ user, repo }: repo) =>
     `${base}/isValidRepo?user=${user}&repo=${repo}`
 }

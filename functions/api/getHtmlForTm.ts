@@ -1,4 +1,4 @@
-import { getHeaders } from "functions/shared"
+import { getRepoIndexLocal, getHeaders } from "functions/shared"
 
 export const onRequestGet: PagesFunction = async (context) => {
   // Contents of context object
@@ -16,54 +16,47 @@ export const onRequestGet: PagesFunction = async (context) => {
   const url = new URL(request.url)
   let user = url.searchParams?.get("user")
   let repo = url.searchParams?.get("repo")
-  let bookKey = url.searchParams?.get("book")
-  let chapter = url.searchParams?.get("chapter")
+  let navSection = url.searchParams?.get("navSection")
 
-  if (!user || !repo || !bookKey || !chapter) {
+  if (!user || !repo || !navSection) {
     return new Response(null, {
       status: 400,
       statusText: "Missing parameters"
     })
   }
+  // Used to rewrite A links via files Names
+  const repoIndex = await getRepoIndexLocal(env, user, repo)
+  let possibleFiles =
+    repoIndex && repoIndex.navigation?.map((navOb) => navOb.File)
 
+  // rewrite to use query params
   class aTagHandler {
     element(element: Element) {
-      console.log(element)
       let href = element.getAttribute("href")
       if (!href) return
-      if (href && href.includes("/u/")) return
-      //
-      console.log(href)
-
-      let hashWithoutHashTag = href.split("#")[1]
-      //
-      let parts = hashWithoutHashTag.split("-")
-      let book = parts[2]
-      let chapter = parts[3]
-      console.log({ book, chapter, hashWithoutHashTag })
-
-      let newUrl = `?book=${book}&chapter=${chapter}#${hashWithoutHashTag}`
-      element.setAttribute("href", newUrl)
-      element.setAttribute("data-chapter", chapter)
-      element.setAttribute("data-book", book)
-      element.setAttribute("data-hash", hashWithoutHashTag)
-      element.setAttribute("data-crossref", "true")
+      let rep = href.replace(".html", "")
+      let prepended = `?section=${rep}`
+      element.setAttribute("href", prepended)
     }
   }
 
   try {
     // http://localhost/u/WA-Catalog/en_ulb/index.json;
     let baseUrl = env.HTML_API_URL_BASE
-    let finalUrl = `${baseUrl}/${user}/${repo}/${bookKey}/${chapter}.html`
+    let finalUrl = `${baseUrl}/${user}/${repo}/${navSection}.html`
     let response = await fetch(finalUrl)
-
+    // E[foo*="bar"]
     let newResp = new Response(response.body, {
       headers: getHeaders(url)
     })
-    return new HTMLRewriter()
-      .on("a[href*='tn-chunk-'", new aTagHandler())
-      .transform(newResp)
-    return newResp
+    // return newResp
+    let htmlRewriter = new HTMLRewriter()
+    const handler = new aTagHandler()
+    possibleFiles &&
+      possibleFiles.forEach((possible) => {
+        htmlRewriter.on(`a[href*='${possible}']`, handler)
+      })
+    return htmlRewriter.transform(newResp)
   } catch (error) {
     console.error(error)
     return new Response(null, {

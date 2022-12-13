@@ -32,13 +32,34 @@ interface getNonBibleSchemaHtmlParams {
   user: string
   repo: string
 }
-export async function getNonBibleSchemaHtml({
+export async function getTwSchemaHtml({
   navSection,
   user,
   repo
 }: getNonBibleSchemaHtmlParams): Promise<string | undefined> {
   if (!repo || !user || !navSection) return
-  let fetchUrl = FUNCTIONS_ROUTES.getHtmlForNonBibleSchema({
+  let fetchUrl = FUNCTIONS_ROUTES.getHtmlForTw({
+    user,
+    repo,
+    navSection
+  })
+  try {
+    const response = await fetch(fetchUrl)
+    const data = await response.text()
+    return data
+  } catch (error) {
+    console.error(error)
+    return
+  }
+}
+
+export async function getTmSchemaHtml({
+  navSection,
+  user,
+  repo
+}: getNonBibleSchemaHtmlParams): Promise<string | undefined> {
+  if (!repo || !user || !navSection) return
+  let fetchUrl = FUNCTIONS_ROUTES.getHtmlForTm({
     user,
     repo,
     navSection

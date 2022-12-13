@@ -1,6 +1,6 @@
 import { createSignal, createMemo, createEffect, on, Show } from "solid-js"
-import type { nonBibleSchemaPropsType } from "@src/customTypes/types"
-import { getNonBibleSchemaHtml } from "@lib/api"
+import type { twProps } from "@src/customTypes/types"
+import { getTwSchemaHtml } from "@lib/api"
 import {
   getHtmlWithinSpan,
   clickOutside,
@@ -12,12 +12,12 @@ import { BeyondSmallNav, MobileTwNav } from "./TwNav"
 const clickout = clickOutside
 const escape = escapeOut
 
-export default function TranslationWords(props: nonBibleSchemaPropsType) {
+export default function TranslationWords(props: twProps) {
   let [searchTerm, setSearchTerm] = createSignal("")
   let [sectionsHTML, setSectionsHTML] = createSignal({
-    [props.navSection]: props.initialHtml
+    [props.initialPage]: props.initialHtml
   })
-  let [activeSection, setActiveSection] = createSignal(props.navSection)
+  let [activeSection, setActiveSection] = createSignal(props.initialPage)
   const [pos, setPos] = createSignal({
     x: "0px",
     y: "0px"
@@ -30,7 +30,7 @@ export default function TranslationWords(props: nonBibleSchemaPropsType) {
     label: string
     section: string
   }> = []
-  props.repoIndex.words.forEach((word) => {
+  props.repoIndex.words?.forEach((word) => {
     word.words.forEach((single) => {
       allWords.push({
         section: word.slug,
@@ -75,20 +75,21 @@ export default function TranslationWords(props: nonBibleSchemaPropsType) {
     // not loaded page
     console.log("not loaded page")
     let text = await fetchSection(section, hash)
+
     if (text) {
-      setSectionsHTML((prev) => {
-        return {
-          ...prev,
-          [section]: text
-        }
-      })
+      let current = sectionsHTML()
+      let newVal = {
+        ...current,
+        [section]: text
+      }
+      setSectionsHTML(newVal)
     }
     setActiveSection(section)
     document.getElementById(hash)?.scrollIntoView()
   }
   async function fetchSection(section: string, hash: string) {
     try {
-      let newHTML = await getNonBibleSchemaHtml({
+      let newHTML = await getTwSchemaHtml({
         navSection: section,
         user: props.user,
         repo: props.repo
@@ -100,6 +101,7 @@ export default function TranslationWords(props: nonBibleSchemaPropsType) {
       }
     } catch (error) {
       console.error(error)
+      return
     }
   }
 
@@ -126,12 +128,12 @@ export default function TranslationWords(props: nonBibleSchemaPropsType) {
           let newSectionText = await fetchSection(section, hash)
           if (!newSectionText) return
           // we had to fetch, so go ahead and stick in memory
-          setSectionsHTML((prev) => {
-            return {
-              ...prev,
-              [section]: newSectionText
-            }
-          })
+          let current = sectionsHTML()
+          let newVal = {
+            ...current,
+            [section]: newSectionText
+          }
+          setSectionsHTML(newVal)
           memoryDom.innerHTML = newSectionText
         }
 
@@ -204,20 +206,20 @@ export default function TranslationWords(props: nonBibleSchemaPropsType) {
           <div class="p-6" innerHTML={previewPaneHtml()} />
         </div>
       </Show>
-      <div class="theTextWrapper h-full  px-2 sm:px-8">
+      <div class="theTextWrapper h-full  px-2 sm:pl-4 sm:pr-0">
         <div class="relative h-full overflow-y-scroll   sm:flex ">
           <div
-            class="theText tw-theText h-full w-full overflow-y-scroll sm:w-4/5"
+            class="theText tw-theText h-full w-full scroll-pt-16 overflow-y-scroll pt-16 sm:w-4/5 sm:scroll-pt-0 sm:pt-0"
             innerHTML={sectionsHTML()[activeSection()]}
           />
-          <div class="sm:hidden">
+          <div class=" sm:hidden">
             <MobileTwNav
               filteredWords={filteredWords}
               fetchSectionAndNav={fetchSectionAndNav}
               searchWords={searchWords}
             />
           </div>
-          <div class="hidden: sticky top-0 right-0 ml-auto  h-full w-1/5 overflow-y-auto sm:block">
+          <div class="customScrollBar sticky top-0 right-0 ml-auto  hidden h-full w-1/5 overflow-y-auto sm:block">
             <BeyondSmallNav
               filteredWords={filteredWords}
               fetchSectionAndNav={fetchSectionAndNav}
