@@ -1,7 +1,6 @@
 import { registerSW } from "virtual:pwa-register"
 
 window.addEventListener("load", () => {
-  console.log("window load")
   const pwaToast = document.querySelector<HTMLDivElement>("#pwa-toast")!
   const pwaToastMessage = pwaToast.querySelector<HTMLDivElement>(
     ".message #toast-message"

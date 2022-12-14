@@ -1,17 +1,14 @@
 import { HamburgerSvg } from "@components/global/Nav/MenuButtons"
-import type { tmProps, tmSingle } from "@src/customTypes/types"
-import { createSignal, JSX, Show } from "solid-js"
+import type { tmProps } from "@src/customTypes/types"
+import { createSignal, Show } from "solid-js"
 import { TMNav } from "./TmNav"
 
 export default function TranslationManual(props: tmProps) {
-  console.log(props.initialPage)
   const [navIsOpen, setNavIsOpen] = createSignal(false)
-
-  // debugger
 
   return (
     <div class="h-full px-4 md:px-4 md:py-4">
-      <div class="sticky top-0 z-20 pt-4 md:hidden md:pt-0">
+      <div class="sticky top-0 z-20 pt-4 md:hidden md:pt-0 ">
         <button
           class={`ml-auto flex items-center gap-2 rounded-md border border-solid  border-white bg-darkAccent px-4 py-2 capitalize text-white rtl:flex-row-reverse md:hidden ${
             navIsOpen() && "hidden"

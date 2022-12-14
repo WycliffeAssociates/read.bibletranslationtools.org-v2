@@ -157,6 +157,22 @@ body.noscroll {
   color: var(--color-accent);
   text-decoration: underline;
 }
+.tm-wrapper .theText ul {
+  list-style-type: disc;
+  list-style-position: inside;
+}
+.tm-wrapper .theText ol {
+  list-style-type: decimal;
+  list-style-position: outside;
+}
+.tm-wrapper .theText ol li {
+  margin-left: 1em;
+}
+.tm-wrapper .theText li + li,
+.tm-wrapper .theText p + p {
+  margin-top: 0.5em;
+}
+
 .tm-wrapper .navSection .navSection {
   margin-left: 1rem;
 }

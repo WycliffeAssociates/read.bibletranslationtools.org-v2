@@ -1,6 +1,4 @@
 ---
-import { FUNCTIONS_ROUTES } from "@lib/routes"
-
 import Layout from "@layouts/Layout.astro"
 import { ReaderWrapper, TranslationWords, TranslationManual } from "@components"
 import {
@@ -40,9 +38,10 @@ const repoIndex = await getRepoIndex({ user, repo })
 
 if (!repoIndex) return res404
 
-const isBibleSchema = ["bible", "tn", "tq"].includes(repoIndex.resourceType)
+const isBibleSchema = ["bible", "tn", "tq", "commentary"].includes(
+  repoIndex.resourceType
+)
 const isTw = repoIndex.resourceType === "tw"
-const isTM = repoIndex.resourceType === "tm"
 
 // grab query params (if present) for initial HTML
 let repoProps: tmProps | twProps | bibleSchemaProps = {
@@ -79,6 +78,7 @@ else if (repoProps.templateType === "BIBLE") {
     chapter: Astro.url.searchParams.get("chapter"),
     repoIndex
   })
+  if (!book && !chapter) return res404
 
   //  intial props/data for page;
   const initialHtml = await getChapterHtml({ user, repo, book, chapter })
@@ -111,7 +111,7 @@ else if (repoProps.templateType === "BIBLE") {
   if (!intialHTML) return res404
 
   // ADD PROPS FOR TW PAGES
-  repoProps.pageTitle = "TM PAGE"
+  repoProps.pageTitle = `${user}-${repo}-${initialPage}`
   repoProps.initialPage = initialPage
   repoProps.initialHtml = intialHTML
 }
@@ -132,6 +132,7 @@ const initialDict = {
   textDir={repoIndex.textDirection}
 >
   <div
+    data-resourcetype={`resource-${repoIndex.resourceType}`}
     class={`font-sans h-full bg-neutral-50 resourceType-${repoIndex.resourceType}`}
   >
     <!-- #=============== BIBLE SCHEMA  ============= -->

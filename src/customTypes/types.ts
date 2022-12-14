@@ -54,7 +54,7 @@ export interface tmEntry {
 export interface repoIndexObj {
   languageName: string
   languageCode: string
-  resourceType: "bible" | "tn" | "tq" | "tm" | "tw"
+  resourceType: "bible" | "tn" | "tq" | "tm" | "tw" | "commentary"
   resourceTitle: string | null
   textDirection: string
   bible: Array<bibleEntryObj> | null /* covers TN and TQ */

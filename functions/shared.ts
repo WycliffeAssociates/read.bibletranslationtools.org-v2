@@ -31,3 +31,74 @@ export function getHeaders(url: URL) {
   }
   return headers
 }
+
+export function handleRcLinks(element: Element, href: string, user: string) {
+  if (!element || !href || !user) return
+  let linkUser = element.getAttribute("data-user") || user
+  let repo = element.getAttribute("data-repo")
+  if (!repo) return
+  let category = element.getAttribute("data-category")
+  let word = element.getAttribute("data-word")
+  let templateType = element.getAttribute("data-type")
+  if (templateType === "tw") {
+    let newHref = `/read/${linkUser}/${repo}?section=${category}#${word}`
+    element.setAttribute("href", newHref)
+    element.setInnerContent(newHref)
+  } else if (templateType === "tm") {
+    let initialPage = element.getAttribute("data-page")
+    let topic = element.getAttribute("data-topic")
+    let newHref = `/read/${linkUser}/${repo}?section=${initialPage}#${topic}`
+    element.setAttribute("href", newHref)
+    element.setInnerContent(newHref)
+  }
+}
+function handleInteralTnLinks(element: Element, href: string) {
+  let hashWithoutHashTag = href.split("#")[1]
+  let parts = hashWithoutHashTag.split("-")
+  let book = parts[2]
+  let chapter = parts[3]
+  console.log("STEP 5")
+  console.log({ book, chapter })
+
+  let newUrl = `?book=${book}&chapter=${chapter}#${hashWithoutHashTag}`
+  element.setAttribute("href", newUrl)
+  element.setAttribute("data-chapter", chapter)
+  element.setAttribute("data-book", book)
+  element.setAttribute("data-hash", hashWithoutHashTag)
+  element.setAttribute("data-crossref", "true")
+}
+function handleTwLinks(element: Element, href: string) {
+  if (!href) return
+  if (href && href.includes("/u/")) return
+  let rep = href.replace(".html", "")
+  let parts = rep.split("#")
+  let section = parts[0]
+  let hash = parts[1]
+  let newUrl = `?section=${section}#${parts[1]}`
+  element.setAttribute("href", newUrl)
+  element.setAttribute("data-section", section)
+  element.setAttribute("data-hash", hash)
+  element.setAttribute("data-crossref", "true")
+}
+export class aTagHandler {
+  user: string
+  functionContext: "TW" | "TN"
+  constructor(user: string, functionContext: "TW" | "TN") {
+    this.user = user
+    this.functionContext = functionContext
+  }
+  element(element: Element) {
+    let href = element.getAttribute("href")
+    if (!href) return
+    let rcLink = element.getAttribute("data-is-rc-link")
+    let isRcLink = rcLink != null || rcLink != undefined
+    if (href && isRcLink) {
+      return handleRcLinks(element, href, this.user)
+    }
+    if (href.includes("tn-chunk")) {
+      return handleInteralTnLinks(element, href)
+    } else if (this.functionContext == "TW") {
+      return handleTwLinks(element, href)
+    }
+  }
+}

@@ -1,14 +1,5 @@
 import { get, set } from "idb-keyval"
-import {
-  createSignal,
-  onMount,
-  Show,
-  createMemo,
-  batch,
-  For,
-  createEffect,
-  Setter
-} from "solid-js"
+import { createSignal, onMount, Show, For, Setter } from "solid-js"
 import { useI18n } from "@solid-primitives/i18n"
 import type { storeType } from "../ReaderWrapper/ReaderWrapper"
 
@@ -42,7 +33,6 @@ export default function Settings(props: settingsProps) {
   const [cacheStrategy, setCacheStrategy] = createSignal()
   onMount(async () => {
     const currentCacheStrategy = await get(cacheStrategyKey)
-    // console.log({ currentCacheStrategy })
     currentCacheStrategy
       ? setCacheStrategy(currentCacheStrategy)
       : setCacheStrategy(runTimeDefault)
@@ -91,9 +81,6 @@ export default function Settings(props: settingsProps) {
     // fetch request for every chapter in current book
   }
 
-  // createEffect(() => {
-  //   console.log(cacheStrategy())
-  // })
   return (
     <>
       <div>

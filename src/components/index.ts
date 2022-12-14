@@ -1,11 +1,12 @@
 // import ReloadPrompt from "./serviceWorker/ReloadPrompt"
-import { SvgBook } from "./Icons/Icons"
 
 // export { default as Card } from "./Card.astro"
-
+// @ts-ignore
 export { default as Card } from "./Card.astro"
+// @ts-ignore
 export { default as ReloadPrompt } from "./serviceWorker/ReloadPrompt.astro"
 export { default as TestComponent } from "./Test"
+// @ts-ignore
 export { default as Nav } from "./global/Nav/Nav.astro"
 export {
   SvgDownload,

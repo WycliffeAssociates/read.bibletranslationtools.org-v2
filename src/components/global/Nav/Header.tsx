@@ -18,7 +18,7 @@ interface HeaderProps {
 
 export function UnwrappedHeader(props: HeaderProps) {
   // full signature
-  const [t, { add, locale, dict }] = useI18n()
+  const [t, { add, locale }] = useI18n()
   const [flagShowing, setFlagShowing] = createSignal(props.preferredLocale)
 
   const [mobileMenuOpen, setMobileMenuOpen] = createSignal(false)

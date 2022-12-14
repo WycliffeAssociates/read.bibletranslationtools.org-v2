@@ -1,6 +1,5 @@
-import { Accessor, createSignal, For, Setter } from "solid-js"
+import { createSignal, For, Setter } from "solid-js"
 import type { tmSingle } from "@src/customTypes/types"
-import { SvgArrow } from "@components"
 
 interface propsType {
   navigation: Array<tmSingle>
@@ -32,7 +31,6 @@ export function TMNav(props: propsType) {
       <ul>
         <For each={props.navigation}>
           {(navObj) => {
-            let childrenHtml = navObj.Children
             return (
               <NavSection
                 setNavIsOpen={props.setNavIsOpen}
@@ -54,11 +52,6 @@ interface NavSectionProps {
   isNested: boolean
   setNavIsOpen: Setter<boolean>
 }
-interface NavListItemProps {
-  isOpen: Accessor<boolean>
-  navObj: tmSingle
-}
-
 function NavSection(props: NavSectionProps) {
   const isOpenFromProps =
     !props.isNested &&
@@ -67,8 +60,6 @@ function NavSection(props: NavSectionProps) {
 
   let heightRef: any
   function heightRefFxn() {
-    // console.log(isOpen())
-    // console.log({ scrollHeight })
     let val = isOpen() ? `height: auto; ` : `height: 0;`
     return val
   }
@@ -142,16 +133,16 @@ function NavSingleLink(props: NavSectionProps) {
     props.setNavIsOpen(false)
   }
   if (isSameSection && !props.navObj.Slug) {
-    return <span class="text-gray-900">{props.navObj.Label}</span>
+    return <span class="text-gray-800">{props.navObj.Label}</span>
   } else if (isSameSection && props.navObj.Slug) {
     return (
-      <a onClick={onClick} class="text-blue-700" href={href}>
+      <a onClick={onClick} class=" text-blue-700" href={href}>
         {props.navObj.Label}
       </a>
     )
   } else if (!isSameSection) {
     return (
-      <a onClick={onClick} href={href}>
+      <a onClick={onClick} class="text-blue-700" href={href}>
         {props.navObj.Label}
       </a>
     )

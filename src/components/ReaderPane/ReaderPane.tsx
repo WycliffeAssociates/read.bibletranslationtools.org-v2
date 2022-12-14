@@ -5,19 +5,18 @@ import {
   createEffect,
   on,
   batch,
-  Accessor,
-  onCleanup
+  Accessor
+  // onCleanup
 } from "solid-js"
-import { SvgDownload, SvgArrow, SvgSearch, SvgBook } from "@components"
+import { SvgArrow } from "@components"
 import NavButtonLinks from "./NavButtons"
-import { FUNCTIONS_ROUTES } from "@lib/routes"
-import { get, set } from "idb-keyval"
+import { set } from "idb-keyval"
 import type { storeType } from "../ReaderWrapper/ReaderWrapper"
-import type { i18nDictKeysType } from "@lib/i18n"
 import {
   PreviewPane,
   hoverOnCrossReferences,
-  hoverOnFootnotes
+  hoverOnFootnotes,
+  hoverOnCommentaryCrossReferences
 } from "./PreviewPane"
 
 interface ReaderPaneProps {
@@ -35,15 +34,10 @@ export default function ReaderPane(props: ReaderPaneProps) {
     hasNewerData: false,
     response: null
   })
-  // for footnote
-  const [pos, setPos] = createSignal({
-    x: "0px",
-    y: "0px"
-  })
-  const [showFootnote, setShowFootnote] = createSignal(false)
-  const [footnoteText, setFootnoteText] = createSignal("")
   let textRef: HTMLDivElement | undefined
+  // for footnote
 
+  // todo: extract to shared ui Utils and run on the layout level:
   function setLastPageVisited() {
     return set("lastPageVisited", location.href)
   }
@@ -55,68 +49,13 @@ export default function ReaderPane(props: ReaderPaneProps) {
         preFetchAdjacent()
         hoverOnFootnotes()
         hoverOnCrossReferences()
+        hoverOnCommentaryCrossReferences(props.user, props.repositoryName)
       }
     )
   )
-  // todo: see with Reuben about making this cleaner or? Would it be better to wait on this sort of functionality until graphql api and we know relationships or? Or yagni?
-
-  /* 
-  function hoverOnCrossReferences() {
-    let crossReferences = document.querySelectorAll("a[href*='tn-chunk-'")
-
-    crossReferences.forEach((ref) => {
-      ref.addEventListener("mouseover", async (e) => {
-        let target = e.target as HTMLAnchorElement
-        target.focus()
-        let rect = target.getBoundingClientRect()
-        let href = target.href
-        let url = new URL(href)
-        let hashWithoutHashTag = url.hash?.slice(1)
-        let parts = url.hash?.split("-")
-        let book = parts[2]
-        let chapter = parts[3]
-        debugger
-        let response = await fetch(`?book=${book}&chapter=${chapter}`)
-        let text = await response.text()
-        const newDom = document.createElement("html")
-        newDom.innerHTML = text
-        // '[id="#tn-chunk-gen-22-01"] not valid
-        let corresponding = newDom.querySelector(`[id="${hashWithoutHashTag}"]`)
-        let htmlContainer: any[] = [corresponding]
-
-        let firstSib = corresponding && corresponding.nextElementSibling
-        getSiblingsUntil(firstSib, "tn-chunk")
-
-        function getSiblingsUntil(node, idToSearch) {
-          if (node.id && node.id.includes(idToSearch)) {
-            return false
-          } else {
-            htmlContainer.push(node)
-            getSiblingsUntil(node.nextElementSibling, idToSearch)
-          }
-        }
-
-        let html = htmlContainer.map((el) => el.outerHTML).join("")
-        setShowFootnote(true)
-        setPos({
-          x: rect.x + 30 + "px",
-          y: rect.y - 80 + "px"
-        })
-        setFootnoteText(html)
-        console.log({ corresponding })
-      })
-      ref.addEventListener("focusout", () => {
-        setShowFootnote(false)
-      })
-    })
-    console.log({ crossReferences })
-  }
-
-   */
   onMount(() => {
     window.addEventListener("popstate", (e) => {
-      console.log(location)
-      console.log(e)
+      // todo: add popstate logic  to other templates or at layout level?
       let params = new URLSearchParams(location.search)
       let chapter = params.get("chapter")
       if (chapter) {
@@ -174,8 +113,6 @@ export default function ReaderPane(props: ReaderPaneProps) {
   }: fetchReaderParams) {
     event && event.preventDefault()
     const currentBook = props.storeInterface.getStoreVal<string>("currentBook")
-    const currentChap =
-      props.storeInterface.getStoreVal<string>("currentChapter")
 
     if (chapNum && chapNum <= 0 && !dir) return
     let nextCh: number | string | undefined
@@ -266,7 +203,7 @@ export default function ReaderPane(props: ReaderPaneProps) {
             {/* top buttons */}
             <div
               ref={textRef}
-              class="theText mx-auto h-full max-w-[85ch]  overflow-y-scroll bg-inherit pr-1 pt-2 pb-24 text-lg leading-relaxed print:h-min print:break-inside-avoid print:overflow-y-visible  print:pb-4 sm:px-8 md:max-w-[75ch] "
+              class="theText mx-auto h-full max-w-[85ch]  overflow-y-scroll bg-inherit pr-1 pt-2 pb-24 text-lg leading-relaxed print:h-min  print:overflow-y-visible  print:pb-4 sm:px-8 md:max-w-[75ch] "
               innerHTML={props.storeInterface.HTML()}
             />
 
@@ -299,7 +236,7 @@ export default function ReaderPane(props: ReaderPaneProps) {
         <div
           id="wholeBook"
           innerHTML={props.storeInterface.wholeBookHtml()}
-          class=" mx-auto  max-w-[85ch]  bg-inherit text-lg leading-relaxed print:pb-4 sm:px-8 md:max-w-[75ch]"
+          class=" theText  mx-auto  max-w-[85ch] bg-inherit text-lg leading-relaxed print:pb-4 sm:px-8 md:max-w-[75ch]"
         />
       </Show>
     </>

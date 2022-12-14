@@ -1,14 +1,8 @@
 ---
 import Layout from "../layouts/Layout.astro"
-import homePageBg from "@assets/images/homePageBg.jpeg"
-const title = "Free Bible Translation Tools for the Global Chuch"
-// todo: change links and add more of this text to frontmatter here
-import { i18nDict } from "@lib/i18n"
-import { getPreferredLangFromHeader } from "@lib/utils"
-const preferredLocale = getPreferredLangFromHeader(Astro.request)
 ---
 
-<Layout title="Read on Web">
+<Layout title="Read on Web" textDir="ltr">
   <main>
     <!-- <div class="relative">
       <img src={homePageBg} alt="" />

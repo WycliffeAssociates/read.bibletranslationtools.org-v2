@@ -10,6 +10,17 @@ File/Folder tree below:
 - [Vite-pwa](https://vite-pwa-org.netlify.app/frameworks/astro.html) - Generates the Service Worker for PWA (along with Astro adapter)
 - [Google Workbox](https://developer.chrome.com/docs/workbox/) - custom Service worker logic
 
+## Wacs Templates supported
+
+- Bible (bible)
+- Translation Notes (tn)
+- Translation Questions (tq)
+- Bible Commentary (bc)
+- Translation Words (tw)
+- Translation Manual (tm)
+  Notes, bible, questions, and commentary share a template:
+  Words and Manual have their own;
+
 ## Folders
 
 ### Functions

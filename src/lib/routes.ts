@@ -20,6 +20,9 @@ interface repo {
   user: string
   repo: string
 }
+interface commentaryIndividual extends repo {
+  file: string
+}
 
 // these names need to align with the names of files in the functions folder.  They are cloudflare workers.
 const FUNCTIONS_ROUTES = {
@@ -31,6 +34,12 @@ const FUNCTIONS_ROUTES = {
     `${base}/getHtmlForTw?user=${user}&repo=${repo}&navSection=${navSection}`,
   getHtmlForTm: ({ user, repo, navSection }: getNonBibleRepoHtmlType) =>
     `${base}/getHtmlForTm?user=${user}&repo=${repo}&navSection=${navSection}`,
+  getHtmlForCommentaryIndividualSection: ({
+    file,
+    user,
+    repo
+  }: commentaryIndividual) =>
+    `${base}/getHtmlForCommentaryIndividualSection?user=${user}&repo=${repo}&file=${file}`,
   isValidRepo: ({ user, repo }: repo) =>
     `${base}/isValidRepo?user=${user}&repo=${repo}`
 }

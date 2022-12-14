@@ -9,7 +9,9 @@ import {
 } from "@lib/utils-ui"
 import { BeyondSmallNav, MobileTwNav } from "./TwNav"
 // these are hacks to keep typescript from stripping away "unused imports" the actual names are unimportant; These are solid custom directives;
+//@ts-ignore
 const clickout = clickOutside
+//@ts-ignore
 const escape = escapeOut
 
 export default function TranslationWords(props: twProps) {
@@ -48,8 +50,8 @@ export default function TranslationWords(props: twProps) {
   const filteredWords = createMemo(() => {
     return allWords.filter(
       (word) =>
-        word.slug.includes(searchTerm().trim()) ||
-        word.label.includes(searchTerm().trim())
+        word.slug.toLowerCase().includes(searchTerm().toLowerCase().trim()) ||
+        word.label.toLowerCase().includes(searchTerm().toLowerCase().trim())
     )
   })
   function searchWords(event: Event) {
@@ -62,18 +64,15 @@ export default function TranslationWords(props: twProps) {
     hash: string
   ) {
     if (sectionsHTML()[section] && activeSection() == section) {
-      console.log("same 'page' hash scroll;")
       return //same 'page' hash scroll;
     }
     event.preventDefault()
     //  loaded page, not active one:
     if (sectionsHTML()[section]) {
-      console.log("loaded page, not active one:")
       setActiveSection(section)
       document.getElementById(hash)?.scrollIntoView()
     }
     // not loaded page
-    console.log("not loaded page")
     let text = await fetchSection(section, hash)
 
     if (text) {
@@ -110,8 +109,9 @@ export default function TranslationWords(props: twProps) {
       "a[data-crossref='true']"
     ) as NodeListOf<HTMLElement>
 
+    console.log({ crossReferences })
+
     let memoryDom = document.createElement("html")
-    console.log("RUNNGIN CROSS REF HOOKUP")
     crossReferences.forEach((ref) => {
       let section = String(ref.dataset?.section)
       let hash = String(ref.dataset?.hash)
@@ -178,7 +178,7 @@ export default function TranslationWords(props: twProps) {
           use:clickOutside={() => setShowPreviewPane(false)}
           use:escapeOut={() => setShowPreviewPane(false)}
           id="previewPane"
-          class="theText absolute z-30 mx-auto max-h-[50vh]  w-1/3 overflow-y-scroll border border-accent bg-white p-2  shadow shadow-neutral-500"
+          class="theText absolute z-30 mx-auto max-h-[50vh]  w-1/2 overflow-y-scroll border border-accent bg-white p-2 shadow  shadow-neutral-500 lg:w-2/5 "
           style={{ left: pos().x, top: pos().y }}
         >
           <div class="relative h-full w-full">
@@ -206,10 +206,10 @@ export default function TranslationWords(props: twProps) {
           <div class="p-6" innerHTML={previewPaneHtml()} />
         </div>
       </Show>
-      <div class="theTextWrapper h-full  px-2 sm:pl-4 sm:pr-0">
+      <div class="theTextWrapper h-full px-2  print:h-min print:overflow-y-visible sm:pl-4 sm:pr-0">
         <div class="relative h-full overflow-y-scroll   sm:flex ">
           <div
-            class="theText tw-theText h-full w-full scroll-pt-16 overflow-y-scroll pt-16 sm:w-4/5 sm:scroll-pt-0 sm:pt-0"
+            class="theText tw-theText h-full w-full scroll-pt-16 overflow-y-scroll pt-16  sm:w-4/5 sm:scroll-pt-0  sm:pt-0"
             innerHTML={sectionsHTML()[activeSection()]}
           />
           <div class=" sm:hidden">
@@ -219,7 +219,7 @@ export default function TranslationWords(props: twProps) {
               searchWords={searchWords}
             />
           </div>
-          <div class="customScrollBar sticky top-0 right-0 ml-auto  hidden h-full w-1/5 overflow-y-auto sm:block">
+          <div class="customScrollBar sticky top-0 right-0 ml-auto  hidden h-full w-1/5 overflow-y-auto print:hidden sm:block">
             <BeyondSmallNav
               filteredWords={filteredWords}
               fetchSectionAndNav={fetchSectionAndNav}

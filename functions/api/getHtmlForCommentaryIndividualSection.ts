@@ -1,4 +1,4 @@
-import { getHeaders, aTagHandler } from "functions/shared"
+import { getHeaders } from "functions/shared"
 
 export const onRequestGet: PagesFunction = async (context) => {
   // Contents of context object
@@ -14,38 +14,27 @@ export const onRequestGet: PagesFunction = async (context) => {
   const request: Request = context.request
   const env: any = context.env
   const url = new URL(request.url)
+  let file = url.searchParams?.get("file")
   let user = url.searchParams?.get("user")
   let repo = url.searchParams?.get("repo")
-  let navSection = url.searchParams?.get("navSection")
 
-  if (!user || !repo || !navSection) {
+  if (!file || !user || !repo) {
     return new Response(null, {
       status: 400,
       statusText: "Missing parameters"
     })
   }
 
-  class imgTagHandler {
-    element(element: Element) {
-      element.setAttribute("loading", "lazy")
-    }
-  }
-
   try {
     // http://localhost/u/WA-Catalog/en_ulb/index.json;
     let baseUrl = env.HTML_API_URL_BASE
-    let finalUrl = `${baseUrl}/${user}/${repo}/${navSection}.html`
+    let finalUrl = `${baseUrl}/${user}/${repo}/${file}`
     let response = await fetch(finalUrl)
     // E[foo*="bar"]
     let newResp = new Response(response.body, {
       headers: getHeaders(url)
     })
-    const aHandler = new aTagHandler(user, "TW")
-    return new HTMLRewriter()
-      .on("a[data-is-rc-link]", aHandler)
-      .on("a[href*='html']", aHandler)
-      .on("img[src*='content.bibletranslationtools.org'", new imgTagHandler())
-      .transform(newResp)
+    return newResp
   } catch (error) {
     console.error(error)
     return new Response(null, {

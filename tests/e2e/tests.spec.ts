@@ -12,7 +12,8 @@ test("test page titles; ", async ({ page }) => {
   await expect(page).toHaveTitle(/en_ulb/)
 })
 
-test("Menu chapter input updates on nav", async ({ page }) => {
+// skip: changed to not use an input here
+test.skip("Menu chapter input updates on nav", async ({ page }) => {
   await page.goto("/read/WycliffeAssociates/en_ulb/?book=Genesis&chapter=1")
   await page.waitForLoadState("networkidle") //JS has evaluated maybe? I think that's why I have this here
 
@@ -67,8 +68,8 @@ test("history url updating on ajax nav", async ({ page }) => {
   ])
   await page.waitForSelector("#ch-2") //ensure chapter 2 of ulb loaded after button click above
 
-  expect(page.url()).toBe(
-    "/read/WycliffeAssociates/en_ulb/?book=Genesis&chapter=2"
+  expect(page.url()).toContain(
+    "/read/WycliffeAssociates/en_ulb/?book=Gen&chapter=2"
   )
 })
 
@@ -91,8 +92,8 @@ test("book and chapter query params work", async ({ page }) => {
   await page.goto("/read/WycliffeAssociates/en_ulb/?book=John&chapter=3")
   const display = page.getByTestId("menuLangBookDisplay")
   const menuNumInputChapDisplay = page.getByTestId("chapterNavigation")
-  await expect(display).toContainText("English: John")
-  await expect(menuNumInputChapDisplay).toHaveValue("3")
+  await expect(display).toContainText("English:John")
+  await expect(menuNumInputChapDisplay).toHaveText("3")
 })
 
 test("Test language change in header", async ({ page }) => {

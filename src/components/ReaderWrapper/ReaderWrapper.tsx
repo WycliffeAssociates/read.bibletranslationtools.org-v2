@@ -1,6 +1,6 @@
 import type { i18nDictKeysType } from "@lib/i18n"
 import { createI18nContext, I18nContext } from "@solid-primitives/i18n"
-import { createSignal, onMount, Show, createMemo } from "solid-js"
+import { createSignal, createMemo } from "solid-js"
 import type { JSX } from "solid-js"
 import { createStore, produce } from "solid-js/store"
 import { FUNCTIONS_ROUTES } from "@lib/routes"
@@ -13,7 +13,7 @@ import type {
 } from "@src/customTypes/types"
 import type { Accessor } from "solid-js"
 
-// types are a little verbose up here: See them as the bottom:
+// types are a little verbose up here: See them at the bottom:
 
 export default function ReaderWrapper(props: ReaderWrapperProps) {
   //======= Reader App state =============
@@ -40,6 +40,7 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
 
   const [readerStore, setReaderStore] = createStore(defaultStore)
   const [printWholeBook, setPrintWholeBook] = createSignal(false)
+
   // Wrappers and predefined functions for reading and mutating store;
   // # Limit to the non object keys: E.g. string or string[]
   // https://javascript.plainenglish.io/typescript-essentials-conditionally-filter-types-488705bfbf56

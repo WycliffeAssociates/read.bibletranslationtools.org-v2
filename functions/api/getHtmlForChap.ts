@@ -1,4 +1,4 @@
-import { getHeaders } from "functions/shared"
+import { getHeaders, aTagHandler } from "functions/shared"
 
 export const onRequestGet: PagesFunction = async (context) => {
   // Contents of context object
@@ -26,31 +26,6 @@ export const onRequestGet: PagesFunction = async (context) => {
     })
   }
 
-  class aTagHandler {
-    element(element: Element) {
-      console.log(element)
-      let href = element.getAttribute("href")
-      if (!href) return
-      if (href && href.includes("/u/")) return
-      //
-      console.log(href)
-
-      let hashWithoutHashTag = href.split("#")[1]
-      //
-      let parts = hashWithoutHashTag.split("-")
-      let book = parts[2]
-      let chapter = parts[3]
-      console.log({ book, chapter, hashWithoutHashTag })
-
-      let newUrl = `?book=${book}&chapter=${chapter}#${hashWithoutHashTag}`
-      element.setAttribute("href", newUrl)
-      element.setAttribute("data-chapter", chapter)
-      element.setAttribute("data-book", book)
-      element.setAttribute("data-hash", hashWithoutHashTag)
-      element.setAttribute("data-crossref", "true")
-    }
-  }
-
   try {
     // http://localhost/u/WA-Catalog/en_ulb/index.json;
     let baseUrl = env.HTML_API_URL_BASE
@@ -60,8 +35,10 @@ export const onRequestGet: PagesFunction = async (context) => {
     let newResp = new Response(response.body, {
       headers: getHeaders(url)
     })
+    const handler = new aTagHandler(user, "TN")
     return new HTMLRewriter()
-      .on("a[href*='tn-chunk-'", new aTagHandler())
+      .on("a[href*='tn-chunk-']", handler)
+      .on("a[data-is-rc-link]", handler)
       .transform(newResp)
     return newResp
   } catch (error) {

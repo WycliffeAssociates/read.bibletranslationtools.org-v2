@@ -1,5 +1,5 @@
 import { i18nDictKeysType, i18nDictMeta } from "@lib/i18n"
-import { onCleanup } from "solid-js"
+// import { onCleanup } from "solid-js"
 import type { repoIndexObj } from "../customTypes/types"
 
 /**
@@ -42,6 +42,13 @@ export function getBookAndChapterFromUrl({
   book: string
   chapter: string
 } {
+  if (!repoIndex.bible?.length) {
+    // return a falsy value of same ts shape
+    return {
+      book: "",
+      chapter: ""
+    }
+  }
   let matchingBook = repoIndex.bible?.find(
     (repoBook) => repoBook.slug == book || repoBook.label == book
   )
@@ -58,7 +65,10 @@ export function getBookAndChapterFromUrl({
   let firstBookToRender = matchingBook || repoIndex.bible[0] //use first Key;
   let firstChapterToShow = matchingChapter || firstBookToRender.chapters[0]
 
-  return { book: firstBookToRender.slug, chapter: firstChapterToShow.label }
+  return {
+    book: firstBookToRender.slug || "",
+    chapter: firstChapterToShow.label || ""
+  }
 }
 
 interface nonBibSchemaI {

@@ -1,20 +1,11 @@
-import {
-  createSignal,
-  onMount,
-  Show,
-  createEffect,
-  on,
-  batch,
-  Accessor,
-  onCleanup,
-  Signal
-} from "solid-js"
+import { createSignal, Show, Signal } from "solid-js"
 import {
   clickOutside,
   escapeOut,
   positionPreviewPane,
   getHtmlWithinSpan
 } from "@lib/utils-ui"
+import { getCommentarySectionHtml } from "@lib/api"
 
 const [pos, setPos] = createSignal({
   x: "0px",
@@ -43,7 +34,9 @@ function focusWithinClose(ev: FocusEvent) {
 
 export function PreviewPane() {
   // these are hacks to keep typescript from stripping away "unused imports"
+  // @ts-ignore
   const clickout = clickOutside
+  // @ts-ignore
   const escape = escapeOut
   return (
     <Show when={showFootnote()}>
@@ -53,7 +46,7 @@ export function PreviewPane() {
         onFocusOut={focusWithinClose}
         style={{ left: pos().x, top: pos().y }}
         id="previewPane"
-        class="theText absolute z-30 mx-auto max-h-[50vh]  w-1/3 overflow-y-scroll border border-accent bg-white p-2  shadow shadow-neutral-500"
+        class="theText absolute z-30 mx-auto max-h-[50vh]  w-1/2 overflow-y-scroll border border-accent bg-white p-2 shadow  shadow-neutral-500 md:w-1/3"
       >
         <div class="relative h-full w-full">
           <button
@@ -88,7 +81,6 @@ export function hoverOnCrossReferences() {
 
   async function populatePreviewPane(e: Event) {
     let target = e.target as HTMLAnchorElement
-    let rect = target.getBoundingClientRect()
     let hashWithoutHashTag = target.dataset.hash
     let book = target.dataset.book
     let chapter = target.dataset.chapter
@@ -138,6 +130,50 @@ export function hoverOnCrossReferences() {
     ref.addEventListener("mouseover", populatePreviewPane)
     // ref.addEventListener("focus", populatePreviewPane)
   })
+}
+export function hoverOnCommentaryCrossReferences(user: string, repo: string) {
+  if (!document.querySelector("[data-resourcetype*='commentary']")) return
+  console.log("checking for commmentary popups")
+  let commentaryPopups = document.querySelectorAll("a[href*='popup']")
+  commentaryPopups.forEach((link) => link.addEventListener("click", manageLink))
+  commentaryPopups.forEach((link) =>
+    link.addEventListener("mouseover", manageLink)
+  )
+
+  async function manageLink(e: Event) {
+    e?.preventDefault()
+    let target = e.target as HTMLAnchorElement
+    let href = target.href
+    let fileParts = href.split("popup://")
+    let file = fileParts[1]
+    let text: string | undefined
+    try {
+      text = await getCommentarySectionHtml({ file, user, repo })
+      if (!text) return
+    } catch (error) {
+      return
+    }
+    // set new text
+    setFootnoteText(text)
+    // positionion logic:
+    positionPreviewPane({
+      target,
+      previewPaneSelector: "#previewPane",
+      previewPaneSetter: setShowFootnote,
+      setPos
+    })
+    setLastFocused(document.activeElement as HTMLElement)
+    previewCloseButton.focus()
+
+    // To hook up links inside of the preview pane:
+    let previewPane = document.querySelector("#previewPane")
+    if (!previewPane) return
+    let commentaryPopups = previewPane?.querySelectorAll("a[href*='popup']")
+    // if (!commentaryPopups.length) return
+    commentaryPopups.forEach((link) => {
+      link.addEventListener("click", manageLink)
+    })
+  }
 }
 
 export function hoverOnFootnotes() {

@@ -1,35 +1,31 @@
 import {
   createSignal,
   Show,
-  createMemo,
   batch,
   For,
   Setter,
   lazy,
   Suspense
 } from "solid-js"
-import type { Accessor } from "solid-js"
 import { SvgSettings, SvgBook, LoadingSpinner } from "@components"
 import { clickOutside, escapeOut } from "@lib/utils-ui"
 
 // https://github.com/solidjs/solid/discussions/845
 // these are hacks (name doesn't matter) to keep typescript from stripping away "unused imports", but these are used directives below:
+// @ts-ignore
 const clickout = clickOutside
+// @ts-ignore
 const escape = escapeOut
 
 // const Settings = lazy(() => {
 //   import("../Settings/Settings")
 // })
 const Settings = lazy(async () => {
-  // simulate delay
-  // await new Promise((r) => setTimeout(r, 3000))
-  console.log("IMPORTING!")
   return import("../Settings/Settings")
 })
 
 import { useI18n } from "@solid-primitives/i18n"
-import { get, set } from "idb-keyval"
-import type { JSX, ParentComponent, ParentProps, Component } from "solid-js"
+import type { Component } from "solid-js"
 import type { bibleEntryObj } from "../../customTypes/types"
 import type { storeType } from "../ReaderWrapper/ReaderWrapper"
 interface MenuProps {
@@ -106,11 +102,11 @@ const ReaderMenu: Component<MenuProps> = (props) => {
     togglePanel(false)
   }, 300)
 
-  const restoreNumber = debounce((evt: InputEvent) => {
-    const target = evt.target as HTMLInputElement
-    if (!target) return
-    target.value = String(props.storeInterface.getStoreVal("currentChapter"))
-  }, 400)
+  // const restoreNumber = debounce((evt: InputEvent) => {
+  //   const target = evt.target as HTMLInputElement
+  //   if (!target) return
+  //   target.value = String(props.storeInterface.getStoreVal("currentChapter"))
+  // }, 400)
 
   const togglePanel = (bool?: boolean) => {
     let val = bool === false ? bool : !menuIsOpen()
@@ -190,8 +186,8 @@ const ReaderMenu: Component<MenuProps> = (props) => {
           class="w-full text-center text-sm font-bold uppercase print:block sm:w-1/6"
           data-testid="menuLangBookDisplay"
         >
-          {props.storeInterface.getStoreVal("languageName")}-
-          {props.storeInterface.getStoreVal("resourceType")}:{" "}
+          {props.storeInterface.getStoreVal("languageName")}:
+          <br />
           {props.storeInterface.currentBookObj()?.label}
         </div>
 
@@ -226,7 +222,10 @@ const ReaderMenu: Component<MenuProps> = (props) => {
               min={0}
               // onInput={(e) => jumpToNewChapIdx(e)}
             /> */}
-            <span class="menuNumberInput w-[5ch] bg-gray-50 py-1 text-center">
+            <span
+              class="menuNumberInput w-[5ch] bg-gray-50 py-1 text-center"
+              data-testid="chapterNavigation"
+            >
               {props.storeInterface.getStoreVal("currentChapter")}
             </span>
           </div>

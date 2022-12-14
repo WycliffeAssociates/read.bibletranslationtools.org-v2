@@ -10,6 +10,9 @@ interface getRepoInfo extends baseApiInfo {
   chapter: string
   navSection?: string
 }
+interface commentaryIndividual extends baseApiInfo {
+  file: string
+}
 export async function getChapterHtml({
   user,
   repo,
@@ -106,5 +109,26 @@ export async function isValidRepo({
   } catch (error) {
     console.error(error)
     return false
+  }
+}
+
+export async function getCommentarySectionHtml({
+  file,
+  user,
+  repo
+}: commentaryIndividual): Promise<string | undefined> {
+  if (!file || !user || !repo) return
+  let fetchUrl = FUNCTIONS_ROUTES.getHtmlForCommentaryIndividualSection({
+    file,
+    user,
+    repo
+  })
+  try {
+    const response = await fetch(fetchUrl)
+    const data = await response.text()
+    return data
+  } catch (error) {
+    console.error(error)
+    return
   }
 }
