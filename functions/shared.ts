@@ -57,8 +57,6 @@ function handleInteralTnLinks(element: Element, href: string) {
   let parts = hashWithoutHashTag.split("-")
   let book = parts[2]
   let chapter = parts[3]
-  console.log("STEP 5")
-  console.log({ book, chapter })
 
   let newUrl = `?book=${book}&chapter=${chapter}#${hashWithoutHashTag}`
   element.setAttribute("href", newUrl)

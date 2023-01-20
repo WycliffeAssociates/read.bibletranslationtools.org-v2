@@ -70,8 +70,9 @@ jobs:
         # Only open a PR if the branch is not attached to an existing one
         run: |
           pnpm run build &&
-          pnpm run preview && 
+          pnpm run preview &
+          sleep 7 &
           pnpm run dev &
-          sleep 15 &&
-          pnpm run test &
+          sleep 6 &&
+          pnpm run test &&
           pnpm run vitest

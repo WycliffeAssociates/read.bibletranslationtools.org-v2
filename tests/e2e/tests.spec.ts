@@ -109,7 +109,6 @@ test("Test hover of preview panes in desktop", async ({ page }) => {
   await page.goto(
     "http://localhost:3000/read/WycliffeAssociates/en_bc?book=mat&chapter=01"
   )
-  debugger
   await page.mouse.move(200, 200, { steps: 5 })
   const hoverableLink = page.locator("a[href*='popup://messiah']").first()
   await hoverableLink.hover()

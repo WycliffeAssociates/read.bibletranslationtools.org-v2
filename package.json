@@ -13,8 +13,8 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "wrangler pages dev ./dist",
-    "cf-dev": "wrangler pages dev -- pnpm run dev",
+    "preview": "wrangler pages dev ./dist ",
+    "cf-dev": "wrangler pages dev --proxy=3000 -- pnpm run dev",
     "astro": "astro",
     "test": "pnpm dlx playwright test",
     "test-debug": "pnpm dlx playwright test --debug",
