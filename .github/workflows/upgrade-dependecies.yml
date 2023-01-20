@@ -69,5 +69,9 @@ jobs:
         if: steps.changes.outputs.COUNT > 0
         # Only open a PR if the branch is not attached to an existing one
         run: |
-          pnpm run build && 
-          pnpm run dev & sleep 15 && pnpm run test && pnpm run vitest
+          pnpm run build &&
+          pnpm run preview && 
+          pnpm run dev &
+          sleep 15 &&
+          pnpm run test &
+          pnpm run vitest
