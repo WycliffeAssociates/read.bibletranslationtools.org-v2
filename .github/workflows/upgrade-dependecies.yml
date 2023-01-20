@@ -71,5 +71,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         # Only open a PR if the branch is not attached to an existing one
         run: |
-          pnpm run build && pnpm run preview
-          pnpm run test && pnpm run vitest
+          pnpm run build && pnpm run preview && pnpm run test && pnpm run vitest
