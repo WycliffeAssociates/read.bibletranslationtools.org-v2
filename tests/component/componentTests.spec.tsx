@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/experimental-ct-solid"
 
-import TestComponent from "@components/Test"
+import TestComponent from "../../src/components/Test"
 // import TestComponent from "../../src/components/Test"
 
 test.use({ viewport: { width: 500, height: 500 } })
