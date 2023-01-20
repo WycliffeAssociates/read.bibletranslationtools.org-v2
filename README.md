@@ -51,8 +51,8 @@ Assets not processed by Vite. Fonts, and PWA icons etc;
 ### Tests
 
 - e2e - uses [Playwright](https://playwright.dev/docs/intro).
-- component testing - also playwright, but a few additional quirks worth readaing in docs. [Playwright Components](https://playwright.dev/docs/test-components#how-to-get-started). Vitest can also test components, and has the upper hand on speed, but playwright already ships a browser, so components can be tested under different window conditions.
-- Unit - Vitest: https://vitest.dev/guide/why.html; Can theoretically be used to test anything that isn't an astro file, but currently tests primarily cover logic in the lib folder.
+- component testing - also playwright, but a few additional quirks worth readaing in docs. (currently experimental, but component testing isn't probably absolutely needed, [Playwright Components](https://playwright.dev/docs/test-components#how-to-get-started). Vitest can also test components, and has the upper hand on speed, but playwright already ships a browser, so components can be tested under different window conditions. 
+- Unit Tests - Vitest: https://vitest.dev/guide/why.html; Can theoretically be used to test anything that isn't an astro file (e.g. components), but currently tests primarily cover logic in the lib folder.
 
 ### Additional Files
 

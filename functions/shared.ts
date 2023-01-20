@@ -80,25 +80,47 @@ function handleTwLinks(element: Element, href: string) {
   element.setAttribute("data-hash", hash)
   element.setAttribute("data-crossref", "true")
 }
+function handleTMLinks(element: Element, href: string) {
+  let rep = href.replace(".html", "")
+  let prepended = `?section=${rep}`
+  element.setAttribute("href", prepended)
+}
+
 export class aTagHandler {
   user: string
-  functionContext: "TW" | "TN"
-  constructor(user: string, functionContext: "TW" | "TN") {
+  functionContext: "TW" | "TN" | "TM"
+  constructor(user: string, functionContext: "TW" | "TN" | "TM") {
     this.user = user
     this.functionContext = functionContext
   }
   element(element: Element) {
     let href = element.getAttribute("href")
     if (!href) return
-    let rcLink = element.getAttribute("data-is-rc-link")
-    let isRcLink = rcLink != null || rcLink != undefined
-    if (href && isRcLink) {
-      return handleRcLinks(element, href, this.user)
-    }
-    if (href.includes("tn-chunk")) {
-      return handleInteralTnLinks(element, href)
+    if (this.functionContext == "TN") {
+      let rcLink = element.getAttribute("data-is-rc-link")
+      let isRcLink = rcLink != null || rcLink != undefined
+      if (href && isRcLink) {
+        return handleRcLinks(element, href, this.user)
+      }
+      if (href.includes("tn-chunk")) {
+        return handleInteralTnLinks(element, href)
+      }
     } else if (this.functionContext == "TW") {
       return handleTwLinks(element, href)
+    } else if (this.functionContext == "TM") {
+      return handleTMLinks(element, href)
     }
+  }
+}
+export function allParamsAreValid(params: Array<any>) {
+  if (!params || !params.length) return
+  if (
+    params.some(
+      (param) => !Boolean(param) || param == "undefined" || param == "false"
+    )
+  ) {
+    return false
+  } else {
+    return true
   }
 }

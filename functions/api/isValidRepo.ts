@@ -1,4 +1,4 @@
-import { getHeaders } from "functions/shared"
+import { getHeaders, allParamsAreValid } from "functions/shared"
 
 export const onRequestGet: PagesFunction = async (context) => {
   // Contents of context object
@@ -18,7 +18,7 @@ export const onRequestGet: PagesFunction = async (context) => {
   let user = url.searchParams?.get("user")
   let repo = url.searchParams?.get("repo")
 
-  if (!user || !repo) {
+  if (!allParamsAreValid([user, repo])) {
     return new Response(null, {
       status: 400,
       statusText: "Missing parameters"

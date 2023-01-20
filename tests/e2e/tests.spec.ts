@@ -13,26 +13,24 @@ test("test page titles; ", async ({ page }) => {
 })
 
 // skip: changed to not use an input here
-test.skip("Menu chapter input updates on nav", async ({ page }) => {
+test("Menu chapter updates on nav", async ({ page }) => {
   await page.goto("/read/WycliffeAssociates/en_ulb/?book=Genesis&chapter=1")
   await page.waitForLoadState("networkidle") //JS has evaluated maybe? I think that's why I have this here
 
   await Promise.all([
     page.waitForResponse(/api/), //prefetch on page load calls the api
-    page.getByRole("link", { name: "Navigate forwards one chapter" }).click()
+    page.getByTestId("NavForwardBtn").click()
   ])
 
-  let input = page.getByLabel("Quick Jump to Chapter By adjusting input")
-  await expect(input).toHaveValue(/2/)
+  let input = page.getByTestId("chapterNavigation")
+  await expect(input).toHaveText(/2/)
 
   await Promise.all([
     // don't wait for api call this time: Should already be loaded;
-    page.getByRole("link", { name: "Navigate back one chapter" }).click()
+    page.getByTestId("NavBackBtn").click()
   ])
 
-  await expect(
-    page.getByLabel("Quick Jump to Chapter By adjusting input")
-  ).toHaveValue(/1/)
+  await expect(page.getByTestId("chapterNavigation")).toHaveText(/1/)
 })
 
 test("Count Chapters On Book Changes", async ({ page }) => {
@@ -105,4 +103,46 @@ test("Test language change in header", async ({ page }) => {
   const spBtn = page.locator('[data-lang="es"]')
   await spBtn.click()
   await expect(currentLanguageBtn).toContainText("Español")
+})
+
+test("Test hover of preview panes in desktop", async ({ page }) => {
+  await page.goto(
+    "http://localhost:3000/read/WycliffeAssociates/en_bc?book=mat&chapter=01"
+  )
+  debugger
+  await page.mouse.move(200, 200, { steps: 5 })
+  const hoverableLink = page.locator("a[href*='popup://messiah']").first()
+  await hoverableLink.hover()
+  const previewPane = page.locator("#previewPane")
+
+  // ------------------------------------
+  // Check that pane renders with text
+  await expect(previewPane).toHaveCount(1)
+  await expect(previewPane).toContainText("Messiah")
+
+  // ------------------------------------
+  // close method 1:  The close btn
+  const closePreviewBtn = page.getByTestId("closePreviewPane")
+  await closePreviewBtn.click()
+  await expect(previewPane).toHaveCount(0)
+
+  // ------------------------------------
+  // close method 2:  The Escape key
+  await hoverableLink.hover()
+  await expect(previewPane).toHaveCount(1)
+  await page.keyboard.press("Escape")
+  await expect(previewPane).toHaveCount(0)
+
+  // ------------------------------------
+  // close method 3: click outside
+  await page.mouse.move(0, 0)
+  await hoverableLink.hover()
+  await expect(previewPane).toHaveCount(1)
+  const textContainer = page.getByTestId("page-container")
+  // await expect(textContainer).toHaveCount(1)
+  // If you are not interested in testing your app under the real conditions and want to simulate the click by any means possible, you can trigger the HTMLElement.click() behavior via simply dispatching a click event on the element with locator.dispatchEvent():
+  // We use a programmatic click, because while divs are not 'clickable' there is a listener on the body for clicks when the preview pane is open. If the target is not inside the preview pane itself, it treats the behavior as click outside and closes the preview pane.
+  await textContainer.dispatchEvent("click")
+  await textContainer.click()
+  await expect(previewPane).toHaveCount(0)
 })

@@ -1,4 +1,4 @@
-import { getHeaders, aTagHandler } from "functions/shared"
+import { getHeaders, aTagHandler, allParamsAreValid } from "functions/shared"
 
 export const onRequestGet: PagesFunction = async (context) => {
   // Contents of context object
@@ -14,12 +14,12 @@ export const onRequestGet: PagesFunction = async (context) => {
   const request: Request = context.request
   const env: any = context.env
   const url = new URL(request.url)
-  let user = url.searchParams?.get("user")
+  let user = url.searchParams?.get("user") as string
   let repo = url.searchParams?.get("repo")
   let bookKey = url.searchParams?.get("book")
   let chapter = url.searchParams?.get("chapter")
 
-  if (!user || !repo || !bookKey || !chapter) {
+  if (!allParamsAreValid([user, repo, bookKey, chapter])) {
     return new Response(null, {
       status: 400,
       statusText: "Missing parameters"
@@ -35,6 +35,7 @@ export const onRequestGet: PagesFunction = async (context) => {
     let newResp = new Response(response.body, {
       headers: getHeaders(url)
     })
+    // NOTE: TN AND BIBLE CHAP ARE BOTH CHAPTER/VERSE SCHEMAS, SO THE SAME API FETCHER FUNCTION IS HERE USED, BUT WE REWRITE ANY FOUND TN LINKS AS WELL HERE.
     const handler = new aTagHandler(user, "TN")
     return new HTMLRewriter()
       .on("a[href*='tn-chunk-']", handler)

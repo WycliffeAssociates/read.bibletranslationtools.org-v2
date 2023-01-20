@@ -24,12 +24,8 @@ export default defineConfig({
     solidJs(),
     AstroPWA({
       /* your pwa options */
-
-      // base: "/",
-      // scope: "/",
       srcDir: "src",
       filename: "sw.js",
-      // mode: import.meta.env.MODE,
       strategies: "injectManifest",
       // injectManifest: {
       // swDest: "dist/client/sw.js",

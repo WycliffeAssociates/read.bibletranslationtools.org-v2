@@ -40,7 +40,11 @@ const config: PlaywrightTestConfig = {
     baseURL: "http://localhost:3000",
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: "on-first-retry"
+    trace: "on-first-retry",
+    launchOptions: {
+      // in milliseconds.. change if you want to watch in a browser playwright with a bit of buffering to see what it's doing. You can also just step debug it though.
+      slowMo: 0
+    }
   },
 
   /* Configure projects for major browsers */

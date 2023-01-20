@@ -17,7 +17,8 @@ export const onRequestGet: PagesFunction = async (context) => {
   const url = new URL(request.url)
   let user = url.searchParams?.get("user")
   let repo = url.searchParams?.get("repo")
-  if (!user || !repo) {
+  console.log({ user, repo })
+  if (!user || !repo || user == "undefined" || repo == "undefined") {
     return new Response(null, {
       status: 400,
       statusText: "Missing parameters"

@@ -1,4 +1,4 @@
-import { getHeaders, aTagHandler } from "functions/shared"
+import { getHeaders, aTagHandler, allParamsAreValid } from "functions/shared"
 
 export const onRequestGet: PagesFunction = async (context) => {
   // Contents of context object
@@ -14,11 +14,11 @@ export const onRequestGet: PagesFunction = async (context) => {
   const request: Request = context.request
   const env: any = context.env
   const url = new URL(request.url)
-  let user = url.searchParams?.get("user")
+  let user = url.searchParams?.get("user") as string //invariants are checked below
   let repo = url.searchParams?.get("repo")
   let navSection = url.searchParams?.get("navSection")
 
-  if (!user || !repo || !navSection) {
+  if (!allParamsAreValid([user, repo, navSection])) {
     return new Response(null, {
       status: 400,
       statusText: "Missing parameters"
@@ -35,6 +35,7 @@ export const onRequestGet: PagesFunction = async (context) => {
     // http://localhost/u/WA-Catalog/en_ulb/index.json;
     let baseUrl = env.HTML_API_URL_BASE
     let finalUrl = `${baseUrl}/${user}/${repo}/${navSection}.html`
+    console.log({ finalUrl })
     let response = await fetch(finalUrl)
     // E[foo*="bar"]
     let newResp = new Response(response.body, {

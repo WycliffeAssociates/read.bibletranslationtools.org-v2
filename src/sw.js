@@ -134,36 +134,8 @@ class variableCacheOrNetwork extends Strategy {
 if (import.meta.env.DEV) {
   console.log(import.meta.env)
 
-  // todo: remove
-  registerRoute(
-    ({ request, url }) => {
-      if (url.href.includes("/devtest")) {
-        return false
-      }
-    },
-    // new NetworkFirst({
-    //   cacheName: "all-dev-api",
-    //   // plugins: [new CacheableResponsePlugin({statuses: [-1]})],
-    // })
-    new variableCacheOrNetworkdevtest({
-      cacheName: "dev-test"
-    })
-  )
-
-  // Avoid caching on dev: force always go to the server
-  registerRoute(
-    ({ request, url }) => {
-      if (url.href.includes("/api/")) {
-        return false
-      }
-      if (request.mode == "navigate") return false
-      return true
-    },
-    new NetworkFirst({
-      cacheName: "all-dev"
-      // plugins: [new CacheableResponsePlugin({statuses: [-1]})],
-    })
-  )
+  // DEV... For testing the variableCacheNet strategy as desired
+  // Can just return true
   registerRoute(
     ({ request, url }) => {
       if (request.mode == "navigate") return true
@@ -173,18 +145,6 @@ if (import.meta.env.DEV) {
       // plugins: [new CacheableResponsePlugin({statuses: [-1]})],
     })
     // new variableCacheOrNetwork()
-  )
-  registerRoute(
-    ({ request, url }) => {
-      if (url.href.includes("/api/")) {
-        return true
-      }
-    },
-    // new NetworkFirst({
-    //   cacheName: "all-dev-api",
-    //   // plugins: [new CacheableResponsePlugin({statuses: [-1]})],
-    // })
-    new variableCacheOrNetwork()
   )
 }
 
@@ -200,7 +160,7 @@ if (import.meta.env.PROD) {
     strategy: FALLBACK_STRATEGY
   })
 
-  //----- HTML DOCS
+  //----- HTML DOCS ----
   registerRoute(
     ({ request, url }) => {
       const isSameOrigin = self.origin === url.origin
@@ -274,7 +234,7 @@ if (import.meta.env.PROD) {
     // use request.destination to match requests for specific resource types.
     switch (request.destination) {
       case "document":
-        return FALLBACK_STRATEGY.handle({ event, request: route404 })
+        return caches.match(route404)
 
       default:
         // If we don't have a fallback, return an error response.

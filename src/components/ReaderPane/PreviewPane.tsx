@@ -50,6 +50,7 @@ export function PreviewPane() {
       >
         <div class="relative h-full w-full">
           <button
+            data-testid="closePreviewPane"
             ref={previewCloseButton}
             class="absolute top-0 right-0 text-red-300 hover:text-red-700"
             onClick={() => setShowFootnote(false)}

@@ -1,4 +1,9 @@
-import { getRepoIndexLocal, getHeaders } from "functions/shared"
+import {
+  getRepoIndexLocal,
+  getHeaders,
+  allParamsAreValid,
+  aTagHandler
+} from "functions/shared"
 
 export const onRequestGet: PagesFunction = async (context) => {
   // Contents of context object
@@ -14,11 +19,11 @@ export const onRequestGet: PagesFunction = async (context) => {
   const request: Request = context.request
   const env: any = context.env
   const url = new URL(request.url)
-  let user = url.searchParams?.get("user")
-  let repo = url.searchParams?.get("repo")
+  let user = url.searchParams?.get("user") as string
+  let repo = url.searchParams?.get("repo") as string
   let navSection = url.searchParams?.get("navSection")
 
-  if (!user || !repo || !navSection) {
+  if (!allParamsAreValid([user, repo, navSection])) {
     return new Response(null, {
       status: 400,
       statusText: "Missing parameters"
@@ -28,17 +33,7 @@ export const onRequestGet: PagesFunction = async (context) => {
   const repoIndex = await getRepoIndexLocal(env, user, repo)
   let possibleFiles =
     repoIndex && repoIndex.navigation?.map((navOb) => navOb.File)
-
-  // rewrite to use query params
-  class aTagHandler {
-    element(element: Element) {
-      let href = element.getAttribute("href")
-      if (!href) return
-      let rep = href.replace(".html", "")
-      let prepended = `?section=${rep}`
-      element.setAttribute("href", prepended)
-    }
-  }
+  console.log({ possibleFiles })
 
   try {
     // http://localhost/u/WA-Catalog/en_ulb/index.json;
@@ -51,7 +46,9 @@ export const onRequestGet: PagesFunction = async (context) => {
     })
     // return newResp
     let htmlRewriter = new HTMLRewriter()
-    const handler = new aTagHandler()
+    const handler = new aTagHandler(user, "TM")
+    // This line is to transform Hrefs inside the manual from absolute whatever.html into query parameters on the same origin such as
+    // <a href="?section=intro#translate-terms">Terms to Know</a>
     possibleFiles &&
       possibleFiles.forEach((possible) => {
         htmlRewriter.on(`a[href*='${possible}']`, handler)
