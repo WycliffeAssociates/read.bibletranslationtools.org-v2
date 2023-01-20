@@ -65,10 +65,13 @@ jobs:
           else
             echo "Pull request already exists, won't create a new one."
           fi
-      - name: Run Tests
+      - name: Spawn Dev Server
         if: steps.changes.outputs.COUNT > 0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         # Only open a PR if the branch is not attached to an existing one
         run: |
-          pnpm run build && pnpm run preview && pnpm run test && pnpm run vitest
+          pnpm run build && pnpm run dev
+      - name: Run Tests
+        if: steps.changes.outputs.COUNT > 0
+        # Only open a PR if the branch is not attached to an existing one
+        run: |
+          pnpm run test && pnpm run vitest
