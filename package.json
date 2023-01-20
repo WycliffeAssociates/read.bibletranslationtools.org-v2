@@ -19,6 +19,7 @@
     "test": "pnpm dlx playwright test",
     "test-debug": "pnpm dlx playwright test --debug",
     "vitest": "vitest",
+    "vitest-ci": "vitest run",
     "test-ct": "playwright test -c playwright-ct.config.ts"
   },
   "dependencies": {
