@@ -31,7 +31,7 @@ jobs:
         # ADD YOUR CUSTOM DEPENDENCY UPGRADE COMMANDS BELOW
         run: |
           rm -f pnpm-lock.yaml
-          npx --yes pnpm upgrade
+          pnpm install --frozen-lockfile
       # END NODE DEPENDENCIES
       - name: Detect changes
         id: changes
