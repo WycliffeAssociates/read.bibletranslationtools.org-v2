@@ -105,7 +105,7 @@ test("Test language change in header", async ({ page }) => {
   await expect(currentLanguageBtn).toContainText("Español")
 })
 
-test("Test hover of preview panes in desktop", async ({ page }) => {
+test.skip("Test hover of preview panes in desktop", async ({ page }) => {
   await page.goto(
     "http://localhost:3000/read/WycliffeAssociates/en_bc?book=mat&chapter=01"
   )

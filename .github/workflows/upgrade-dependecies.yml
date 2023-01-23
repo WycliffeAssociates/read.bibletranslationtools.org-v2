@@ -70,3 +70,8 @@ jobs:
         # Only open a PR if the branch is not attached to an existing one
         run: |
           pnpm run test
+      - name: Upload test results
+        if: steps.changes.outputs.COUNT > 0
+        # Only open a PR if the branch is not attached to an existing one
+        run: |
+          pnpm run test
