@@ -84,11 +84,13 @@ export async function getRepoIndex({
   if (!user || !repo) return null
   let fetchUrl = FUNCTIONS_ROUTES.getRepoIndex({ user, repo })
   try {
+    console.log(`fetching index; ${fetchUrl}`)
     const response = await fetch(fetchUrl)
     const data: repoIndexObj = await response.json()
     if (typeof data == "string") {
       return null
     }
+    console.log(`data:${data}`)
     return data
   } catch (error) {
     console.error(error)

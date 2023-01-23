@@ -17,18 +17,20 @@ export async function getRepoIndexLocal(
   }
 }
 
-type headersType = {
-  "Content-Type": string
-  "Access-Control-Allow-Origin"?: string
-}
-const allowedOrigins = ["localhost", "http://127.0.0.1"]
 export function getHeaders(url: URL) {
+  type headersType = {
+    "Content-Type": string
+    "Access-Control-Allow-Origin"?: string
+  }
+  const allowedOrigins = ["localhost", "http://127.0.0.1"]
   let headers: headersType = {
     "Content-Type": "text/html"
   }
-  if (allowedOrigins.some((origin) => url.origin.includes(origin))) {
-    headers["Access-Control-Allow-Origin"] = "*"
-  }
+  headers["Access-Control-Allow-Origin"] = "*"
+
+  // if (allowedOrigins.some((origin) => url.origin.includes(origin))) {
+  //   headers["Access-Control-Allow-Origin"] = "*"
+  // }
   return headers
 }
 
