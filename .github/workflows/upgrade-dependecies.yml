@@ -7,6 +7,10 @@ on:
     # Runs every Monday at 8:00 UTC (4:00 Eastern)
     - cron: "0 8 * * 1"
 
+env:
+  ACTIONS_RUNNER_DEBUG: true
+  ACTIONS_STEP_DEBUG: true
+
 jobs:
   upgrade:
     name: Upgrade & Open Pull Request
@@ -66,11 +70,6 @@ jobs:
             echo "Pull request already exists, won't create a new one."
           fi
       - name: Spawn Dev Server and test
-        if: steps.changes.outputs.COUNT > 0
-        # Only open a PR if the branch is not attached to an existing one
-        run: |
-          pnpm run test
-      - name: Upload test results
         if: steps.changes.outputs.COUNT > 0
         # Only open a PR if the branch is not attached to an existing one
         run: |
