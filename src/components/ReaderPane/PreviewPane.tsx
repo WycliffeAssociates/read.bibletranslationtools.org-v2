@@ -110,7 +110,6 @@ export function hoverOnCrossReferences() {
         node.id.includes("tn-chunk")
       )
     }
-    // debugger
     let html = getHtmlWithinSpan(corresponding, truthyFunction)
     setFootnoteText(html)
 

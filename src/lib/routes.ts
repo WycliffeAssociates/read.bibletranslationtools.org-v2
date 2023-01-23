@@ -1,11 +1,14 @@
 let mode = import.meta.env.MODE
-let base =
+const devUrl = import.meta.env.PUBLIC_FUNCTIONS_API_BASE
+// read-dev.bibletranslationtools.org
+// local scripture rendering pipeline: http://127.0.0.1:8788/api
+const base =
   mode === "development"
-    ? "http://127.0.0.1:8788/api"
+    ? devUrl
     : mode === "test"
-    ? "http://127.0.0.1:8788/api"
+    ? devUrl
     : mode === "ci"
-    ? "http://127.0.0.1:8788/api"
+    ? devUrl
     : "https://astro-live-reader.pages.dev/api"
 
 interface getRepoHtmlType {

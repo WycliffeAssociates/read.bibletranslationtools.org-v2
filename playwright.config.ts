@@ -104,7 +104,7 @@ const config: PlaywrightTestConfig = {
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: "pnpm run build && pnpm run cf-dev",
+    command: "pnpm run cf-dev",
     url: "http://localhost:3000",
     timeout: 240 * 1000,
     reuseExistingServer: !process.env.CI

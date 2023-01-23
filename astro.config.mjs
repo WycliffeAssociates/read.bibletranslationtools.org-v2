@@ -13,6 +13,10 @@ import AstroPWA from "@vite-pwa/astro"
 import { manifest } from "./manifest"
 import { visualizer } from "rollup-plugin-visualizer"
 
+// TODO: SET SITE:
+// site: 'https://www.my-site.dev'
+// https://docs.astro.build/en/reference/configuration-reference/#site
+
 // https://astro.build/config
 export default defineConfig({
   output: "server",
