@@ -73,4 +73,4 @@ jobs:
         if: steps.changes.outputs.COUNT > 0
         # Only open a PR if the branch is not attached to an existing one
         run: |
-          pnpm run test
+          DEBUG=pw:api pnpm run test
