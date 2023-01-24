@@ -28,10 +28,11 @@ if (!repo || !user) {
 repo = String(repo)
 user = String(user)
 // is current wacs repo check
-const isValid = isValidRepo({ user, repo })
-if (!isValid) {
-  return res404
-}
+// todo: maybe put this back if needed? The url is is sort of buried.
+// const isValid = isValidRepo({ user, repo })
+// if (!isValid) {
+//   return res404
+// }
 
 // get of text and metadata
 const repoIndex = await getRepoIndex({ user, repo })
