@@ -186,8 +186,8 @@ const ReaderMenu: Component<MenuProps> = (props) => {
           class="w-full text-center text-sm font-bold uppercase print:block sm:w-1/6"
           data-testid="menuLangBookDisplay"
         >
-          {props.storeInterface.getStoreVal("languageName")}:
-          <br />
+          {props.storeInterface.getStoreVal("languageName")}: &nbsp;
+          <br class="hidden lg:block" />
           {props.storeInterface.currentBookObj()?.label}
         </div>
 
@@ -326,6 +326,8 @@ const ReaderMenu: Component<MenuProps> = (props) => {
             <div class=" relative w-max rounded-md ltr:ml-auto rtl:mr-auto ">
               <button
                 class="border-bg-neutral-300 rounded-md  border p-3"
+                // todo: internationalize label
+                aria-label="Open Settings"
                 onClick={() => {
                   setSettingsAreOpen(!settingsAreOpen())
                   props.setPrintWholeBook(false)

@@ -41,7 +41,7 @@ function supplyBaseLocation() {
   if (import.meta.env.MODE === "development") {
     return devUrl
   } else if (typeof window !== "undefined" && import.meta.env.PROD) {
-    let clientBase = window.location.origin
+    let clientBase = `${window.location.origin}/api`
     return clientBase
   }
 }

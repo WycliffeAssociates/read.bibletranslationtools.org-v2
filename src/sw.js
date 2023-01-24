@@ -167,9 +167,15 @@ if (import.meta.env.PROD) {
   //   strategy: FALLBACK_STRATEGY
   // })
   try {
-    registerRoute(new NavigationRoute(createHandlerBoundToURL("/404")))
+    if (typeof window != undefined) {
+      registerRoute(
+        new NavigationRoute(
+          createHandlerBoundToURL(`${window.location.origin}/404`)
+        )
+      )
+    }
   } catch (error) {
-    console.error(error)
+    console.warn(error)
   }
 
   //----- HTML DOCS ----

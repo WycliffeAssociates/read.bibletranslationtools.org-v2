@@ -196,7 +196,6 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
       return controller.abort()
     }
     setIsFetching(true)
-    debugger
     let nextUrl = FUNCTIONS_ROUTES.getRepoHtml({
       user: props.user,
       repo: props.repositoryName,

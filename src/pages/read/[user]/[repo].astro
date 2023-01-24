@@ -18,7 +18,6 @@ import {
 import { setOriginUrl } from "@lib/routes"
 import type { tmProps, twProps, bibleSchemaProps } from "@src/customTypes/types"
 let { repo, user } = Astro.params
-debugger
 setOriginUrl(Astro.url.origin)
 const res404 = new Response(null, {
   status: 404
