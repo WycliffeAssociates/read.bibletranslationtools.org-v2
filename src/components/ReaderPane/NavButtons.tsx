@@ -48,9 +48,7 @@ export default function NavButtonLinks(props: navProps) {
             ? t("ariaNavigateForwardsOneChapter")
             : t("ariaNavigateBackwardsOneChapter")
         }
-        href={`${import.meta.env.PUBLIC_READER_URL}/${props.user}/${
-          props.repo
-        }/?book=${props.book}&chapter=${props.chapter}`}
+        href={`/read/${props.user}/${props.repo}/?book=${props.book}&chapter=${props.chapter}`}
         class={`${props.dir == "BACK" ? backwardClassA : forwardClassNamesA}`}
         onClick={props.onClick}
       >

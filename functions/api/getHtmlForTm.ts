@@ -33,7 +33,6 @@ export const onRequestGet: PagesFunction = async (context) => {
   const repoIndex = await getRepoIndexLocal(env, user, repo)
   let possibleFiles =
     repoIndex && repoIndex.navigation?.map((navOb) => navOb.File)
-  console.log({ possibleFiles })
 
   try {
     // http://localhost/u/WA-Catalog/en_ulb/index.json;
