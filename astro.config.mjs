@@ -31,10 +31,11 @@ export default defineConfig({
       srcDir: "src",
       filename: "sw.js",
       strategies: "injectManifest",
-      srcDir: "src",
-      filename: "sw.js",
       registerType: "autoUpdate",
       manifest: manifest,
+      workbox: {
+        globIgnores: ["**/node_modules/**/*", "_worker.js"]
+      },
       devOptions: {
         enabled: true,
         type: "module"

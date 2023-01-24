@@ -140,8 +140,6 @@ class variableCacheOrNetwork extends Strategy {
 //@ DEV DON'T CACHE
 
 if (import.meta.env.DEV) {
-  console.log(import.meta.env)
-
   // DEV... For testing the variableCacheNet strategy as desired
   // Can just return true
   registerRoute(
@@ -159,6 +157,7 @@ if (import.meta.env.DEV) {
 // @ PROD ROUTES
 if (import.meta.env.PROD) {
   let precacheUrls = self.__WB_MANIFEST
+  console.log({ precacheUrls })
   // let route404 = location.origin.concat("/404")
   // const FALLBACK_STRATEGY = new CacheFirst()
 
