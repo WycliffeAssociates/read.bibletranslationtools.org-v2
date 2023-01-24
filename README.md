@@ -56,7 +56,8 @@ Assets not processed by Vite. Fonts, and PWA icons etc;
 
 ### Additional Files
 
-- .dev.vars - Used as .env for cloudflare bindings.
+- .dev.vars - Used as .env for local (wrangler) cloudflare bindings. [see more](https://developers.cloudflare.com/workers/platform/environment-variables/#secrets-in-development))
+
 - manifest.ts - The pwa manifest
 - stats.html - There is a [Vite/Rollup plugin](https://www.npmjs.com/package/rollup-plugin-visualizer) to visualize bundle size in the vite build process. This is the output of that. Reasonable Performance budget suggests about ~100kib of HTML/CSS/Fonts (e.g. check network tab for amount loaded), and then ~300-350kib JS gzipped: Read more [here](): [text](https://infrequently.org/2021/03/the-performance-inequality-gap/)
 - Config file - see respective tools for guides to their configs.
