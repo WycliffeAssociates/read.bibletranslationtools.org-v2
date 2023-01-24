@@ -12,7 +12,7 @@ const base =
     ? devUrl
     : mode === "ci"
     ? devUrl
-    : "/api"
+    : "https://readv2.bibleineverylanguage.org/api"
 
 interface getRepoHtmlType {
   user: string

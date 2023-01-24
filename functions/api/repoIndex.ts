@@ -32,6 +32,7 @@ export const onRequestGet: PagesFunction = async (context) => {
   let finalUrl = `${baseUrl}/${user}/${repo}/index.json`
   try {
     // http://localhost/u/WA-Catalog/en_ulb/index.json;
+    console.log(`fetching ${finalUrl}`)
     let response = await fetch(finalUrl)
     returnValue = response.body
     return new Response(returnValue, {
@@ -39,6 +40,7 @@ export const onRequestGet: PagesFunction = async (context) => {
     })
   } catch (error) {
     console.log(error)
+    console.log(`Fetch for ${finalUrl} failed.`)
     return new Response(null, {
       status: 404,
       statusText: `Fetch for ${finalUrl} failed.`
