@@ -9,7 +9,7 @@ const base =
     ? devUrl
     : mode === "ci"
     ? devUrl
-    : "https://astro-live-reader.pages.dev/api"
+    : devUrl
 
 interface getRepoHtmlType {
   user: string

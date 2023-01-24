@@ -10,6 +10,7 @@ on:
 env:
   ACTIONS_RUNNER_DEBUG: true
   ACTIONS_STEP_DEBUG: true
+  NODE_ENV: "development"
 
 jobs:
   upgrade:
