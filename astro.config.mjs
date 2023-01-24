@@ -36,8 +36,8 @@ export default defineConfig({
       injectManifest: {
         globIgnores: [
           "**/node_modules/**/*",
-          "**/_worker.js",
-          "$server_build/_worker.js"
+          "$server_build/*",
+          "$server_build/**/*"
         ]
       },
       devOptions: {
