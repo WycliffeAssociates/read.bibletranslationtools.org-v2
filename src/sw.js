@@ -166,7 +166,11 @@ if (import.meta.env.PROD) {
   //   urls: [route404],
   //   strategy: FALLBACK_STRATEGY
   // })
-  registerRoute(new NavigationRoute(createHandlerBoundToURL("/404")))
+  try {
+    registerRoute(new NavigationRoute(createHandlerBoundToURL("/404")))
+  } catch (error) {
+    console.error(error)
+  }
 
   //----- HTML DOCS ----
   registerRoute(

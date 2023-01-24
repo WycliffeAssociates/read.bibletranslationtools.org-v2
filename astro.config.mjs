@@ -33,8 +33,12 @@ export default defineConfig({
       strategies: "injectManifest",
       registerType: "autoUpdate",
       manifest: manifest,
-      workbox: {
-        globIgnores: ["**/node_modules/**/*", "_worker.js"]
+      injectManifest: {
+        globIgnores: [
+          "**/node_modules/**/*",
+          "**/_worker.js",
+          "$server_build/_worker.js"
+        ]
       },
       devOptions: {
         enabled: true,
