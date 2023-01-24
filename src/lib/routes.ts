@@ -1,5 +1,6 @@
 let mode = import.meta.env.MODE
 const devUrl = import.meta.env.PUBLIC_FUNCTIONS_API_BASE
+// todo: change to a production url:
 // read-dev.bibletranslationtools.org
 // local scripture rendering pipeline: http://127.0.0.1:8788/api
 const base =
@@ -9,7 +10,7 @@ const base =
     ? devUrl
     : mode === "ci"
     ? devUrl
-    : devUrl
+    : "https://astro-live-reader.pages.dev/api"
 
 interface getRepoHtmlType {
   user: string
