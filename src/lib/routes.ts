@@ -12,6 +12,8 @@ const base =
     ? devUrl
     : "https://astro-live-reader.pages.dev/api"
 
+console.log({ base })
+
 interface getRepoHtmlType {
   user: string
   repo: string

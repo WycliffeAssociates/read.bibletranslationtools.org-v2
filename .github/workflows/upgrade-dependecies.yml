@@ -10,7 +10,6 @@ on:
 env:
   ACTIONS_RUNNER_DEBUG: true
   ACTIONS_STEP_DEBUG: true
-  NODE_ENV: "development"
 
 jobs:
   upgrade:
@@ -72,6 +71,7 @@ jobs:
           fi
       - name: Spawn Dev Server and test
         if: steps.changes.outputs.COUNT > 0
-        # Only open a PR if the branch is not attached to an existing one
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           DEBUG=pw:api pnpm run test
