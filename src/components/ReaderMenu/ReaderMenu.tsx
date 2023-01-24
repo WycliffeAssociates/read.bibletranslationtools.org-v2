@@ -177,7 +177,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
     >
       <div
         // use:clickOutside={setMenuIsOpen(false)}
-        use:clickOutside={() => setMenuIsOpen(false)}
+        // use:clickOutside={() => setMenuIsOpen(false)}
         use:escapeOut={() => setMenuIsOpen(false)}
         class=" mx-auto flex w-full flex-wrap items-center px-4 py-2 "
       >
