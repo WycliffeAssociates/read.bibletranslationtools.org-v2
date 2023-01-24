@@ -31,16 +31,12 @@ export default defineConfig({
       srcDir: "src",
       filename: "sw.js",
       strategies: "injectManifest",
-      // injectManifest: {
-      // swDest: "dist/client/sw.js",
-      // globDirectory: "dist/client",
-      // globPatterns: ["**/*.{css,js,html,svg,png,ico,txt}"],
-      // sourcemap: true,
-      // },
+      srcDir: "src",
+      filename: "sw.js",
       registerType: "autoUpdate",
       manifest: manifest,
       devOptions: {
-        enabled: false,
+        enabled: true,
         type: "module"
         /* other options */
       }

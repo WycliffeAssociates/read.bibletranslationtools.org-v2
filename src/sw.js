@@ -1,6 +1,14 @@
-import { precacheAndRoute, cleanupOutdatedCaches } from "workbox-precaching"
+import {
+  precacheAndRoute,
+  cleanupOutdatedCaches,
+  createHandlerBoundToURL
+} from "workbox-precaching"
 import { clientsClaim } from "workbox-core"
-import { registerRoute, setCatchHandler } from "workbox-routing"
+import {
+  registerRoute,
+  setCatchHandler,
+  NavigationRoute
+} from "workbox-routing"
 import {
   NetworkFirst,
   StaleWhileRevalidate,
@@ -151,14 +159,15 @@ if (import.meta.env.DEV) {
 // @ PROD ROUTES
 if (import.meta.env.PROD) {
   let precacheUrls = self.__WB_MANIFEST
-  let route404 = location.origin.concat("/404")
-  const FALLBACK_STRATEGY = new CacheFirst()
+  // let route404 = location.origin.concat("/404")
+  // const FALLBACK_STRATEGY = new CacheFirst()
 
   precacheAndRoute(precacheUrls)
-  warmStrategyCache({
-    urls: [route404],
-    strategy: FALLBACK_STRATEGY
-  })
+  // warmStrategyCache({
+  //   urls: [route404],
+  //   strategy: FALLBACK_STRATEGY
+  // })
+  registerRoute(new NavigationRoute(createHandlerBoundToURL("/404")))
 
   //----- HTML DOCS ----
   registerRoute(
@@ -227,20 +236,20 @@ if (import.meta.env.PROD) {
       ]
     })
   )
-  setCatchHandler(async ({ request }) => {
-    // The warmStrategyCache recipe is used to add the fallback assets ahead of
-    // time to the runtime cache, and are served in the event of an error below.
-    // Use `event`, `request`, and `url` to figure out how to respond, or
-    // use request.destination to match requests for specific resource types.
-    switch (request.destination) {
-      case "document":
-        return caches.match(route404)
+  // setCatchHandler(async ({ request }) => {
+  //   // The warmStrategyCache recipe is used to add the fallback assets ahead of
+  //   // time to the runtime cache, and are served in the event of an error below.
+  //   // Use `event`, `request`, and `url` to figure out how to respond, or
+  //   // use request.destination to match requests for specific resource types.
+  //   switch (request.destination) {
+  //     case "document":
+  //       return caches.match(route404)
 
-      default:
-        // If we don't have a fallback, return an error response.
-        return Response.error()
-    }
-  })
+  //     default:
+  //       // If we don't have a fallback, return an error response.
+  //       return Response.error()
+  //   }
+  // })
 }
 // SKIP WAITING prompt comes from the sw update process; Used for updating SW between builds
 self.addEventListener("message", (event) => {

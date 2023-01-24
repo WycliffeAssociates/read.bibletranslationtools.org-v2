@@ -1,18 +1,10 @@
 let mode = import.meta.env.MODE
 const devUrl = import.meta.env.PUBLIC_FUNCTIONS_API_BASE
-
+let base: string
 // console.log(location)
 // todo: change to a production url:
 // read-dev.bibletranslationtools.org
 // local scripture rendering pipeline: http://127.0.0.1:8788/api
-const base =
-  mode === "development"
-    ? devUrl
-    : mode === "test"
-    ? devUrl
-    : mode === "ci"
-    ? devUrl
-    : "https://readv2.bibleineverylanguage.org/api"
 
 interface getRepoHtmlType {
   user: string
@@ -35,6 +27,16 @@ interface commentaryIndividual extends repo {
 }
 
 // these names need to align with the names of files in the functions folder.  They are cloudflare workers.
+export function setOriginUrl(origin: string) {
+  base =
+    mode === "development"
+      ? devUrl
+      : mode === "test"
+      ? devUrl
+      : mode === "ci"
+      ? devUrl
+      : `${origin}/api`
+}
 const FUNCTIONS_ROUTES = {
   getRepoIndex: ({ user, repo }: repo) =>
     `${base}/repoIndex?user=${user}&repo=${repo}`,
