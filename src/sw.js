@@ -166,17 +166,6 @@ if (import.meta.env.PROD) {
   //   urls: [route404],
   //   strategy: FALLBACK_STRATEGY
   // })
-  try {
-    if (typeof window != undefined) {
-      registerRoute(
-        new NavigationRoute(
-          createHandlerBoundToURL(`${window.location.origin}/404`)
-        )
-      )
-    }
-  } catch (error) {
-    console.warn(error)
-  }
 
   //----- HTML DOCS ----
   registerRoute(
@@ -224,7 +213,7 @@ if (import.meta.env.PROD) {
 
   // Cache CSS, and (non pre-cached JS)
   registerRoute(
-    ({ request }) => {
+    ({ request, url }) => {
       const isStyleOrScript =
         request.destination === "style" || request.destination === "script"
       const isSameOrigin = self.origin === url.origin

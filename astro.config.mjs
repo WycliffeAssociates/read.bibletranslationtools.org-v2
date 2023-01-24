@@ -34,6 +34,7 @@ export default defineConfig({
       registerType: "autoUpdate",
       manifest: manifest,
       injectManifest: {
+        additionalManifestEntries: ["/404"],
         globIgnores: [
           "**/node_modules/**/*",
           "$server_build/*",
