@@ -50,6 +50,10 @@ export default function ReaderPane(props: ReaderPaneProps) {
         hoverOnFootnotes()
         hoverOnCrossReferences()
         hoverOnCommentaryCrossReferences(props.user, props.repositoryName)
+        pushHistory(
+          props.storeInterface.getStoreVal("currentBook"),
+          props.storeInterface.getStoreVal("currentChapter")
+        )
       }
     )
   )
@@ -92,12 +96,6 @@ export default function ReaderPane(props: ReaderPaneProps) {
     }
     setLastPageVisited()
   }
-
-  /* // if (!location.)
-    pushHistory(historyBook, currentChap)
-
-    // adjust doc title for history
-    document.title = `${props.repositoryName}-${currentBook}-${currentChap}` */
 
   type fetchReaderParams = {
     event?: Event
@@ -142,7 +140,6 @@ export default function ReaderPane(props: ReaderPaneProps) {
     if (!existingChap) return
     if (existingText && navigate) {
       if (textRef) textRef.scrollTop = 0
-      pushHistory(currentBook, nextCh)
       return props.storeInterface.mutateStore("currentChapter", nextCh)
     } else if (existingText) {
       return
@@ -167,7 +164,6 @@ export default function ReaderPane(props: ReaderPaneProps) {
       if (navigate) {
         props.storeInterface.mutateStore("currentChapter", String(nextCh))
         if (textRef) textRef.scrollTop = 0
-        pushHistory(currentBook, String(nextCh))
       }
     })
 

@@ -138,6 +138,9 @@ body.noscroll {
 .theText p {
   font-size: var(--font-size-base);
 }
+.theText li p {
+  display: inline;
+}
 .theText h1,
 .theText h2,
 .theText h3,

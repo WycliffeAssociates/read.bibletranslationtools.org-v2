@@ -102,7 +102,7 @@ const config: PlaywrightTestConfig = {
   /* Folder for test artifacts such as screenshots, videos, traces, etc. */
   // outputDir: 'test-results/',
 
-  /* Run your local dev server before starting the tests */
+  // /* Run your local dev server before starting the tests */
   webServer: {
     command: "pnpm run cf-dev",
     timeout: 480 * 1000,

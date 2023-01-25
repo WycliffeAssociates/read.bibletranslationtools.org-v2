@@ -38,7 +38,7 @@ export function setOriginUrl(origin: string) {
       : `${origin}/api`
 }
 function supplyBaseLocation() {
-  if (import.meta.env.MODE === "development") {
+  if (!import.meta.env.PROD) {
     return devUrl
   } else if (typeof window !== "undefined" && import.meta.env.PROD) {
     let clientBase = `${window.location.origin}/api`

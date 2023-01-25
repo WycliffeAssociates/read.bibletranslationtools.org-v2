@@ -186,7 +186,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
           class="w-full text-center text-sm font-bold uppercase print:block sm:w-1/6"
           data-testid="menuLangBookDisplay"
         >
-          {props.storeInterface.getStoreVal("languageName")}: &nbsp;
+          {props.storeInterface.getStoreVal("languageName")}:&nbsp;
           <br class="hidden lg:block" />
           {props.storeInterface.currentBookObj()?.label}
         </div>
@@ -295,6 +295,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                                 data-testid="menuChapter"
                               >
                                 <button
+                                  data-testid="pickChapter"
                                   classList={{
                                     "w-full p-3 hover:bg-accent/10": true,
                                     "text-blue-400": isActiveBookAndChap(
