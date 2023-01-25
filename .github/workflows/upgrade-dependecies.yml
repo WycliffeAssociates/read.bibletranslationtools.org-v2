@@ -73,5 +73,6 @@ jobs:
         if: steps.changes.outputs.COUNT > 0
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CI: true
         run: |
           DEBUG=pw:api pnpm run test

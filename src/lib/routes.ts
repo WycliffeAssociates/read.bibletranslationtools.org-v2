@@ -43,6 +43,9 @@ function supplyBaseLocation() {
   } else if (typeof window !== "undefined" && import.meta.env.PROD) {
     let clientBase = `${window.location.origin}/api`
     return clientBase
+  } else if (import.meta.env.CI) {
+    console.log("using dev in ci")
+    return "http://127.0.0.1:8788/api"
   }
 }
 
