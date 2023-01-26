@@ -192,14 +192,14 @@ export default function ReaderPane(props: ReaderPaneProps) {
                   fetchReaderHtml({ event, navigate: true, dir: "BACK" })
                 }}
                 icon={
-                  <SvgArrow className="color-inherit mx-auto fill-current ltr:rotate-0 rtl:rotate-180" />
+                  <SvgArrow className="color-inherit mx-auto fill-current stroke-current ltr:rotate-0 rtl:rotate-180" />
                 }
               />
             </Show>
             {/* top buttons */}
             <div
               ref={textRef}
-              class="theText mx-auto h-full max-w-[85ch]  overflow-y-scroll bg-inherit pr-1 pt-2 pb-24 text-lg leading-relaxed print:h-min  print:overflow-y-visible  print:pb-4 sm:px-8 md:max-w-[75ch] "
+              class="theText mx-auto h-full max-w-[85ch]  overflow-y-scroll bg-inherit pr-1 pt-2 pb-24 text-lg leading-relaxed print:h-min print:overflow-y-visible  print:pb-4  sm:px-2 md:max-w-[75ch] md:text-2xl "
               innerHTML={props.storeInterface.HTML()}
             />
 
@@ -232,7 +232,7 @@ export default function ReaderPane(props: ReaderPaneProps) {
         <div
           id="wholeBook"
           innerHTML={props.storeInterface.wholeBookHtml()}
-          class=" theText  mx-auto  max-w-[85ch] bg-inherit text-lg leading-relaxed print:pb-4 sm:px-8 md:max-w-[75ch]"
+          class=" theText  mx-auto  max-w-[85ch] bg-inherit text-lg leading-relaxed print:pb-4 sm:px-8 md:max-w-[75ch] md:text-2xl"
         />
       </Show>
     </>

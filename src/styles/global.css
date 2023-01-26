@@ -81,7 +81,7 @@
 
 /* @=============== scrollbar   ============= */
 
-.theText::-webkit-scrollbar,
+/* .theText::-webkit-scrollbar,
 .customScrollBar::-webkit-scrollbar {
   width: 12px;
 }
@@ -100,7 +100,7 @@
   background-color: var(--thumbBG);
   border-radius: 6px;
   border: 3px solid var(--scrollbarBG);
-}
+} */
 /*# =============== scrollbar   ============= */
 
 /* @ =============== addl utils   ============= */

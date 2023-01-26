@@ -46,7 +46,7 @@ export function PreviewPane() {
         onFocusOut={focusWithinClose}
         style={{ left: pos().x, top: pos().y }}
         id="previewPane"
-        class="theText absolute z-30 mx-auto max-h-[50vh]  w-1/2 overflow-y-scroll border border-accent bg-white p-2 shadow  shadow-neutral-500 md:w-1/3"
+        class="theText absolute z-30 mx-auto max-h-[50vh]  w-1/2 overflow-y-auto border border-accent bg-white p-2 shadow  shadow-neutral-500 md:w-1/3"
       >
         <div class="relative h-full w-full">
           <button

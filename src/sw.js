@@ -216,20 +216,20 @@ if (import.meta.env.PROD) {
     ({ request, url }) => {
       const isStyleOrScript =
         request.destination === "style" || request.destination === "script"
-      const isSameOrigin = self.origin === url.origin
-      if (isSameOrigin && isStyleOrScript) {
+      // const isSameOrigin = self.origin === url.origin
+      if (isStyleOrScript) {
         return true
       } else {
         return false
       }
     },
-    new StaleWhileRevalidate({
+    new CacheFirst({
       cacheName: "lr-assets",
       plugins: [
         new CacheableResponsePlugin({ statuses: [200] }),
         new ExpirationPlugin({
           purgeOnQuotaError: true,
-          maxEntries: 30
+          maxEntries: 50
         })
       ]
     })

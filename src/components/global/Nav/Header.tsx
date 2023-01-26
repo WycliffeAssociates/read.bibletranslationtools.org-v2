@@ -116,7 +116,7 @@ export function UnwrappedHeader(props: HeaderProps) {
             <button
               onClick={(e) => manageLanguagePickerToggle()}
               data-js="languagePicker"
-              class={`languagePicker relative inline-flex place-content-center rtl:flex-row-reverse  ${
+              class={`languagePicker relative inline-flex place-content-center hover:text-secondary rtl:flex-row-reverse ${
                 languagePickerOpen() ? "open" : ""
               }`}
               data-i18nkey={"thisLanguage"}
