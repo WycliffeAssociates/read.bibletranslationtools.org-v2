@@ -3,21 +3,21 @@ import { unstable_dev } from "wrangler"
 import type { UnstableDevWorker } from "wrangler"
 let worker: UnstableDevWorker
 
-test.beforeAll(async () => {
-  // A string containing a path to your Worker script, relative to your Worker project’s root directory.
-  // https://developers.cloudflare.com/workers/wrangler/api/#parameters
-  worker = await unstable_dev("functions/[[path]].js", {
-    logLevel: "log",
-    compatibilityDate: "2023-01-25",
-    experimental: {
-      disableExperimentalWarning: true
-    }
-  })
-})
+// test.beforeAll(async () => {
+//   // A string containing a path to your Worker script, relative to your Worker project’s root directory.
+//   // https://developers.cloudflare.com/workers/wrangler/api/#parameters
+//   worker = await unstable_dev("functions/[[path]].js", {
+//     logLevel: "log",
+//     compatibilityDate: "2023-01-25",
+//     experimental: {
+//       disableExperimentalWarning: true
+//     }
+//   })
+// })
 
-test.afterAll(async () => {
-  await worker.stop()
-})
+// test.afterAll(async () => {
+//   await worker.stop()
+// })
 
 test("test page titles; ", async ({ page }) => {
   await page.goto(

@@ -1,4 +1,4 @@
-import type { PlaywrightTestConfig } from "@playwright/experimental-ct-react"
+import type { PlaywrightTestConfig } from "@playwright/experimental-ct-solid"
 import { devices } from "@playwright/experimental-ct-solid"
 
 /**
