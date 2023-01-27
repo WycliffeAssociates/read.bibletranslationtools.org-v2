@@ -35,9 +35,9 @@ export default defineConfig({
       manifest: manifest,
       injectManifest: {
         globIgnores: [
-          "**/node_modules/**/*"
-          // "$server_build/*",
-          // "$server_build/**/*"
+          "**/node_modules/**/*",
+          "$server_build/*",
+          "$server_build/**/*"
         ]
       },
       devOptions: {
