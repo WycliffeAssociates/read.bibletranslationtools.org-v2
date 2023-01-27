@@ -213,7 +213,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
           </div>
           <Show when={menuIsOpen()}>
             {/*//! TABLET AND UP */}
-            <div class="sm:shadow-dark-300 z-20 hidden max-h-[71vh]  w-4/5  overflow-y-auto   bg-white sm:absolute sm:top-full sm:block sm:rounded-xl sm:border sm:shadow-xl">
+            <div class="sm:shadow-dark-300 z-20 hidden max-h-[71vh]  w-4/5  overflow-y-hidden   bg-white sm:absolute sm:top-full sm:block sm:rounded-xl sm:border sm:shadow-xl">
               <div class="hidden sm:flex">
                 {/* Books */}
                 <div class="border-netural-200 w-2/5 border-r">
@@ -236,7 +236,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                             value={searchQuery()}
                           />
                         </label>
-                        <ul class="max-h-[50vh] min-h-[100px] overflow-y-auto">
+                        <ul class="max-h-[50vh] min-h-[100px] overflow-y-auto pb-32">
                           <For each={props.storeInterface.menuBookNames()}>
                             {(book) => (
                               <li class="w-full">
@@ -269,7 +269,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                     </h2>
                     <div class="mt-2 w-full border-t border-neutral-200 pt-2">
                       <div class="p-2">
-                        <ul class="grid     max-h-[55vh] grid-cols-6 justify-start  gap-2 overflow-y-auto  ">
+                        <ul class="grid max-h-[55vh] grid-cols-6 justify-start  gap-2 overflow-y-auto  pb-24">
                           <For each={props.storeInterface.possibleChapters()}>
                             {(book, idx) => (
                               <li

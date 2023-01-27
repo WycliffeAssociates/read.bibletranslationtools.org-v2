@@ -153,30 +153,31 @@ if (import.meta.env.DEV) {
     // new variableCacheOrNetwork()
   )
 
-  // Cache CSS, and (non pre-cached JS)
-  // registerRoute(
-  //   ({ request, url }) => {
-  //     const isStyleOrScript =
-  //       request.destination === "style" || request.destination === "script"
-  //     // const isSameOrigin = self.origin === url.origin
-  //     if (isStyleOrScript) {
-  //       console.log(`caching ${request.url}`)
-  //       return true
-  //     } else {
-  //       return false
-  //     }
-  //   },
-  //   new CacheFirst({
-  //     cacheName: "lr-assets",
-  //     plugins: [
-  //       new CacheableResponsePlugin({ statuses: [200, 304] }),
-  //       new ExpirationPlugin({
-  //         purgeOnQuotaError: true,
-  //         maxEntries: 50
-  //       })
-  //     ]
-  //   })
-  // )
+  //----- HTML DOCS ----
+  registerRoute(
+    ({ request, url }) => {
+      const isSameOrigin = self.origin === url.origin
+      const isDoc = request.destination === "document"
+      console.log(url.href)
+
+      if (isSameOrigin && isDoc && !url.href?.includes("sw.js")) {
+        return true
+      }
+      return false
+    },
+    new variableCacheOrNetwork({
+      cacheName: "lr-pages",
+      plugins: [
+        new CacheableResponsePlugin({
+          statuses: [200]
+        }),
+        new ExpirationPlugin({
+          purgeOnQuotaError: true,
+          maxEntries: 2000
+        })
+      ]
+    })
+  )
 }
 
 // @ PROD ROUTES
@@ -237,28 +238,28 @@ if (import.meta.env.PROD) {
   )
 
   // Cache CSS, and (non pre-cached JS)
-  registerRoute(
-    ({ request, url }) => {
-      const isStyleOrScript =
-        request.destination === "style" || request.destination === "script"
-      // const isSameOrigin = self.origin === url.origin
-      if (isStyleOrScript) {
-        return true
-      } else {
-        return false
-      }
-    },
-    new CacheFirst({
-      cacheName: "lr-assets",
-      plugins: [
-        new CacheableResponsePlugin({ statuses: [200] }),
-        new ExpirationPlugin({
-          purgeOnQuotaError: true,
-          maxEntries: 50
-        })
-      ]
-    })
-  )
+  // registerRoute(
+  //   ({ request, url }) => {
+  //     const isStyleOrScript =
+  //       request.destination === "style" || request.destination === "script"
+  //     // const isSameOrigin = self.origin === url.origin
+  //     if (isStyleOrScript) {
+  //       return true
+  //     } else {
+  //       return false
+  //     }
+  //   },
+  //   new CacheFirst({
+  //     cacheName: "lr-assets",
+  //     plugins: [
+  //       new CacheableResponsePlugin({ statuses: [200] }),
+  //       new ExpirationPlugin({
+  //         purgeOnQuotaError: true,
+  //         maxEntries: 50
+  //       })
+  //     ]
+  //   })
+  // )
   // setCatchHandler(async ({ request }) => {
   //   // The warmStrategyCache recipe is used to add the fallback assets ahead of
   //   // time to the runtime cache, and are served in the event of an error below.
