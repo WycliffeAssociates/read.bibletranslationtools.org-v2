@@ -152,6 +152,31 @@ if (import.meta.env.DEV) {
     })
     // new variableCacheOrNetwork()
   )
+
+  // Cache CSS, and (non pre-cached JS)
+  registerRoute(
+    ({ request, url }) => {
+      const isStyleOrScript =
+        request.destination === "style" || request.destination === "script"
+      // const isSameOrigin = self.origin === url.origin
+      if (isStyleOrScript) {
+        console.log(`caching ${request.url}`)
+        return true
+      } else {
+        return false
+      }
+    },
+    new CacheFirst({
+      cacheName: "lr-assets",
+      plugins: [
+        new CacheableResponsePlugin({ statuses: [200, 304] }),
+        new ExpirationPlugin({
+          purgeOnQuotaError: true,
+          maxEntries: 50
+        })
+      ]
+    })
+  )
 }
 
 // @ PROD ROUTES
