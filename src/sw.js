@@ -94,8 +94,8 @@ class variableCacheOrNetwork extends Strategy {
       const cacheStrategy = await get("cacheStrategy")
       if (cacheStrategy === "networkFirst" || !cacheStrategy) {
         try {
-          // try network
-          let response = await handler.fetch(request)
+          // try network, and if successful, put in cache
+          let response = await handler.fetchAndCachePut(request)
           response && response.ok && res(response)
           // if no network, check cache;
           if (!response) {
@@ -110,10 +110,15 @@ class variableCacheOrNetwork extends Strategy {
           let response = await handler.cacheMatch(request)
           // network fallback and put
           if (!response || !response.ok) {
-            res(handler.fetchAndCachePut(request))
+            try {
+              // try network and put in cache if successufl
+              res(handler.fetchAndCachePut(request))
+            } catch (error) {
+              console.log(error)
+            }
           } else {
+            // default to sending cache match
             let clone = response.clone()
-
             res(clone)
           }
         } catch (error) {
