@@ -6,6 +6,6 @@ registerSW({
     console.log("SW registered: ", swScriptUrl)
   },
   onOfflineReady() {
-    console.log("PWA application ready to work offline")
+    console.log("PWA application ready to work offline.")
   }
 })

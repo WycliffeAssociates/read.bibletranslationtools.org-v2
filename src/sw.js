@@ -96,7 +96,7 @@ class variableCacheOrNetwork extends Strategy {
         try {
           // try network
           let response = await handler.fetch(request)
-          response && res(response)
+          response && response.ok && res(response)
           // if no network, check cache;
           if (!response) {
             return handler.cacheMatch(request).then((response) => res(response))
@@ -109,7 +109,7 @@ class variableCacheOrNetwork extends Strategy {
           // cache first
           let response = await handler.cacheMatch(request)
           // network fallback and put
-          if (!response) {
+          if (!response || !response.ok) {
             res(handler.fetchAndCachePut(request))
           } else {
             let clone = response.clone()
@@ -123,7 +123,7 @@ class variableCacheOrNetwork extends Strategy {
         try {
           // cache only
           let response = await handler.cacheMatch(request)
-          response && res(response)
+          response && response.ok && res(response)
           if (import.meta.env.DEV) {
             res(handler.fetch(request))
           } else {
@@ -154,29 +154,29 @@ if (import.meta.env.DEV) {
   )
 
   // Cache CSS, and (non pre-cached JS)
-  registerRoute(
-    ({ request, url }) => {
-      const isStyleOrScript =
-        request.destination === "style" || request.destination === "script"
-      // const isSameOrigin = self.origin === url.origin
-      if (isStyleOrScript) {
-        console.log(`caching ${request.url}`)
-        return true
-      } else {
-        return false
-      }
-    },
-    new CacheFirst({
-      cacheName: "lr-assets",
-      plugins: [
-        new CacheableResponsePlugin({ statuses: [200, 304] }),
-        new ExpirationPlugin({
-          purgeOnQuotaError: true,
-          maxEntries: 50
-        })
-      ]
-    })
-  )
+  // registerRoute(
+  //   ({ request, url }) => {
+  //     const isStyleOrScript =
+  //       request.destination === "style" || request.destination === "script"
+  //     // const isSameOrigin = self.origin === url.origin
+  //     if (isStyleOrScript) {
+  //       console.log(`caching ${request.url}`)
+  //       return true
+  //     } else {
+  //       return false
+  //     }
+  //   },
+  //   new CacheFirst({
+  //     cacheName: "lr-assets",
+  //     plugins: [
+  //       new CacheableResponsePlugin({ statuses: [200, 304] }),
+  //       new ExpirationPlugin({
+  //         purgeOnQuotaError: true,
+  //         maxEntries: 50
+  //       })
+  //     ]
+  //   })
+  // )
 }
 
 // @ PROD ROUTES
@@ -210,7 +210,7 @@ if (import.meta.env.PROD) {
         }),
         new ExpirationPlugin({
           purgeOnQuotaError: true,
-          maxEntries: 1000
+          maxEntries: 2000
         })
       ]
     })
@@ -230,7 +230,7 @@ if (import.meta.env.PROD) {
         }),
         new ExpirationPlugin({
           purgeOnQuotaError: true,
-          maxEntries: 1000
+          maxEntries: 2000
         })
       ]
     })
@@ -275,8 +275,8 @@ if (import.meta.env.PROD) {
   // })
 }
 // SKIP WAITING prompt comes from the sw update process; Used for updating SW between builds
-self.addEventListener("message", (event) => {
-  console.log(event)
-  if (event.data && event.data.type === "SKIP_WAITING") self.skipWaiting()
-  // window.reload();
-})
+// self.addEventListener("message", (event) => {
+//   console.log(event)
+//   if (event.data && event.data.type === "SKIP_WAITING") self.skipWaiting()
+//   // window.reload();
+// })
