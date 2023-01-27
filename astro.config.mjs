@@ -36,6 +36,8 @@ export default defineConfig({
       injectManifest: {
         globIgnores: [
           "**/node_modules/**/*",
+          // Somehow or another, Vite PWA was trying to cache server build things, which resulted in a bad precaching response, which broke the build
+          // WK Friday January 27, 2023 05:00PM
           "$server_build/*",
           "$server_build/**/*"
         ]

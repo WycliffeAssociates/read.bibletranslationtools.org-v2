@@ -232,7 +232,7 @@ export default function ReaderPane(props: ReaderPaneProps) {
         <div
           id="wholeBook"
           innerHTML={props.storeInterface.wholeBookHtml()}
-          class=" theText  mx-auto  max-w-[85ch] bg-inherit text-lg leading-relaxed print:pb-4 sm:px-8 md:max-w-[75ch] md:text-2xl"
+          class=" theText  mx-auto  max-w-[85ch] !overflow-y-visible bg-inherit text-lg leading-relaxed print:pb-4 sm:px-8 md:max-w-[75ch] md:text-2xl"
         />
       </Show>
     </>
