@@ -84,6 +84,7 @@ class variableCacheOrNetworkdevtest extends Strategy {
     })
   }
 }
+
 class variableCacheOrNetwork extends Strategy {
   // https://developer.chrome.com/docs/workbox/modules/workbox-strategies/
   // handler: A StrategyHandler instance automatically created for the current strategy.
@@ -92,6 +93,7 @@ class variableCacheOrNetwork extends Strategy {
     // https://developer.chrome.com/docs/workbox/modules/workbox-strategies/
     return new Promise(async (res, rej) => {
       const cacheStrategy = await get("cacheStrategy")
+      let finalError
       if (cacheStrategy === "networkFirst" || !cacheStrategy) {
         try {
           // try network, and if successful, put in cache
@@ -102,12 +104,25 @@ class variableCacheOrNetwork extends Strategy {
             return handler.cacheMatch(request).then((response) => res(response))
           }
         } catch (error) {
-          rej(error)
+          console.log(error)
+          try {
+            // offline perhaps; Check the cache for an older version now.
+            return handler.cacheMatch(request).then((response) => res(response))
+          } catch (cacheFallBackError) {
+            // couldn't fetch, and not in cache: reject.
+            rej(cacheFallBackError)
+          }
         }
       } else if (cacheStrategy === "cacheFirst") {
         try {
           // cache first
           let response = await handler.cacheMatch(request)
+          // default to sending cache match if there
+          if (response && response.ok) {
+            let clone = response.clone()
+            res(clone)
+          }
+        } catch (error) {
           // network fallback and put
           if (!response || !response.ok) {
             try {
@@ -115,14 +130,10 @@ class variableCacheOrNetwork extends Strategy {
               res(handler.fetchAndCachePut(request))
             } catch (error) {
               console.log(error)
+              // neither fetch nor cache worked: rej
+              rej(error)
             }
-          } else {
-            // default to sending cache match
-            let clone = response.clone()
-            res(clone)
           }
-        } catch (error) {
-          rej(error)
         }
       } else if (cacheStrategy === "cacheOnly") {
         try {
@@ -135,6 +146,7 @@ class variableCacheOrNetwork extends Strategy {
             rej("No cache match")
           }
         } catch (error) {
+          // can't go to network to fetch;  Must reject since wasn't in cache.
           rej(error)
         }
       }
@@ -163,7 +175,7 @@ if (import.meta.env.DEV) {
     ({ request, url }) => {
       const isSameOrigin = self.origin === url.origin
       const isDoc = request.destination === "document"
-      console.log(url.href)
+      // console.log(url.href)
 
       if (isSameOrigin && isDoc && !url.href?.includes("sw.js")) {
         return true

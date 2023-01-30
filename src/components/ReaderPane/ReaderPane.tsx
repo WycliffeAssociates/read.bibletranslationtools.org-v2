@@ -39,7 +39,13 @@ export default function ReaderPane(props: ReaderPaneProps) {
 
   // todo: extract to shared ui Utils and run on the layout level:
   function setLastPageVisited() {
-    return set("lastPageVisited", location.href)
+    const setLastEvent = new CustomEvent("setLastPageVisited", {
+      detail: {
+        url: location.href
+      }
+    })
+    const menu = document.querySelector("#commonWrapper")
+    menu && menu.dispatchEvent(setLastEvent)
   }
 
   createEffect(
@@ -92,7 +98,22 @@ export default function ReaderPane(props: ReaderPaneProps) {
       let newRelativePathQuery =
         window.location.pathname + "?" + searchParams.toString()
       document.title = `${props.repositoryName}-${currentBook}-${currentChap}`
-      history.pushState(null, "", newRelativePathQuery)
+      history.pushState(
+        {
+          newUrl: newRelativePathQuery
+        },
+        "",
+        newRelativePathQuery
+      )
+      // Add html url to cache:
+      const menu = document.querySelector("#commonWrapper")
+      const updateSwCache = new CustomEvent("addCurrentPageToSw", {
+        detail: {
+          url: location.href,
+          cacheName: "lr-pages"
+        }
+      })
+      menu && menu.dispatchEvent(updateSwCache)
     }
     setLastPageVisited()
   }

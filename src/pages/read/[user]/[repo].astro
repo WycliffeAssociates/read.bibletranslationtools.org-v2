@@ -1,6 +1,11 @@
 ---
 import Layout from "@layouts/Layout.astro"
-import { ReaderWrapper, TranslationWords, TranslationManual } from "@components"
+import {
+  ReaderWrapper,
+  TranslationWords,
+  TranslationManual,
+  CommonWrapper
+} from "@components"
 import {
   getChapterHtml,
   getTwSchemaHtml,
@@ -134,11 +139,7 @@ const initialDict = {
   use100vh={true}
   textDir={repoIndex.textDirection}
 >
-  <div
-    data-testid="page-container"
-    data-resourcetype={`resource-${repoIndex.resourceType}`}
-    class={`font-sans h-full bg-neutral-50 resourceType-${repoIndex.resourceType}`}
-  >
+  <CommonWrapper resourceType={repoIndex.resourceType} client:load>
     <!-- #=============== BIBLE SCHEMA  ============= -->
     {
       repoProps.templateType === "BIBLE" && (
@@ -175,11 +176,14 @@ const initialDict = {
         </div>
       )
     }
-  </div>
+  </CommonWrapper>
 </Layout>
 
 <script>
-  window.addEventListener("popstate", (event) => {
-    console.log(event)
-  })
+  // window.addEventListener("popstate", (event) => {
+  //   console.log({ event })
+  // })
+  // function handleNav(details: any) {
+  //   console.log({ details })
+  // }
 </script>
