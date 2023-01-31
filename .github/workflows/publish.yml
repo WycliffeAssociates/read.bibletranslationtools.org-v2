@@ -23,8 +23,7 @@ jobs:
           cache: pnpm
       - name: Upgrade JS dependencies
         # ADD YOUR CUSTOM DEPENDENCY UPGRADE COMMANDS BELOW
-        run: |
-          - uses: actions/setup-node@v3
+        uses: actions/setup-node@v3
         with:
           node-version: "16"
           cache: pnpm
