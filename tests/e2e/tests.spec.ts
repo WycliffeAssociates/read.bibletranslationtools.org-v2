@@ -6,7 +6,7 @@ let worker: UnstableDevWorker
 test.beforeAll(async () => {
   // A string containing a path to your Worker script, relative to your Worker project’s root directory.
   // https://developers.cloudflare.com/workers/wrangler/api/#parameters
-  worker = await unstable_dev("dist/_worker.js", {
+  worker = await unstable_dev("function/[[path]].js", {
     logLevel: "log",
     compatibilityDate: "2023-01-25",
     experimental: {
