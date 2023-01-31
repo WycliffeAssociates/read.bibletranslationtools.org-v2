@@ -33,7 +33,7 @@ export const onRequestGet: PagesFunction = async (context) => {
 
   try {
     // http://localhost/u/WA-Catalog/en_ulb/index.json;
-    let baseUrl = env.HTML_API_URL_BASE
+    let baseUrl = env.PIPELINE_API_URL_BASE
     let finalUrl = `${baseUrl}/${user}/${repo}/${navSection}.html`
     console.log({ finalUrl })
     let response = await fetch(finalUrl)

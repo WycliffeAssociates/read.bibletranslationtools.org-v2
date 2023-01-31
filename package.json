@@ -3,23 +3,31 @@
   "type": "module",
   "version": "0.0.1",
   "private": true,
+  "pnpm": {
+    "updateConfig": {
+      "ignoreDependencies": [
+        ""
+      ]
+    }
+  },
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "wrangler pages dev ./dist",
-    "cf-dev": "wrangler pages dev -- pnpm run dev",
+    "preview": "wrangler pages dev ./dist ",
+    "cf-dev": "wrangler pages dev --proxy=3000 -- pnpm run dev",
     "astro": "astro",
-    "test": "pnpm dlx playwright test",
+    "test": "pnpm exec playwright install --with-deps && pnpm playwright test",
     "test-debug": "pnpm dlx playwright test --debug",
     "vitest": "vitest",
+    "vitest-ci": "vitest run",
     "test-ct": "playwright test -c playwright-ct.config.ts"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^5.0.0",
-    "@astrojs/solid-js": "^1.2.3",
-    "@astrojs/tailwind": "^2.1.3",
+    "@astrojs/solid-js": "^2.0.0",
+    "@astrojs/tailwind": "^2.0.0",
     "@solid-primitives/i18n": "^1.1.3",
-    "astro": "^1.9.2",
+    "astro": "^1.7.0",
     "idb-keyval": "^6.2.0",
     "solid-js": "^1.6.9",
     "tailwindcss": "^3.2.4",
@@ -27,17 +35,17 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20221111.1",
-    "@playwright/experimental-ct-solid": "^1.29.2",
-    "@playwright/test": "^1.29.2",
-    "@typescript-eslint/eslint-plugin": "^5.48.2",
-    "@typescript-eslint/parser": "^5.48.2",
+    "@playwright/experimental-ct-solid": "^1.30.0",
+    "@playwright/test": "^1.30.0",
+    "@typescript-eslint/eslint-plugin": "^5.49.0",
+    "@typescript-eslint/parser": "^5.49.0",
     "@vite-pwa/astro": "^0.0.1",
     "eslint": "^8.32.0",
     "eslint-plugin-astro": "^0.23.0",
     "eslint-plugin-jsx-a11y": "^6.7.1",
     "prettier": "2.8.3",
     "prettier-plugin-astro": "^0.7.2",
-    "prettier-plugin-tailwindcss": "^0.2.1",
+    "prettier-plugin-tailwindcss": "^0.2.2",
     "rollup-plugin-visualizer": "^5.9.0",
     "typescript": "^4.9.4",
     "vite": "^4.0.4",
@@ -50,6 +58,6 @@
     "workbox-routing": "^6.5.4",
     "workbox-strategies": "^6.5.4",
     "workbox-window": "^6.5.4",
-    "wrangler": "^2.8.0"
+    "wrangler": "^2.8.1"
   }
 }

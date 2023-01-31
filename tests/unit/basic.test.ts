@@ -251,8 +251,6 @@ test("API - Individual Bible Chapter ", async () => {
   expect(resMissRepo.status).toBe(400)
   expect(resMissBook.status).toBe(400)
   expect(resMissChapter.status).toBe(400)
-  const watDis = await resInvChapNum.text()
-  console.log({ watDis })
   // ----- VALID REQUESTS ---------
   const req = new Request(testRouteFxn({ user, repo, book, chapter }))
   const response = await fetch(req)

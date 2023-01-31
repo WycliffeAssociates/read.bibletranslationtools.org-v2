@@ -4,7 +4,6 @@
 // @ts-ignore
 export { default as Card } from "./Card.astro"
 // @ts-ignore
-export { default as ReloadPrompt } from "./serviceWorker/ReloadPrompt.astro"
 export { default as TestComponent } from "./Test"
 // @ts-ignore
 export { default as Nav } from "./global/Nav/Nav.astro"
@@ -21,4 +20,5 @@ export { default as ReaderPane } from "./ReaderPane/ReaderPane"
 export { default as ReaderWrapper } from "./ReaderWrapper/ReaderWrapper"
 export { default as TranslationWords } from "./TranslationWords/Tw"
 export { default as TranslationManual } from "./TranslationManual/TranslationManual"
+export { default as CommonWrapper } from "./global/CommonWrapper"
 // settings Component is lazy loaded

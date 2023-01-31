@@ -1,6 +1,11 @@
 ---
 import Layout from "@layouts/Layout.astro"
-import { ReaderWrapper, TranslationWords, TranslationManual } from "@components"
+import {
+  ReaderWrapper,
+  TranslationWords,
+  TranslationManual,
+  CommonWrapper
+} from "@components"
 import {
   getChapterHtml,
   getTwSchemaHtml,
@@ -15,8 +20,10 @@ import {
   seedAndMutateInitialDataRepoIndex,
   getTmQueryParamOrDefault
 } from "@lib/utils"
+import { setOriginUrl } from "@lib/routes"
 import type { tmProps, twProps, bibleSchemaProps } from "@src/customTypes/types"
 let { repo, user } = Astro.params
+setOriginUrl(Astro.url.origin)
 const res404 = new Response(null, {
   status: 404
 })
@@ -28,10 +35,11 @@ if (!repo || !user) {
 repo = String(repo)
 user = String(user)
 // is current wacs repo check
-const isValid = isValidRepo({ user, repo })
-if (!isValid) {
-  return res404
-}
+// todo: maybe put this back if needed? The url is is sort of buried.
+// const isValid = isValidRepo({ user, repo })
+// if (!isValid) {
+//   return res404
+// }
 
 // get of text and metadata
 const repoIndex = await getRepoIndex({ user, repo })
@@ -131,11 +139,7 @@ const initialDict = {
   use100vh={true}
   textDir={repoIndex.textDirection}
 >
-  <div
-    data-testid="page-container"
-    data-resourcetype={`resource-${repoIndex.resourceType}`}
-    class={`font-sans h-full bg-neutral-50 resourceType-${repoIndex.resourceType}`}
-  >
+  <CommonWrapper resourceType={repoIndex.resourceType} client:load>
     <!-- #=============== BIBLE SCHEMA  ============= -->
     {
       repoProps.templateType === "BIBLE" && (
@@ -172,11 +176,14 @@ const initialDict = {
         </div>
       )
     }
-  </div>
+  </CommonWrapper>
 </Layout>
 
 <script>
-  window.addEventListener("popstate", (event) => {
-    console.log(event)
-  })
+  // window.addEventListener("popstate", (event) => {
+  //   console.log({ event })
+  // })
+  // function handleNav(details: any) {
+  //   console.log({ details })
+  // }
 </script>

@@ -13,6 +13,10 @@ import AstroPWA from "@vite-pwa/astro"
 import { manifest } from "./manifest"
 import { visualizer } from "rollup-plugin-visualizer"
 
+// TODO: SET SITE:
+// site: 'https://www.my-site.dev'
+// https://docs.astro.build/en/reference/configuration-reference/#site
+
 // https://astro.build/config
 export default defineConfig({
   output: "server",
@@ -27,16 +31,19 @@ export default defineConfig({
       srcDir: "src",
       filename: "sw.js",
       strategies: "injectManifest",
-      // injectManifest: {
-      // swDest: "dist/client/sw.js",
-      // globDirectory: "dist/client",
-      // globPatterns: ["**/*.{css,js,html,svg,png,ico,txt}"],
-      // sourcemap: true,
-      // },
       registerType: "autoUpdate",
       manifest: manifest,
+      injectManifest: {
+        globIgnores: [
+          "**/node_modules/**/*",
+          // Somehow or another, Vite PWA was trying to cache server build things, which resulted in a bad precaching response, which broke the build
+          // WK Friday January 27, 2023 05:00PM
+          "$server_build/*",
+          "$server_build/**/*"
+        ]
+      },
       devOptions: {
-        enabled: false,
+        enabled: true,
         type: "module"
         /* other options */
       }
