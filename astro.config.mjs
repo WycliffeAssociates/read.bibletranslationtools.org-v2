@@ -21,7 +21,7 @@ import { visualizer } from "rollup-plugin-visualizer"
 export default defineConfig({
   output: "server",
   adapter: cloudflare({
-    mode: "directory"
+    mode: "advanced"
   }),
   integrations: [
     tailwind(),
