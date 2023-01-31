@@ -33,7 +33,12 @@ export const onRequestGet: PagesFunction = async (context) => {
   try {
     // http://localhost/u/WA-Catalog/en_ulb/index.json;
     console.log(`fetching ${finalUrl}`)
-    let response = await fetch(finalUrl)
+    let response = await fetch(finalUrl, {
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+
     returnValue = response.body
     return new Response(returnValue, {
       headers: getHeaders(url)
