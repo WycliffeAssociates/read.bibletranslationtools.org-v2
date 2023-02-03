@@ -6,7 +6,7 @@ let worker: UnstableDevWorker
 test.beforeAll(async () => {
   // A string containing a path to your Worker script, relative to your Worker project’s root directory.
   // https://developers.cloudflare.com/workers/wrangler/api/#parameters
-  worker = await unstable_dev("dist/_worker.js", {
+  worker = await unstable_dev("functions/[[path]].js", {
     logLevel: "log",
     compatibilityDate: "2023-01-25",
     experimental: {
@@ -80,7 +80,7 @@ test("history url updating on ajax nav", async ({ page }) => {
   await page.goto("/read/WycliffeAssociates/en_ulb/")
   await page.waitForLoadState("networkidle")
   await Promise.all([
-    page.waitForResponse(/api/), //prefetch on page load calls the api or button click will.  Await either on click
+    // page.waitForResponse(/api/), //prefetch on page load calls the api or button click will.  Await either on click
     page.getByRole("link", { name: "Navigate forwards one chapter" }).click()
   ])
   await page.waitForSelector("#ch-2") //ensure chapter 2 of ulb loaded after button click above
