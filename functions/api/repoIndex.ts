@@ -12,6 +12,7 @@ export const onRequestGet: PagesFunction = async (context) => {
   // } = context
 
   const request: Request = context.request
+  // console.log({ request })
   const env: any = context.env
 
   const url = new URL(request.url)
@@ -27,19 +28,27 @@ export const onRequestGet: PagesFunction = async (context) => {
 
   let returnValue
 
+  let baseUrl = env.PIPELINE_API_URL_BASE
+  let finalUrl = `${baseUrl}/${user}/${repo}/index.json`
   try {
     // http://localhost/u/WA-Catalog/en_ulb/index.json;
-    let baseUrl = env.HTML_API_URL_BASE
-    let finalUrl = `${baseUrl}/${user}/${repo}/index.json`
-    let response = await fetch(finalUrl)
+    console.log(`fetching ${finalUrl}`)
+    let response = await fetch(finalUrl, {
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+
     returnValue = response.body
     return new Response(returnValue, {
       headers: getHeaders(url)
     })
   } catch (error) {
-    console.error(error)
+    console.log(error)
+    console.log(`Fetch for ${finalUrl} failed.`)
     return new Response(null, {
-      status: 404
+      status: 404,
+      statusText: `Fetch for ${finalUrl} failed.`
     })
   }
 }

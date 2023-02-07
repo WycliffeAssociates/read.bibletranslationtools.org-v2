@@ -12,6 +12,7 @@ export const onRequestGet: PagesFunction = async (context) => {
   // } = context
 
   const request: Request = context.request
+  // console.log({ request })
   const env: any = context.env
   const url = new URL(request.url)
   let user = url.searchParams?.get("user") as string
@@ -28,7 +29,7 @@ export const onRequestGet: PagesFunction = async (context) => {
 
   try {
     // http://localhost/u/WA-Catalog/en_ulb/index.json;
-    let baseUrl = env.HTML_API_URL_BASE
+    let baseUrl = env.PIPELINE_API_URL_BASE
     let finalUrl = `${baseUrl}/${user}/${repo}/${bookKey}/${chapter}.html`
     let response = await fetch(finalUrl)
 

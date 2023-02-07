@@ -3,15 +3,23 @@
   "type": "module",
   "version": "0.0.1",
   "private": true,
+  "pnpm": {
+    "updateConfig": {
+      "ignoreDependencies": [
+        ""
+      ]
+    }
+  },
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "wrangler pages dev ./dist",
-    "cf-dev": "wrangler pages dev -- pnpm run dev",
+    "preview": "wrangler pages dev ./dist ",
+    "cf-dev": "wrangler pages dev --proxy=3000 -- pnpm run dev",
     "astro": "astro",
-    "test": "pnpm dlx playwright test",
+    "test": "pnpm exec playwright install --with-deps && pnpm playwright test",
     "test-debug": "pnpm dlx playwright test --debug",
     "vitest": "vitest",
+    "vitest-ci": "vitest run",
     "test-ct": "playwright test -c playwright-ct.config.ts"
   },
   "dependencies": {

@@ -39,7 +39,13 @@ export default function ReaderPane(props: ReaderPaneProps) {
 
   // todo: extract to shared ui Utils and run on the layout level:
   function setLastPageVisited() {
-    return set("lastPageVisited", location.href)
+    const setLastEvent = new CustomEvent("setLastPageVisited", {
+      detail: {
+        url: location.href
+      }
+    })
+    const menu = document.querySelector("#commonWrapper")
+    menu && menu.dispatchEvent(setLastEvent)
   }
 
   createEffect(
@@ -50,6 +56,10 @@ export default function ReaderPane(props: ReaderPaneProps) {
         hoverOnFootnotes()
         hoverOnCrossReferences()
         hoverOnCommentaryCrossReferences(props.user, props.repositoryName)
+        pushHistory(
+          props.storeInterface.getStoreVal("currentBook"),
+          props.storeInterface.getStoreVal("currentChapter")
+        )
       }
     )
   )
@@ -88,16 +98,25 @@ export default function ReaderPane(props: ReaderPaneProps) {
       let newRelativePathQuery =
         window.location.pathname + "?" + searchParams.toString()
       document.title = `${props.repositoryName}-${currentBook}-${currentChap}`
-      history.pushState(null, "", newRelativePathQuery)
+      history.pushState(
+        {
+          newUrl: newRelativePathQuery
+        },
+        "",
+        newRelativePathQuery
+      )
+      // Add html url to cache:
+      const menu = document.querySelector("#commonWrapper")
+      const updateSwCache = new CustomEvent("addCurrentPageToSw", {
+        detail: {
+          url: location.href,
+          cacheName: "lr-pages"
+        }
+      })
+      menu && menu.dispatchEvent(updateSwCache)
     }
     setLastPageVisited()
   }
-
-  /* // if (!location.)
-    pushHistory(historyBook, currentChap)
-
-    // adjust doc title for history
-    document.title = `${props.repositoryName}-${currentBook}-${currentChap}` */
 
   type fetchReaderParams = {
     event?: Event
@@ -142,7 +161,6 @@ export default function ReaderPane(props: ReaderPaneProps) {
     if (!existingChap) return
     if (existingText && navigate) {
       if (textRef) textRef.scrollTop = 0
-      pushHistory(currentBook, nextCh)
       return props.storeInterface.mutateStore("currentChapter", nextCh)
     } else if (existingText) {
       return
@@ -167,7 +185,6 @@ export default function ReaderPane(props: ReaderPaneProps) {
       if (navigate) {
         props.storeInterface.mutateStore("currentChapter", String(nextCh))
         if (textRef) textRef.scrollTop = 0
-        pushHistory(currentBook, String(nextCh))
       }
     })
 
@@ -196,14 +213,14 @@ export default function ReaderPane(props: ReaderPaneProps) {
                   fetchReaderHtml({ event, navigate: true, dir: "BACK" })
                 }}
                 icon={
-                  <SvgArrow className="color-inherit mx-auto fill-current ltr:rotate-0 rtl:rotate-180" />
+                  <SvgArrow className="color-inherit mx-auto fill-current stroke-current ltr:rotate-0 rtl:rotate-180" />
                 }
               />
             </Show>
             {/* top buttons */}
             <div
               ref={textRef}
-              class="theText mx-auto h-full max-w-[85ch]  overflow-y-scroll bg-inherit pr-1 pt-2 pb-24 text-lg leading-relaxed print:h-min  print:overflow-y-visible  print:pb-4 sm:px-8 md:max-w-[75ch] "
+              class="theText mx-auto h-full max-w-[85ch]  overflow-y-scroll bg-inherit pr-1 pt-2 pb-24 text-lg leading-relaxed print:h-min print:overflow-y-visible  print:pb-4  sm:px-2 md:max-w-[75ch] md:text-2xl "
               innerHTML={props.storeInterface.HTML()}
             />
 
@@ -236,7 +253,7 @@ export default function ReaderPane(props: ReaderPaneProps) {
         <div
           id="wholeBook"
           innerHTML={props.storeInterface.wholeBookHtml()}
-          class=" theText  mx-auto  max-w-[85ch] bg-inherit text-lg leading-relaxed print:pb-4 sm:px-8 md:max-w-[75ch]"
+          class=" theText  mx-auto  max-w-[85ch] !overflow-y-visible bg-inherit text-lg leading-relaxed print:pb-4 sm:px-8 md:max-w-[75ch] md:text-2xl"
         />
       </Show>
     </>

@@ -139,6 +139,7 @@ export default function TranslationWords(props: twProps) {
 
         // Get and Set html
         let firstElWithHashId = memoryDom.querySelector(`#${hash}`)
+
         let firstSib = firstElWithHashId && firstElWithHashId.nextElementSibling
         if (!firstSib) return
         function truthyFunction(htmlNode: Element) {

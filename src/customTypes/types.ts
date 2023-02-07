@@ -8,6 +8,13 @@ declare module "solid-js" {
         newDictCode: string
         addToOtherDict: boolean
       }>
+      setLastPageVisited: CustomEvent<{
+        url: string
+      }>
+      addCurrentPageToSw: CustomEvent<{
+        url: string
+        cacheName: string | undefined
+      }>
     }
     interface Directives {
       clickOutside(el: HTMLElement, accessor: any): void

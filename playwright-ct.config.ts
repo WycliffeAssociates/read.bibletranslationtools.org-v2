@@ -1,14 +1,5 @@
-import type { PlaywrightTestConfig } from "@playwright/experimental-ct-react"
+import type { PlaywrightTestConfig } from "@playwright/experimental-ct-solid"
 import { devices } from "@playwright/experimental-ct-solid"
-import { resolve, dirname } from "path"
-import { fileURLToPath } from "url"
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
-const srcDir = resolve(__dirname, "./src")
-const componentsDir = `${srcDir}/components`
-// todo: remove
-// console.log({ componentsDir })
-// console.log("directory-name 👉️", __dirname)
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -39,11 +30,7 @@ const config: PlaywrightTestConfig = {
     ctPort: 3100,
     ctViteConfig: {
       resolve: {
-        alias: {
-          "@": resolve(__dirname, "./src"),
-          "@components": componentsDir,
-          "@components/*": resolve(componentsDir, "/*")
-        }
+        alias: {}
       }
     }
   },
