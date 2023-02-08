@@ -158,7 +158,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
   return (
     <div
       use:clickOutside={() => setMenuIsOpen(false)}
-      class="mx-auto max-w-[1400px]"
+      class="mx-auto w-full"
       on:changelanguage={(
         e: CustomEvent<{
           language: string
@@ -340,7 +340,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
         <Show when={menuIsOpen()}>
           <div
             id="mobileMenu"
-            class="r-0  bottom-0 left-0 top-0 right-0   z-10 w-screen overflow-y-scroll bg-white sm:hidden "
+            class="r-0  bottom-0 left-0 top-0 right-0   z-10 w-full overflow-y-scroll bg-white sm:hidden "
           >
             <ul class="flex justify-between ">
               <li class="w-full text-center">

@@ -197,7 +197,7 @@ export default function ReaderPane(props: ReaderPaneProps) {
       <Show when={!props.printWholeBook()}>
         <PreviewPane />
         <div class="mx-auto  w-full max-w-[1400px] px-4">
-          <div class="relative flex  h-full content-center items-center justify-center gap-2">
+          <div class="relative flex  h-full content-center  justify-center gap-2">
             <Show
               when={props.storeInterface.navLinks()?.prev}
               fallback={<NavButtonLinks fallback={true} />}
@@ -220,7 +220,7 @@ export default function ReaderPane(props: ReaderPaneProps) {
             {/* top buttons */}
             <div
               ref={textRef}
-              class="theText mx-auto mb-24 h-full  max-w-[85ch] overflow-y-scroll bg-inherit pr-1 pt-2 text-lg leading-relaxed print:h-min print:overflow-y-visible  print:pb-4  sm:px-2 md:mr-auto md:ml-0 md:w-4/5 md:max-w-[75ch] md:text-2xl xl:mx-auto"
+              class="theText mx-auto mb-24 h-full  max-w-[85ch] overflow-y-auto bg-inherit pr-1 pt-2 text-lg leading-relaxed print:h-min print:overflow-y-visible  print:pb-4  sm:px-2 md:mr-auto md:ml-0 md:w-4/5 md:max-w-[75ch] md:text-2xl xl:mx-auto"
               innerHTML={props.storeInterface.HTML()}
             />
 
