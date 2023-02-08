@@ -122,7 +122,17 @@ body.noscroll {
 #pageWrapper {
   height: var(--screenHeight);
   display: grid;
-  grid-template-rows: (100px, calc(var(--screenHeight) - 100px));
+  /* grid-template-rows: (100px, calc(var(--screenHeight) - 100px)); */
+}
+#commonWrapper,
+#readerWrapper {
+  display: flex;
+  flex-flow: column;
+  flex: 1 1 auto;
+  overflow-y: auto;
+}
+#readerWrapper {
+  justify-content: flex-start;
 }
 
 /*# =============== !addl utils   ============= */

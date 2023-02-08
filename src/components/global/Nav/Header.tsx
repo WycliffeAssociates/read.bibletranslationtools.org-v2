@@ -65,7 +65,7 @@ export function UnwrappedHeader(props: HeaderProps) {
   }
 
   return (
-    <nav class="w-full bg-darkAccent pt-9 pb-5 font-sans print:hidden">
+    <nav class="w-full bg-darkAccent py-5 font-sans print:hidden">
       <div class="relative mx-auto flex max-w-[1400px] items-center justify-between px-4 text-white">
         <picture>
           <source srcset={props.logoWebP} type="image/webp" />
