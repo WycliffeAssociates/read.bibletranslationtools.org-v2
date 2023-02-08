@@ -45,7 +45,7 @@ export default function TranslationManual(props: tmProps) {
             </Show>
             <nav
               aria-label="Translation Manual Navigation"
-              class={`fixed inset-0 z-10 h-screen w-full overflow-y-scroll bg-neutral-50 px-4  md:sticky md:top-0 md:block md:h-full md:bg-none md:pt-0 ${
+              class={`fixed inset-0 z-10 h-[var(--screenHeight)] w-full overflow-y-scroll bg-neutral-50 px-4  md:sticky md:top-0 md:block md:h-full md:bg-none md:pt-0 ${
                 navIsOpen() ? "block pt-24" : "hidden"
               }`}
             >

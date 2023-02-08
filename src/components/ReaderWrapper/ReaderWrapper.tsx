@@ -242,7 +242,7 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
         locale={props.preferredLocale}
         initialDict={props.initialDict}
       >
-        <div class=" mx-auto grid max-h-full grid-rows-[90px,_calc(100vh-190px)] overflow-hidden print:block print:overflow-visible md:grid-rows-[70px,_calc(100vh-170px)] md:justify-center">
+        <div class=" mx-auto grid max-h-full grid-rows-[90px,_calc(var(--screenHeight)-190px)] overflow-hidden print:block print:overflow-visible md:grid-rows-[70px,_calc(var(--screenHeight)-170px)] md:justify-center">
           <div class=" w-screen border-b border-b-neutral-200">
             <ReaderMenu
               storeInterface={storeInterface}
