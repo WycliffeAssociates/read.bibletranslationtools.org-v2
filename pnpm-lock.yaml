@@ -1,7 +1,7 @@
 lockfileVersion: 5.4
 
 specifiers:
-  '@astrojs/cloudflare': ^6.1.2
+  '@astrojs/cloudflare': 6.1.1
   '@astrojs/solid-js': ^2.0.2
   '@astrojs/tailwind': ^3.0.1
   '@cloudflare/workers-types': ^4.20230115.0
@@ -37,7 +37,7 @@ specifiers:
   wrangler: ^2.9.1
 
 dependencies:
-  '@astrojs/cloudflare': 6.1.2_astro@2.0.9
+  '@astrojs/cloudflare': 6.1.1_astro@2.0.9
   '@astrojs/solid-js': 2.0.2_kp5ivkcya5u6ceupcga4aht6xm
   '@astrojs/tailwind': 3.0.1_yroyefrquwvghcn3xhop6h6pcy
   '@solid-primitives/i18n': 1.1.4_solid-js@1.6.10
@@ -95,10 +95,10 @@ packages:
       leven: 3.1.0
     dev: true
 
-  /@astrojs/cloudflare/6.1.2_astro@2.0.9:
-    resolution: {integrity: sha512-CrLqSy4UkqdL50U/S3tL5lKb5IV6fZ4LV1hXAEh+VBgSctKkQgtxtFhmMZ48/MJDpJjjALRhgCzApqokIryAqg==}
+  /@astrojs/cloudflare/6.1.1_astro@2.0.9:
+    resolution: {integrity: sha512-g1nsDnxT0w0V3xDzhWf04or76fo93/Df/B6kLuMO8YXMIL3SZia4auSprSw3NNmLqZLGqnD9cX5QrpZ0hygSdw==}
     peerDependencies:
-      astro: ^2.0.7
+      astro: ^2.0.4
     dependencies:
       astro: 2.0.9
       esbuild: 0.15.18

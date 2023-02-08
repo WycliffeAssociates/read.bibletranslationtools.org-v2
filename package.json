@@ -23,7 +23,7 @@
     "test-ct": "playwright test -c playwright-ct.config.ts"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^6.1.2",
+    "@astrojs/cloudflare": "6.1.1",
     "@astrojs/solid-js": "^2.0.2",
     "@astrojs/tailwind": "^3.0.1",
     "@solid-primitives/i18n": "^1.1.4",
