@@ -103,6 +103,7 @@ async function tryLocalCache(handler, request) {
     return
   }
 }
+// If this goes to slow, it seems it doesn't do well on CF... maybe I should just make them race?
 class variableCacheOrNetwork extends Strategy {
   // https://developer.chrome.com/docs/workbox/modules/workbox-strategies/
   // handler: A StrategyHandler instance automatically created for the current strategy.
