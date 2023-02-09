@@ -66,7 +66,8 @@ export default function Settings(props: settingsProps) {
       })
       let promises: Promise<void | string>[] = htmlPromises
       if (includeSavingApiCalls) {
-        const apiPromises = await makeApiCallsAndSaveToWorkingMemory()
+        // pass true and make sure all calls get made to network so that the SW saves them, if it didn't already.
+        const apiPromises = await makeApiCallsAndSaveToWorkingMemory(true)
         promises = [...apiPromises, ...htmlPromises]
         // debugger
       }
@@ -88,12 +89,14 @@ export default function Settings(props: settingsProps) {
       // })
     }
   }
-  async function makeApiCallsAndSaveToWorkingMemory() {
+  async function makeApiCallsAndSaveToWorkingMemory(fetchingForSw = false) {
     let currentBookObj = props.currentBookObj()
     let promises: Array<Promise<string>> = []
     currentBookObj?.chapters.forEach((bibleChapObj) => {
       const promisedFetch = new Promise<string>(async (res, rej) => {
-        if (bibleChapObj.text) return res(bibleChapObj.text) //already fetched
+        if (!fetchingForSw) {
+          if (bibleChapObj.text) return res(bibleChapObj.text) //already fetched
+        }
         let text = await props.fetchHtml({
           book: String(currentBookObj?.slug),
           chapter: bibleChapObj.label,
