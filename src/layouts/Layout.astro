@@ -18,7 +18,7 @@ let initialDictModule = await import(`../translations/${preferredLocale}.json`)
 const initialDict = {
   [preferredLocale]: initialDictModule.default
 }
-const stringPwa = JSON.stringify(pwaInfo)
+console.log(pwaInfo)
 ---
 
 <!DOCTYPE html>
@@ -45,15 +45,17 @@ const stringPwa = JSON.stringify(pwaInfo)
     <title>{title}</title>
     <meta name="description" content="A site to read rendered USFM" />
     <script src="/src/pwa.ts"></script>
-    {console.log({ pwaInfo })}
+    {
+      import.meta.env.PROD && (
+        <Fragment
+          set:html={'<link rel="manifest" href="/manifest.webmanifest">'}
+        />
+      )
+    }
     {pwaInfo && <Fragment set:html={pwaInfo.webManifest.linkTag} />}
   </head>
   <body>
-    <div
-      class={use100vh ? "print:block print:pb-20" : ""}
-      id="pageWrapper"
-      data-pwa={stringPwa}
-    >
+    <div class={use100vh ? "print:block print:pb-20" : ""} id="pageWrapper">
       <Nav preferredLocale={preferredLocale} initialDict={initialDict} />
       <slot />
       <!-- <ReloadPrompt /> -->
