@@ -117,7 +117,7 @@ class variableCacheOrNetwork extends Strategy {
         if (response && response.ok) {
           return res(response)
         } else {
-          let resp = tryLocalCache(handler, request)
+          let resp = await tryLocalCache(handler, request)
           if (resp) {
             res(resp)
           } else {
