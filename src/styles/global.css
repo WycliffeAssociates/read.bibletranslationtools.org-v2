@@ -123,13 +123,16 @@ body.noscroll {
   height: var(--screenHeight);
   display: grid;
   /* grid-template-rows: (100px, calc(var(--screenHeight) - 100px)); */
+  @apply print:h-auto print:overflow-visible;
 }
+
 #commonWrapper,
 #readerWrapper {
   display: flex;
   flex-flow: column;
   flex: 1 1 auto;
   overflow-y: auto;
+  @apply print:h-auto print:overflow-visible;
 }
 #readerWrapper {
   justify-content: flex-start;

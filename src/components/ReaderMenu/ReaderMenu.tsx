@@ -54,7 +54,6 @@ const ReaderMenu: Component<MenuProps> = (props) => {
   }
 
   const jumpToNewChapIdx = debounce(async (evt: InputEvent, value: string) => {
-    debugger
     const storeInterface = props.storeInterface
     const target = evt.target as HTMLInputElement
     const menuBook = storeInterface.getStoreVal("menuBook") as string
@@ -182,17 +181,6 @@ const ReaderMenu: Component<MenuProps> = (props) => {
           use:escapeOut={() => setMenuIsOpen(false)}
           class=" mx-auto flex w-full flex-wrap items-center px-4 py-2 "
         >
-          {/* "publication" */}
-          {/* <div
-          class="w-full text-center text-sm font-bold uppercase print:block sm:w-1/6"
-          data-testid="menuLangBookDisplay"
-        >
-          {props.storeInterface.getStoreVal("languageName")}:&nbsp;
-          <br class="hidden lg:block" />
-          {props.storeInterface.currentBookObj()?.label}
-        </div> */}
-
-          {/* menu button / info */}
           <div class="relative flex w-full items-center justify-between gap-3  print:hidden sm:w-5/6 ltr:sm:ml-auto rtl:sm:mr-auto">
             <div class="my-2 flex w-4/5 justify-between overflow-hidden  rounded-lg bg-neutral-200 outline outline-1 outline-gray-300 hover:outline-accent">
               <button
@@ -429,8 +417,6 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                               "text-blue-400": isActiveBookAndChap(book.label)
                             }}
                             onClick={(e) => {
-                              debugger
-                              console.log({ book })
                               jumpToNewChapIdx(e, book.label)
                             }}
                           >

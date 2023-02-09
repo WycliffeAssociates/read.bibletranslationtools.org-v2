@@ -15,6 +15,7 @@ interface settingsProps {
 export default function Settings(props: settingsProps) {
   const [t] = useI18n()
   const [preparingPrint, setPreparingPrint] = createSignal(false)
+  const [savingOffline, setSavingOffline] = createSignal(false)
 
   // Cache Strategy:
   // Prefer Network (prefer always checking for new content first)
@@ -46,9 +47,48 @@ export default function Settings(props: settingsProps) {
     setCacheStrategy(strategy)
   }
 
-  async function printWholeBook() {
-    setPreparingPrint(true)
-    // get current book
+  async function saveEveryHtmlPageToCache(includeSavingApiCalls = false) {
+    // debugger
+    setSavingOffline(true)
+    let urlBase = window.location.origin
+    const chapters = props.currentBookObj()?.chapters
+    const bookSlug = props.currentBookObj()?.slug
+    if (!chapters || !chapters.length) return
+    // todo: this query parameter scheme will only work for bible type schema
+    let htmlPagesToSaveInCache = chapters.map((chap) => {
+      return `${urlBase}/read/${props.user}/${props.repo}?book=${bookSlug}&chap=${chap.label}`
+    })
+    // listens for a custom even to dispatch saving of these URLs from anywhere;
+    const commonWrapper = document.querySelector("#commonWrapper")
+    if (commonWrapper) {
+      const htmlPromises = htmlPagesToSaveInCache.map((url) => {
+        return caches.open("lr-pages").then((cache) => cache.add(url))
+      })
+      let promises: Promise<void | string>[] = htmlPromises
+      if (includeSavingApiCalls) {
+        const apiPromises = await makeApiCallsAndSaveToWorkingMemory()
+        promises = [...apiPromises, ...htmlPromises]
+        // debugger
+      }
+      Promise.all(promises).then((values) => {
+        console.log("all done")
+        console.log(values)
+        // debugger
+        setSavingOffline(false)
+      })
+
+      // htmlPagesToSaveInCache.forEach((url) => {
+      //   const event = new CustomEvent("addCurrentPageToSw", {
+      //     detail: {
+      //       url: url,
+      //       cacheName: "lr-pages"
+      //     }
+      //   })
+      //   commonWrapper.dispatchEvent(event)
+      // })
+    }
+  }
+  async function makeApiCallsAndSaveToWorkingMemory() {
     let currentBookObj = props.currentBookObj()
     let promises: Array<Promise<string>> = []
     currentBookObj?.chapters.forEach((bibleChapObj) => {
@@ -71,11 +111,20 @@ export default function Settings(props: settingsProps) {
       })
       promises.push(promisedFetch)
     })
+    return promises
+  }
+
+  async function printWholeBook() {
+    setPreparingPrint(true)
+    // get current book
+    const promises = await makeApiCallsAndSaveToWorkingMemory()
     Promise.all(promises).then((values) => {
+      saveEveryHtmlPageToCache(false)
       props.setPrintWholeBook(true)
       setPreparingPrint(false)
+      // never  a need to refactor await this. WE are just queining up a background saving. The api responses should automatically be save and put in bg.
       window.print()
-      // print pauses execution of js in window while print dialog is open: If closed/canceled, then this will resume
+      // window.print pauses execution of js in window while print dialog is open: If closed/canceled, then this will resume
       props.setPrintWholeBook(false)
     })
     // fetch request for every chapter in current book
@@ -114,6 +163,39 @@ export default function Settings(props: settingsProps) {
         </details>
       </div>
       <ul>
+        <li class="my-2">
+          <button
+            class="sentenceCase hover:text-accent focus:text-accent"
+            onClick={() => saveEveryHtmlPageToCache(true)}
+            disabled={savingOffline()}
+          >
+            <Show when={savingOffline()}>
+              <svg
+                class="mr-3 inline-block h-5 w-5 animate-spin text-accent"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                ></circle>
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+            </Show>
+            {!savingOffline()
+              ? `${t("downloadWholeBook")}`
+              : `${t("saving")}...`}
+          </button>
+        </li>
         <li class="my-2">
           <button
             class="sentenceCase hover:text-accent focus:text-accent"

@@ -12,7 +12,7 @@ export default function CommonWrapper(props: CommonWrapperProps) {
     return set("lastPageVisited", url)
   }
   function addNewPageToSWCache(cacheName: string = "lr-pages", url: string) {
-    // console.log("setting cache (if in prod)")
+    console.log(`setting cache for ${url}`)
     if (!url) return
     if (import.meta.env.PROD) {
       setTimeout(() => {

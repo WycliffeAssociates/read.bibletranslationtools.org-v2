@@ -106,14 +106,14 @@ export default function ReaderPane(props: ReaderPaneProps) {
         newRelativePathQuery
       )
       // Add html url to cache:
-      const menu = document.querySelector("#commonWrapper")
+      const commonWrapper = document.querySelector("#commonWrapper")
       const updateSwCache = new CustomEvent("addCurrentPageToSw", {
         detail: {
           url: location.href,
           cacheName: "lr-pages"
         }
       })
-      menu && menu.dispatchEvent(updateSwCache)
+      commonWrapper && commonWrapper.dispatchEvent(updateSwCache)
     }
     setLastPageVisited()
   }
