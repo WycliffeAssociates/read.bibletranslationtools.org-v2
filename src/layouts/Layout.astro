@@ -18,6 +18,7 @@ let initialDictModule = await import(`../translations/${preferredLocale}.json`)
 const initialDict = {
   [preferredLocale]: initialDictModule.default
 }
+const stringPwa = JSON.stringify(pwaInfo)
 ---
 
 <!DOCTYPE html>
@@ -51,7 +52,7 @@ const initialDict = {
     <div
       class={use100vh ? "print:block print:pb-20" : ""}
       id="pageWrapper"
-      data-pwaInfo={JSON.stringify(pwaInfo)}
+      data-pwa={stringPwa}
     >
       <Nav preferredLocale={preferredLocale} initialDict={initialDict} />
       <slot />
