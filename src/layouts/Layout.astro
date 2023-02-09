@@ -48,13 +48,14 @@ const initialDict = {
     {pwaInfo && <Fragment set:html={pwaInfo.webManifest.linkTag} />}
   </head>
   <body>
-    <div class={use100vh ? "print:block print:pb-20" : ""} id="pageWrapper">
+    <div
+      class={use100vh ? "print:block print:pb-20" : ""}
+      id="pageWrapper"
+      data-pwaInfo={JSON.stringify(pwaInfo)}
+    >
       <Nav preferredLocale={preferredLocale} initialDict={initialDict} />
       <slot />
       <!-- <ReloadPrompt /> -->
     </div>
   </body>
 </html>
-<script>
-  console.log({ pwaInfo })
-</script>
