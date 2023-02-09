@@ -103,6 +103,32 @@ async function tryLocalCache(handler, request) {
     return
   }
 }
+
+class CacheNetworkRace extends Strategy {
+  _handle(request, handler) {
+    const fetchAndCachePutDone = handler.fetchAndCachePut(request)
+    const cacheMatchDone = handler.cacheMatch(request)
+
+    return new Promise((resolve, reject) => {
+      fetchAndCachePutDone.then(resolve)
+      cacheMatchDone.then((response) => response && resolve(response))
+
+      // Reject if both network and cache error or find no response.
+      Promise.allSettled([fetchAndCachePutDone, cacheMatchDone]).then(
+        (results) => {
+          const [fetchAndCachePutResult, cacheMatchResult] = results
+          if (
+            fetchAndCachePutResult.status === "rejected" &&
+            !cacheMatchResult.value
+          ) {
+            reject(fetchAndCachePutResult.reason)
+          }
+        }
+      )
+    })
+  }
+}
+
 // If this goes to slow, it seems it doesn't do well on CF... maybe I should just make them race?
 class variableCacheOrNetwork extends Strategy {
   // https://developer.chrome.com/docs/workbox/modules/workbox-strategies/
@@ -124,7 +150,7 @@ class variableCacheOrNetwork extends Strategy {
             rej("cannot fetch from network and not in cache.")
           }
         }
-      } else if (cacheStrategy === "cacheFirst" || !cacheStrategy) {
+      } else if (cacheStrategy === "cacheFirst") {
         const response = await tryLocalCache(handler, request)
         if (response && response.ok) {
           return res(response)
@@ -221,7 +247,7 @@ if (import.meta.env.PROD) {
       }
       return false
     },
-    new variableCacheOrNetwork({
+    new CacheNetworkRace({
       cacheName: "lr-pages",
       plugins: [
         new CacheableResponsePlugin({
@@ -241,7 +267,7 @@ if (import.meta.env.PROD) {
         return true
       }
     },
-    new variableCacheOrNetwork({
+    new CacheNetworkRace({
       cacheName: "live-reader-api",
       plugins: [
         new CacheableResponsePlugin({
