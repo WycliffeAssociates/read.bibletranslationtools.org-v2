@@ -184,7 +184,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
           <div class="relative flex w-full items-center justify-between gap-3  print:hidden sm:w-5/6 ltr:sm:ml-auto rtl:sm:mr-auto">
             <div class="my-2 flex w-4/5 justify-between overflow-hidden  rounded-lg bg-neutral-200 outline outline-1 outline-gray-300 hover:outline-accent">
               <button
-                class="flex w-full flex-grow items-center justify-between rounded-md pl-4"
+                class="flex w-full flex-grow items-center justify-between rounded-md ltr:pl-4 rtl:pr-4"
                 onClick={(e) => togglePanel()}
               >
                 <span class="flex items-center">
