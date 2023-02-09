@@ -21,19 +21,19 @@ test.afterAll(async () => {
 
 test("test page titles; ", async ({ page }) => {
   await page.goto(
-    "/read/WA-Catalog/ru_ulb/?book=%D0%91%D1%8B%D1%82%D0%B8%D0%B5&chapter=1"
+    "/WA-Catalog/ru_ulb/?book=%D0%91%D1%8B%D1%82%D0%B8%D0%B5&chapter=1"
   )
 
   // // Expect a title "to contain" a substring.
   await expect(page).toHaveTitle(/ru_ulb/)
 
-  await page.goto("/read/WycliffeAssociates/en_ulb/?book=Genesis&chapter=1")
+  await page.goto("/WycliffeAssociates/en_ulb/?book=Genesis&chapter=1")
   await expect(page).toHaveTitle(/en_ulb/)
 })
 
 // skip: changed to not use an input here
 test("Menu chapter updates on nav", async ({ page }) => {
-  await page.goto("/read/WycliffeAssociates/en_ulb/?book=Genesis&chapter=1")
+  await page.goto("/WycliffeAssociates/en_ulb/?book=Genesis&chapter=1")
   await page.waitForLoadState("networkidle") //JS has evaluated maybe? I think that's why I have this here
 
   await Promise.all([
@@ -53,7 +53,7 @@ test("Menu chapter updates on nav", async ({ page }) => {
 })
 
 test("Count Chapters On Book Changes", async ({ page }) => {
-  await page.goto("/read/WycliffeAssociates/en_ulb/?book=Genesis&chapter=1")
+  await page.goto("/WycliffeAssociates/en_ulb/?book=Genesis&chapter=1")
   await page.waitForLoadState("networkidle") //JS has evaluated maybe? I think that's why I have this here
   await page.getByRole("button", { name: "Genesis" }).click()
   await page.getByRole("button", { name: "Exodus" }).click()
@@ -71,13 +71,13 @@ test("fallback to default locale", async ({ page, context }) => {
       }
     })
   })
-  await page.goto("/read/WycliffeAssociates/en_ulb/?book=Genesis&chapter=1")
+  await page.goto("/WycliffeAssociates/en_ulb/?book=Genesis&chapter=1")
   const currentLanguage = page.locator("[data-js=languagePicker]")
   await expect(currentLanguage).toContainText("Español")
 })
 
 test("history url updating on ajax nav", async ({ page }) => {
-  await page.goto("/read/WycliffeAssociates/en_ulb/")
+  await page.goto("/WycliffeAssociates/en_ulb/")
   await page.waitForLoadState("networkidle")
   await Promise.all([
     // page.waitForResponse(/api/), //prefetch on page load calls the api or button click will.  Await either on click
@@ -85,20 +85,18 @@ test("history url updating on ajax nav", async ({ page }) => {
   ])
   await page.waitForSelector("#ch-2") //ensure chapter 2 of ulb loaded after button click above
 
-  expect(page.url()).toContain(
-    "/read/WycliffeAssociates/en_ulb/?book=Gen&chapter=2"
-  )
+  expect(page.url()).toContain("/WycliffeAssociates/en_ulb/?book=Gen&chapter=2")
 })
 
 test("navigate previous button hidden on first chapter", async ({ page }) => {
-  await page.goto("/read/WycliffeAssociates/en_ulb/?book=Genesis&chapter=1")
+  await page.goto("/WycliffeAssociates/en_ulb/?book=Genesis&chapter=1")
 
   const placeholderBtn = page.getByTestId("NavBackBtn") //ensure chapter 2 of ulb loaded after button click above
 
   await expect(placeholderBtn).toHaveCount(0)
 })
 test("navigate next button hidden on last chapter", async ({ page }) => {
-  await page.goto("/read/WycliffeAssociates/en_ulb/?book=Genesis&chapter=50")
+  await page.goto("/WycliffeAssociates/en_ulb/?book=Genesis&chapter=50")
 
   const placeholderBtn = page.getByTestId("NavForwardBtn") //ensure chapter 2 of ulb loaded after button click above
 
@@ -107,7 +105,7 @@ test("navigate next button hidden on last chapter", async ({ page }) => {
 
 // todo: rewrite tests to look at nav buttons to test query params
 test.skip("book and chapter query params work", async ({ page }) => {
-  await page.goto("/read/WycliffeAssociates/en_ulb/?book=John&chapter=3")
+  await page.goto("/WycliffeAssociates/en_ulb/?book=John&chapter=3")
   // const display = page.getByTestId("menuLangBookDisplay")
   const menuNumInputChapDisplay = page.getByTestId("chapterNavigation")
   // await expect(display).toContainText(/English:\s?John/)
@@ -116,7 +114,7 @@ test.skip("book and chapter query params work", async ({ page }) => {
 
 test("Test language change in header", async ({ page }) => {
   await page.goto(
-    "http://localhost:3000/read/WycliffeAssociates/en_ulb/?book=John&chapter=3"
+    "http://localhost:3000/WycliffeAssociates/en_ulb/?book=John&chapter=3"
   )
   const currentLanguageBtn = page.locator("[data-js=languagePicker]")
   await currentLanguageBtn.click()
@@ -127,7 +125,7 @@ test("Test language change in header", async ({ page }) => {
 
 test.skip("Test hover of preview panes in desktop", async ({ page }) => {
   await page.goto(
-    "http://localhost:3000/read/WycliffeAssociates/en_bc?book=mat&chapter=01"
+    "http://localhost:3000/WycliffeAssociates/en_bc?book=mat&chapter=01"
   )
   await page.mouse.move(200, 200, { steps: 5 })
   const hoverableLink = page.locator("a[href*='popup://messiah']").first()

@@ -127,7 +127,7 @@ else if (repoProps.templateType === "BIBLE") {
 // Set props common to all pages:
 const preferredLocale = getPreferredLangFromHeader(Astro.request)
 const initialDictModule = await import(
-  `../../../translations/${preferredLocale}.json`
+  `../../translations/${preferredLocale}.json`
 )
 const initialDict = {
   [preferredLocale]: initialDictModule.default
@@ -180,6 +180,15 @@ const initialDict = {
 </Layout>
 
 <script>
+  function secDocHeight() {
+    let root = document.documentElement
+    // hacky stuff to adjust based on JS load for a true 100vh, but normalize the behavior between
+    const amount = window.innerHeight + "px"
+    root.style.setProperty("--screenHeight", amount)
+  }
+  window.addEventListener("load", secDocHeight)
+  window.addEventListener("resize", secDocHeight)
+  window.addEventListener("orientationchange", secDocHeight)
   // window.addEventListener("popstate", (event) => {
   //   console.log({ event })
   // })
