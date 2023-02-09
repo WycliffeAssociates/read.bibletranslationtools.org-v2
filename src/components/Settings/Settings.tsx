@@ -135,7 +135,8 @@ export default function Settings(props: settingsProps) {
 
   return (
     <>
-      <div>
+      {/* This controls the loading behavior of Service Worker, for custom Strategy during runtime.  It needs some work as of Thursday February 09, 2023 03:50PM, so using the Race strategy that workbox gives and example of */}
+      {/* <div>
         <details>
           <summary class="sentenceCase">{t("loadingBehavior")}</summary>
           <ul class="text-sm">
@@ -164,7 +165,7 @@ export default function Settings(props: settingsProps) {
             </For>
           </ul>
         </details>
-      </div>
+      </div> */}
       <ul>
         <li class="my-2">
           <button

@@ -103,7 +103,8 @@ async function tryLocalCache(handler, request) {
     return
   }
 }
-
+// provided here
+// https://developer.chrome.com/docs/workbox/modules/workbox-strategies/#custom-cache-network-race-strategy
 class CacheNetworkRace extends Strategy {
   _handle(request, handler) {
     const fetchAndCachePutDone = handler.fetchAndCachePut(request)
@@ -129,7 +130,10 @@ class CacheNetworkRace extends Strategy {
   }
 }
 
-// If this goes to slow, it seems it doesn't do well on CF... maybe I should just make them race?
+// todo: debug this
+// todo: maybe instead of a custom strategy, see if you can read Index DB and use the outtheBox strategies to respond.
+// https://developer.chrome.com/docs/workbox/modules/workbox-strategies/#advanced-usage
+// On a throttled network, this consistetly has issues: Will need further troubleshooting.
 class variableCacheOrNetwork extends Strategy {
   // https://developer.chrome.com/docs/workbox/modules/workbox-strategies/
   // handler: A StrategyHandler instance automatically created for the current strategy.
