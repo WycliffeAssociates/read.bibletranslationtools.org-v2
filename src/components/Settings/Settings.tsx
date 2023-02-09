@@ -56,7 +56,7 @@ export default function Settings(props: settingsProps) {
     if (!chapters || !chapters.length) return
     // todo: this query parameter scheme will only work for bible type schema
     let htmlPagesToSaveInCache = chapters.map((chap) => {
-      return `${urlBase}/read/${props.user}/${props.repo}?book=${bookSlug}&chapter=${chap.label}`
+      return `${urlBase}/${props.user}/${props.repo}?book=${bookSlug}&chapter=${chap.label}`
     })
     // listens for a custom even to dispatch saving of these URLs from anywhere;
     const commonWrapper = document.querySelector("#commonWrapper")
