@@ -283,7 +283,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                                       jumpToNewChapIdx(e, book.label)
                                     }}
                                   >
-                                    {book.label}
+                                    {book.label.replace(/^(0+)/, "")}
                                   </button>
                                 </li>
                               )}
@@ -422,7 +422,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                               jumpToNewChapIdx(e, book.label)
                             }}
                           >
-                            {book.label}
+                            {book.label.replace(/^(0+)/, "")}
                           </button>
                         </li>
                       )}
