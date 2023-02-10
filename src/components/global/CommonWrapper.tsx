@@ -12,7 +12,6 @@ export default function CommonWrapper(props: CommonWrapperProps) {
     return set("lastPageVisited", url)
   }
   function addNewPageToSWCache(cacheName: string = "lr-pages", url: string) {
-    // console.log("setting cache (if in prod)")
     if (!url) return
     if (import.meta.env.PROD) {
       setTimeout(() => {
@@ -28,7 +27,11 @@ export default function CommonWrapper(props: CommonWrapperProps) {
       data-resourcetype={`resource-${props.resourceType}`}
       data-testid="page-container"
       id="commonWrapper"
+<<<<<<< HEAD
       class={`h-full bg-neutral-50 font-sans resourceType-${props.resourceType}`}
+=======
+      class={` bg-neutral-50 font-sans resourceType-${props.resourceType}`}
+>>>>>>> master
       on:setLastPageVisited={(
         e: CustomEvent<{
           url: string

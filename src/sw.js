@@ -4,23 +4,27 @@ import {
   createHandlerBoundToURL
 } from "workbox-precaching"
 import { clientsClaim } from "workbox-core"
+<<<<<<< HEAD
 import {
   registerRoute,
   setCatchHandler,
   NavigationRoute
 } from "workbox-routing"
+=======
+import { registerRoute } from "workbox-routing"
+>>>>>>> master
 import {
   NetworkFirst,
-  StaleWhileRevalidate,
-  CacheFirst,
-  CacheOnly,
+  // StaleWhileRevalidate,
+  // CacheFirst,
+  // CacheOnly,
   Strategy
 } from "workbox-strategies"
 import { CacheableResponsePlugin } from "workbox-cacheable-response"
 import { ExpirationPlugin } from "workbox-expiration"
-import { warmStrategyCache } from "workbox-recipes"
+// import { warmStrategyCache } from "workbox-recipes"
 
-import { get, set } from "idb-keyval"
+import { get } from "idb-keyval"
 
 // Adds an activate event listener which will clean up incompatible precaches that were created by older versions of Workbox.
 self.skipWaiting()
@@ -36,55 +40,112 @@ cleanupOutdatedCaches()
 //     })
 //   )
 // );
-class variableCacheOrNetworkdevtest extends Strategy {
-  // https://developer.chrome.com/docs/workbox/modules/workbox-strategies/
-  // handler: A StrategyHandler instance automatically created for the current strategy.
-  // handle(): Perform a request strategy and return a Promise that will resolve with a Response, invoking all relevant plugin callbacks.
-  async _handle(request, handler) {
-    // https://developer.chrome.com/docs/workbox/modules/workbox-strategies/
-    return new Promise(async (res, rej) => {
-      const cacheStrategy = await get("cacheStrategy")
-      // console.log({ cacheStrategy })
-      if (cacheStrategy === "networkFirst") {
-        try {
-          // try network
-          let response = await handler.fetch(request)
-          response && res(response)
-          // if no network, check cache;
-          if (!response) {
-            return handler.cacheMatch(request).then((response) => res(response))
+// class variableCacheOrNetworkdevtest extends Strategy {
+//   // https://developer.chrome.com/docs/workbox/modules/workbox-strategies/
+//   // handler: A StrategyHandler instance automatically created for the current strategy.
+//   // handle(): Perform a request strategy and return a Promise that will resolve with a Response, invoking all relevant plugin callbacks.
+//   async _handle(request, handler) {
+//     // https://developer.chrome.com/docs/workbox/modules/workbox-strategies/
+//     return new Promise(async (res, rej) => {
+//       const cacheStrategy = await get("cacheStrategy")
+//       // console.log({ cacheStrategy })
+//       if (cacheStrategy === "networkFirst") {
+//         try {
+//           // try network
+//           let response = await handler.fetch(request)
+//           response && res(response)
+//           // if no network, check cache;
+//           if (!response) {
+//             return handler.cacheMatch(request).then((response) => res(response))
+//           }
+//         } catch (error) {
+//           rej(error)
+//         }
+//       } else if (cacheStrategy === "cacheFirst" || !cacheStrategy) {
+//         try {
+//           // cache first
+//           let response = await handler.cacheMatch(request)
+//           // network fallback
+//           if (!response) {
+//             res(handler.fetchAndCachePut(request))
+//           } else {
+//             let clone = response.clone()
+//             res(clone)
+//           }
+//         } catch (error) {
+//           rej(error)
+//         }
+//       } else if (cacheStrategy === "cacheOnly") {
+//         try {
+//           // cache only
+//           let response = await handler.cacheMatch(request)
+//           response && res(response)
+//           !response && rej("no match")
+//         } catch (error) {
+//           rej(error)
+//         }
+//       }
+//     })
+//   }
+// }
+async function tryNetwork(handler, request) {
+  try {
+    let response = await handler.fetchAndCachePut(request)
+    if (response && response.ok) {
+      return response
+    }
+  } catch (error) {
+    console.log(error)
+    return
+  }
+}
+async function tryLocalCache(handler, request) {
+  try {
+    // cache first
+    let response = await handler.cacheMatch(request)
+    // default to sending cache match if there
+    if (response && response.ok) {
+      return response
+    } else {
+      throw new Error("No response or not ok")
+    }
+  } catch (error) {
+    // network fallback and put
+    console.log(error)
+    return
+  }
+}
+// provided here
+// https://developer.chrome.com/docs/workbox/modules/workbox-strategies/#custom-cache-network-race-strategy
+class CacheNetworkRace extends Strategy {
+  _handle(request, handler) {
+    const fetchAndCachePutDone = handler.fetchAndCachePut(request)
+    const cacheMatchDone = handler.cacheMatch(request)
+
+    return new Promise((resolve, reject) => {
+      fetchAndCachePutDone.then(resolve)
+      cacheMatchDone.then((response) => response && resolve(response))
+
+      // Reject if both network and cache error or find no response.
+      Promise.allSettled([fetchAndCachePutDone, cacheMatchDone]).then(
+        (results) => {
+          const [fetchAndCachePutResult, cacheMatchResult] = results
+          if (
+            fetchAndCachePutResult.status === "rejected" &&
+            !cacheMatchResult.value
+          ) {
+            reject(fetchAndCachePutResult.reason)
           }
-        } catch (error) {
-          rej(error)
         }
-      } else if (cacheStrategy === "cacheFirst" || !cacheStrategy) {
-        try {
-          // cache first
-          let response = await handler.cacheMatch(request)
-          // network fallback
-          if (!response) {
-            res(handler.fetchAndCachePut(request))
-          } else {
-            let clone = response.clone()
-            res(clone)
-          }
-        } catch (error) {
-          rej(error)
-        }
-      } else if (cacheStrategy === "cacheOnly") {
-        try {
-          // cache only
-          let response = await handler.cacheMatch(request)
-          response && res(response)
-          !response && rej("no match")
-        } catch (error) {
-          rej(error)
-        }
-      }
+      )
     })
   }
 }
 
+// todo: debug this
+// todo: maybe instead of a custom strategy, see if you can read Index DB and use the outtheBox strategies to respond.
+// https://developer.chrome.com/docs/workbox/modules/workbox-strategies/#advanced-usage
+// On a throttled network, this consistetly has issues: Will need further troubleshooting.
 class variableCacheOrNetwork extends Strategy {
   // https://developer.chrome.com/docs/workbox/modules/workbox-strategies/
   // handler: A StrategyHandler instance automatically created for the current strategy.
@@ -93,59 +154,41 @@ class variableCacheOrNetwork extends Strategy {
     // https://developer.chrome.com/docs/workbox/modules/workbox-strategies/
     return new Promise(async (res, rej) => {
       const cacheStrategy = await get("cacheStrategy")
-      let finalError
       if (cacheStrategy === "networkFirst" || !cacheStrategy) {
-        try {
-          // try network, and if successful, put in cache updating it.
-          let response = await handler.fetchAndCachePut(request)
-          response && response.ok && res(response)
-          // if no network, check cache;
-          if (!response) {
-            return handler.cacheMatch(request).then((response) => res(response))
-          }
-        } catch (error) {
-          console.log(error)
-          try {
-            // offline perhaps; Check the cache for an older version now.
-            return handler.cacheMatch(request).then((response) => res(response))
-          } catch (cacheFallBackError) {
-            // couldn't fetch, and not in cache: reject.
-            rej(cacheFallBackError)
+        const response = await tryNetwork(handler, request)
+        if (response && response.ok) {
+          return res(response)
+        } else {
+          let resp = await tryLocalCache(handler, request)
+          if (resp) {
+            res(resp)
+          } else {
+            rej("cannot fetch from network and not in cache.")
           }
         }
       } else if (cacheStrategy === "cacheFirst") {
-        try {
-          // cache first
-          let response = await handler.cacheMatch(request)
-          // default to sending cache match if there
-          if (response && response.ok) {
-            let clone = response.clone()
-            res(clone)
-          }
-        } catch (error) {
-          // network fallback and put
-          if (!response || !response.ok) {
-            try {
-              // try network and put in cache if successufl
-              res(handler.fetchAndCachePut(request))
-            } catch (error) {
-              console.log(error)
-              // neither fetch nor cache worked: rej
-              rej(error)
-            }
+        const response = await tryLocalCache(handler, request)
+        if (response && response.ok) {
+          return res(response)
+        } else {
+          let resp = tryNetwork(handler, request)
+          if (resp) {
+            res(resp)
+          } else {
+            rej("Not in cache and cannot fetch from network")
           }
         }
       } else if (cacheStrategy === "cacheOnly") {
         try {
           // cache only
-          let response = await handler.cacheMatch(request)
-          response && response.ok && res(response)
-          if (import.meta.env.DEV) {
-            res(handler.fetch(request))
+          const response = await tryLocalCache(handler, request)
+          if (response && response.ok) {
+            return res(response)
           } else {
-            rej("No cache match")
+            rej("no cache match")
           }
         } catch (error) {
+          console.error({ error })
           // can't go to network to fetch;  Must reject since wasn't in cache.
           rej(error)
         }
@@ -220,7 +263,7 @@ if (import.meta.env.PROD) {
       }
       return false
     },
-    new variableCacheOrNetwork({
+    new CacheNetworkRace({
       cacheName: "lr-pages",
       plugins: [
         new CacheableResponsePlugin({
@@ -240,7 +283,7 @@ if (import.meta.env.PROD) {
         return true
       }
     },
-    new variableCacheOrNetwork({
+    new CacheNetworkRace({
       cacheName: "live-reader-api",
       plugins: [
         new CacheableResponsePlugin({

@@ -43,13 +43,13 @@ export function handleRcLinks(element: Element, href: string, user: string) {
   let word = element.getAttribute("data-word")
   let templateType = element.getAttribute("data-type")
   if (templateType === "tw") {
-    let newHref = `/read/${linkUser}/${repo}?section=${category}#${word}`
+    let newHref = `/${linkUser}/${repo}?section=${category}#${word}`
     element.setAttribute("href", newHref)
     element.setInnerContent(newHref)
   } else if (templateType === "tm") {
     let initialPage = element.getAttribute("data-page")
     let topic = element.getAttribute("data-topic")
-    let newHref = `/read/${linkUser}/${repo}?section=${initialPage}#${topic}`
+    let newHref = `/${linkUser}/${repo}?section=${initialPage}#${topic}`
     element.setAttribute("href", newHref)
     element.setInnerContent(newHref)
   }

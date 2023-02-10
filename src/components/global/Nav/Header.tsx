@@ -65,7 +65,7 @@ export function UnwrappedHeader(props: HeaderProps) {
   }
 
   return (
-    <nav class="w-full bg-darkAccent pt-9 pb-5 font-sans print:hidden">
+    <nav class="w-full bg-darkAccent py-5 font-sans print:hidden">
       <div class="relative mx-auto flex max-w-[1400px] items-center justify-between px-4 text-white">
         <picture>
           <source srcset={props.logoWebP} type="image/webp" />
@@ -96,7 +96,7 @@ export function UnwrappedHeader(props: HeaderProps) {
           data-js="mobileMenu"
           class={`${
             mobileMenuOpen() ? "block" : "hidden"
-          } absolute top-full  left-0 right-0  z-30 w-full flex-col bg-darkAccent pt-5 md:static md:flex md:w-auto md:flex-row`}
+          } absolute top-full  left-0 right-0  z-50 w-full flex-col bg-darkAccent pt-5 md:static md:flex md:w-auto md:flex-row`}
         >
           <ul class="flex flex-col ltr:pl-4 rtl:pr-4 md:flex-row">
             <Index each={props.menuItems}>
