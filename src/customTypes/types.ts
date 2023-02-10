@@ -15,6 +15,9 @@ declare module "solid-js" {
         url: string
         cacheName: string | undefined
       }>
+      notifiedOfScrollTop: CustomEvent<{
+        amount: number
+      }>
     }
     interface Directives {
       clickOutside(el: HTMLElement, accessor: any): void

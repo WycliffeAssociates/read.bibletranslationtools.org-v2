@@ -125,9 +125,9 @@ export default function ReaderPane(props: ReaderPaneProps) {
     chapNum?: number | string
   }
   function scrollToTop() {
-    let pane = document.querySelector('[data-js="scrollToTop"]')
-    if (pane) {
-      pane.scrollTop = 0
+    let scrollPane = document.querySelector('[data-js="scrollToTop"]')
+    if (scrollPane) {
+      scrollPane.scrollTop = 0
     }
   }
   async function fetchReaderHtml({

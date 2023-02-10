@@ -71,3 +71,13 @@ export function positionPreviewPane({
     y: posY + "px"
   })
 }
+export function debounce(callback: Function, wait: number) {
+  console.log("DEBOUNCING!")
+  let timeoutId: number | null = null
+  return (...args: any) => {
+    window.clearTimeout(timeoutId)
+    timeoutId = window.setTimeout(() => {
+      callback.apply(null, args)
+    }, wait)
+  }
+}

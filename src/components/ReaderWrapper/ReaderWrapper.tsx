@@ -12,6 +12,7 @@ import type {
   repoIndexObj
 } from "@src/customTypes/types"
 import type { Accessor } from "solid-js"
+import { debounce } from "@lib/utils-ui"
 
 // types are a little verbose up here: See them at the bottom:
 
@@ -235,6 +236,22 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
     getMenuBook,
     navLinks
   }
+  function reportScrollPosition(event: Event) {
+    const target = event.target as HTMLElement
+    const amount = target.scrollTop
+    const notifyPreviewPaneOfScrollEvent = new CustomEvent(
+      "notifiedOfScrollTop",
+      {
+        detail: {
+          amount: amount
+        }
+      }
+    )
+
+    const previewPane = document.querySelector("#previewPane")
+    previewPane && previewPane.dispatchEvent(notifyPreviewPaneOfScrollEvent)
+  }
+  const notifyPreviewPaneOfScroll = debounce(reportScrollPosition, 20)
 
   return (
     <>
@@ -243,6 +260,7 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
         initialDict={props.initialDict}
       >
         <div
+          onscroll={notifyPreviewPaneOfScroll}
           id="readerWrapper"
           data-js="scrollToTop"
           class=" mx-auto grid max-h-full w-full overflow-hidden print:block  print:overflow-visible md:justify-center"

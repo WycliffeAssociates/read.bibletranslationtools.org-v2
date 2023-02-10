@@ -8,7 +8,7 @@ import {
   Suspense
 } from "solid-js"
 import { SvgSettings, SvgBook, LoadingSpinner } from "@components"
-import { clickOutside, escapeOut } from "@lib/utils-ui"
+import { clickOutside, debounce, escapeOut } from "@lib/utils-ui"
 
 // https://github.com/solidjs/solid/discussions/845
 // these are hacks (name doesn't matter) to keep typescript from stripping away "unused imports", but these are used directives below:
@@ -28,6 +28,8 @@ import { useI18n } from "@solid-primitives/i18n"
 import type { Component } from "solid-js"
 import type { bibleEntryObj } from "../../customTypes/types"
 import type { storeType } from "../ReaderWrapper/ReaderWrapper"
+import { BookList } from "./BookListItem"
+import { BibleBookCategories } from "@lib/contants"
 interface MenuProps {
   storeInterface: storeType
   setPrintWholeBook: Setter<boolean>
@@ -42,16 +44,18 @@ const ReaderMenu: Component<MenuProps> = (props) => {
   )
   const [settingsAreOpen, setSettingsAreOpen] = createSignal(false)
   const [searchQuery, setSearchQuery] = createSignal("")
-
-  const debounce = (callback: Function, wait: number) => {
-    let timeoutId: number | null = null
-    return (...args: any) => {
-      window.clearTimeout(timeoutId)
-      timeoutId = window.setTimeout(() => {
-        callback.apply(null, args)
-      }, wait)
-    }
+  let bibleMenuBooksByCategory: {
+    OT: any[]
+    NT: any[]
+  } = {
+    OT: [],
+    NT: []
   }
+  props.storeInterface.menuBookNames().forEach((book) => {
+    BibleBookCategories.OT.includes(book.slug.toUpperCase())
+      ? bibleMenuBooksByCategory.OT.push(book)
+      : bibleMenuBooksByCategory.NT.push(book)
+  })
 
   const jumpToNewChapIdx = debounce(async (evt: InputEvent, value: string) => {
     const storeInterface = props.storeInterface
@@ -228,26 +232,11 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                               value={searchQuery()}
                             />
                           </label>
-                          <ul class="max-h-[50vh] min-h-[100px] overflow-y-auto pb-32">
-                            <For each={props.storeInterface.menuBookNames()}>
-                              {(book) => (
-                                <li class="w-full">
-                                  <button
-                                    classList={{
-                                      " w-full text-xl py-2 ltr:text-left rtl:text-right border-y border-gray-100 ltr:pl-4 rtl:pr-4 hover:bg-accent/10 focus:bg-accent/10 focus:font-bold":
-                                        true,
-                                      "font-bold text-accent": isActiveBook(
-                                        book.slug
-                                      )
-                                    }}
-                                    onClick={(e) => switchBooks(book.slug)}
-                                  >
-                                    {book.label}
-                                  </button>
-                                </li>
-                              )}
-                            </For>
-                          </ul>
+                          <BookList
+                            switchBooks={switchBooks}
+                            isActiveBook={isActiveBook}
+                            bibleMenuBooksByCategory={bibleMenuBooksByCategory}
+                          />
                         </div>
                       </div>
                     </div>

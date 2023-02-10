@@ -26,5 +26,7 @@
   "loading": "Loading",
   "loadingBehavior": "Loading behavior",
   "ariaNavigateForwardsOneChapter": "Navigate forwards one chapter",
-  "ariaNavigateBackwardsOneChapter": "Navigate backwards one chapter"
+  "ariaNavigateBackwardsOneChapter": "Navigate backwards one chapter",
+  "oldTestament": "Old Testament",
+  "newTestament": "New Testament"
 }

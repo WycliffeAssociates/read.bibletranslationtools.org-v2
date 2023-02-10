@@ -1,4 +1,4 @@
-import { createSignal, Show, Signal } from "solid-js"
+import { createSignal, onMount, Show, Signal } from "solid-js"
 import {
   clickOutside,
   escapeOut,
@@ -11,15 +11,24 @@ const [pos, setPos] = createSignal({
   x: "0px",
   y: "0px"
 })
+const [mousedIn, setMousedIn] = createSignal(false)
 const [showFootnote, setShowFootnote] = createSignal(false)
 const [footnoteText, setFootnoteText] = createSignal("")
+const [currentScrollTop, setCurrentScrollTop] = createSignal(0)
 const [lastFocused, setLastFocused] =
   createSignal() as Signal<HTMLElement | null>
 let previewCloseButton: HTMLButtonElement //ref
 
+// onMount(() => {
+//   let scrollPane = document.querySelector('[data-js="scrollToTop"]')
+//   scrollPane.ad
+// })
+
 function closeModal() {
   setShowFootnote(false)
   lastFocused()?.focus()
+  setMousedIn(false)
+  setCurrentScrollTop(0)
 }
 function focusWithinClose(ev: FocusEvent) {
   let currentTarget = ev.currentTarget as Node
@@ -28,6 +37,16 @@ function focusWithinClose(ev: FocusEvent) {
   if (!relatedTaret) return
 
   if (!currentTarget?.contains(relatedTaret)) {
+    closeModal()
+  }
+}
+function reactToScrollingWhenNoteIsOpen(amount: number) {
+  console.log(amount)
+  if (!showFootnote()) {
+    return
+  }
+  const diffFromStart = Math.abs(amount - currentScrollTop())
+  if (diffFromStart > 100) {
     closeModal()
   }
 }
@@ -41,6 +60,13 @@ export function PreviewPane() {
   return (
     <Show when={showFootnote()}>
       <div
+        on:notifiedOfScrollTop={(
+          e: CustomEvent<{
+            amount: number
+          }>
+        ) => {
+          reactToScrollingWhenNoteIsOpen(e.detail.amount)
+        }}
         use:clickOutside={() => closeModal()}
         use:escapeOut={() => closeModal()}
         onFocusOut={focusWithinClose}
@@ -80,65 +106,80 @@ export function PreviewPane() {
 export function hoverOnCrossReferences() {
   let crossReferences = document.querySelectorAll("a[data-crossref='true']")
 
-  async function populatePreviewPane(e: Event) {
-    let target = e.target as HTMLAnchorElement
-    let hashWithoutHashTag = target.dataset.hash
-    let book = target.dataset.book
-    let chapter = target.dataset.chapter
-    let response: Response
-    let text: string
+  function managePreviewPane(e: Event) {
+    setTimeout(() => {
+      setMousedIn(true)
+      let scrollPane = document.querySelector('[data-js="scrollToTop"]')
+      if (scrollPane) {
+        setCurrentScrollTop(scrollPane.scrollTop)
+      }
+      populatePreviewPane()
+    }, 400)
 
-    try {
-      response = await fetch(`?book=${book}&chapter=${chapter}`)
-      text = await response.text()
-    } catch (error) {
-      console.error(error)
-      return
+    async function populatePreviewPane() {
+      if (!mousedIn()) return
+      let target = e.target as HTMLAnchorElement
+      let hashWithoutHashTag = target.dataset.hash
+      let book = target.dataset.book
+      let chapter = target.dataset.chapter
+      let response: Response
+      let text: string
+
+      try {
+        response = await fetch(`?book=${book}&chapter=${chapter}`)
+        text = await response.text()
+      } catch (error) {
+        console.error(error)
+        return
+      }
+
+      const newDom = document.createElement("html")
+      newDom.innerHTML = text
+      // '[id="#tn-chunk-gen-22-01"] not valid
+      let corresponding = newDom.querySelector(`[id="${hashWithoutHashTag}"]`)
+      if (!corresponding) return
+      // let htmlContainer: any[] = [corresponding]
+
+      function truthyFunction(node: Element) {
+        return (
+          !!node.id &&
+          node.id !== hashWithoutHashTag &&
+          node.id.includes("tn-chunk")
+        )
+      }
+      let html = getHtmlWithinSpan(corresponding, truthyFunction)
+      setFootnoteText(html)
+
+      // positionion logic:
+      positionPreviewPane({
+        target,
+        previewPaneSelector: "#previewPane",
+        previewPaneSetter: setShowFootnote,
+        setPos
+      })
+
+      // manage focus
+      setLastFocused(document.activeElement as HTMLElement)
+      previewCloseButton.focus()
     }
-
-    const newDom = document.createElement("html")
-    newDom.innerHTML = text
-    // '[id="#tn-chunk-gen-22-01"] not valid
-    let corresponding = newDom.querySelector(`[id="${hashWithoutHashTag}"]`)
-    if (!corresponding) return
-    // let htmlContainer: any[] = [corresponding]
-
-    function truthyFunction(node: Element) {
-      return (
-        !!node.id &&
-        node.id !== hashWithoutHashTag &&
-        node.id.includes("tn-chunk")
-      )
-    }
-    let html = getHtmlWithinSpan(corresponding, truthyFunction)
-    setFootnoteText(html)
-
-    // positionion logic:
-    positionPreviewPane({
-      target,
-      previewPaneSelector: "#previewPane",
-      previewPaneSetter: setShowFootnote,
-      setPos
-    })
-
-    // manage focus
-    setLastFocused(document.activeElement as HTMLElement)
-    previewCloseButton.focus()
   }
 
   crossReferences.forEach((ref) => {
-    ref.addEventListener("mouseover", populatePreviewPane)
+    ref.addEventListener("mouseover", managePreviewPane)
+    ref.addEventListener("mouseout", () => {
+      setMousedIn(false)
+    })
     // ref.addEventListener("focus", populatePreviewPane)
   })
 }
 export function hoverOnCommentaryCrossReferences(user: string, repo: string) {
   if (!document.querySelector("[data-resourcetype*='commentary']")) return
-  console.log("checking for commmentary popups")
+
   let commentaryPopups = document.querySelectorAll("a[href*='popup']")
-  commentaryPopups.forEach((link) => link.addEventListener("click", manageLink))
-  commentaryPopups.forEach((link) =>
+  commentaryPopups.forEach((link) => {
+    link.addEventListener("click", manageLink)
     link.addEventListener("mouseover", manageLink)
-  )
+  })
 
   async function manageLink(e: Event) {
     e?.preventDefault()
@@ -180,46 +221,59 @@ export function hoverOnFootnotes() {
   let footnotes: NodeListOf<HTMLAnchorElement> = document.querySelectorAll(
     'a[href*="footnote-target"]'
   )
-
   function manageNote(ev: MouseEvent | FocusEvent) {
-    let target = ev.target as HTMLAnchorElement
-    let rect = target.getBoundingClientRect()
-    let last = target.href.split("-").pop()
-    setShowFootnote(true)
-    setShowFootnote(true)
-    let previewPane = document.querySelector("#previewPane") //stick in DOM to measure it's vh client height. This runs quickly enough that you won't get some flashing before we position it;
+    // debugger
+    if (ev.type == "mouseenter") {
+      setMousedIn(true)
+      setTimeout(() => {
+        console.log("timeout go!")
+        doHoverNote()
+      }, 375)
+    }
+    function doHoverNote() {
+      if (!mousedIn()) return
+      console.log("DOING HOVER NOTE!")
+      let target = ev.target as HTMLAnchorElement
+      let rect = target.getBoundingClientRect()
+      let last = target.href.split("-").pop()
+      setShowFootnote(true)
+      setShowFootnote(true)
+      let previewPane = document.querySelector("#previewPane") //stick in DOM to measure it's vh client height. This runs quickly enough that you won't get some flashing before we position it;
 
-    if (!previewPane) return
-    let windowMidPoint = window.innerWidth / 2
-    let posX = rect.x > windowMidPoint ? rect.x - 50 + "px" : rect.x + 50 + "px"
-    let posY =
-      rect.y > window.innerHeight / 2
-        ? rect.y - previewPane.clientHeight
-        : rect.y + 30
-    setPos({
-      x: posX,
-      y: posY + "px"
-    })
-    // footnote-caller-1
-    // footnote-target-1
-    let correspondingA = document.querySelector(
-      `a[href*="footnote-caller-${last}"]`
-    )
-    if (!correspondingA) return
-    let parent = correspondingA.parentElement?.parentElement
-    let footnoteText = parent ? parent.innerText : ""
-    setFootnoteText(footnoteText)
+      if (!previewPane) return
+      let windowMidPoint = window.innerWidth / 2
+      let posX =
+        rect.x > windowMidPoint ? rect.x - 50 + "px" : rect.x + 50 + "px"
+      let posY =
+        rect.y > window.innerHeight / 2
+          ? rect.y - previewPane.clientHeight
+          : rect.y + 30
+      setPos({
+        x: posX,
+        y: posY + "px"
+      })
+      // footnote-caller-1
+      // footnote-target-1
+      let correspondingA = document.querySelector(
+        `a[href*="footnote-caller-${last}"]`
+      )
+      if (!correspondingA) return
+      let parent = correspondingA.parentElement?.parentElement
+      let footnoteText = parent ? parent.innerText : ""
+      setFootnoteText(footnoteText)
+    }
   }
 
   footnotes.forEach((note) => {
     note.addEventListener("mouseenter", manageNote)
+    note.addEventListener("mouseout", () => {
+      setMousedIn(false)
+    })
     // note.addEventListener("focus", manageNote)
 
     // note.addEventListener("mouseout", () => {
     //   setShowFootnote(false)
     // })
-    // note.addEventListener("focusout", () => {
-    //   setShowFootnote(false)
-    // })
+    note.addEventListener("focusout", () => setMousedIn(false))
   })
 }
