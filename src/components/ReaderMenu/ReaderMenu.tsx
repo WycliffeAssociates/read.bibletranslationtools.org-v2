@@ -28,7 +28,7 @@ import { useI18n } from "@solid-primitives/i18n"
 import type { Component } from "solid-js"
 import type { bibleEntryObj } from "../../customTypes/types"
 import type { storeType } from "../ReaderWrapper/ReaderWrapper"
-import { BookList } from "./BookListItem"
+import { BookList } from "./BookList"
 import { BibleBookCategories } from "@lib/contants"
 interface MenuProps {
   storeInterface: storeType
@@ -233,9 +233,10 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                             />
                           </label>
                           <BookList
-                            switchBooks={switchBooks}
+                            onClick={(book: string) => switchBooks(book)}
                             isActiveBook={isActiveBook}
                             bibleMenuBooksByCategory={bibleMenuBooksByCategory}
+                            isMobile={false}
                           />
                         </div>
                       </div>
@@ -369,27 +370,15 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                       value={searchQuery()}
                     />
                   </label>
-                  <ul class="h-[95vh] overflow-y-auto pb-96">
-                    <For each={props.storeInterface.menuBookNames()}>
-                      {(book) => (
-                        <li class="w-full">
-                          <button
-                            classList={{
-                              " w-full text-xl py-2 text-left border-y border-gray-100 pl-4 hover:bg-accent/10 focus:bg-accent/10":
-                                true,
-                              "font-bold text-accent": isActiveBook(book.slug)
-                            }}
-                            onClick={(e) => {
-                              switchBooks(book.slug)
-                              setMobileTabOpen("chapter")
-                            }}
-                          >
-                            {book.label}
-                          </button>
-                        </li>
-                      )}
-                    </For>
-                  </ul>
+                  <BookList
+                    onClick={(bookSlug: string) => {
+                      switchBooks(bookSlug)
+                      setMobileTabOpen("chapter")
+                    }}
+                    isActiveBook={isActiveBook}
+                    bibleMenuBooksByCategory={bibleMenuBooksByCategory}
+                    isMobile={true}
+                  />
                 </div>
               </Show>
               {/* MOBILE CHAPTERS */}
