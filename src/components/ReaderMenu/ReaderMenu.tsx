@@ -124,8 +124,10 @@ const ReaderMenu: Component<MenuProps> = (props) => {
     props.storeInterface.mutateStore("menuBook", book)
   }
   function isActiveBookAndChap(label: string) {
+    let menuBook = props.storeInterface.getMenuBook()
+    let currentBook = props.storeInterface.currentBookObj()
     let currentChap = props.storeInterface.currentChapObj()
-    return currentChap?.label == label
+    return currentChap?.label == label && menuBook?.label == currentBook?.label
   }
   function isActiveBook(book: string) {
     return props.storeInterface.getStoreVal("currentBook") == book
