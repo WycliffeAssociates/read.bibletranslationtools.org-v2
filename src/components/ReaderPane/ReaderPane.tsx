@@ -106,22 +106,14 @@ export default function ReaderPane(props: ReaderPaneProps) {
         newRelativePathQuery
       )
       // Add html url to cache:
-<<<<<<< HEAD
-      const menu = document.querySelector("#commonWrapper")
-=======
       const commonWrapper = document.querySelector("#commonWrapper")
->>>>>>> master
       const updateSwCache = new CustomEvent("addCurrentPageToSw", {
         detail: {
           url: location.href,
           cacheName: "lr-pages"
         }
       })
-<<<<<<< HEAD
-      menu && menu.dispatchEvent(updateSwCache)
-=======
       commonWrapper && commonWrapper.dispatchEvent(updateSwCache)
->>>>>>> master
     }
     setLastPageVisited()
   }
@@ -131,6 +123,12 @@ export default function ReaderPane(props: ReaderPaneProps) {
     navigate?: boolean
     dir?: "BACK" | "FORWARD"
     chapNum?: number | string
+  }
+  function scrollToTop() {
+    let pane = document.querySelector('[data-js="scrollToTop"]')
+    if (pane) {
+      pane.scrollTop = 0
+    }
   }
   async function fetchReaderHtml({
     event,
@@ -168,7 +166,7 @@ export default function ReaderPane(props: ReaderPaneProps) {
     let existingText = existingChap?.text //html if put there;
     if (!existingChap) return
     if (existingText && navigate) {
-      if (textRef) textRef.scrollTop = 0
+      scrollToTop()
       return props.storeInterface.mutateStore("currentChapter", nextCh)
     } else if (existingText) {
       return
@@ -192,7 +190,7 @@ export default function ReaderPane(props: ReaderPaneProps) {
       })
       if (navigate) {
         props.storeInterface.mutateStore("currentChapter", String(nextCh))
-        if (textRef) textRef.scrollTop = 0
+        scrollToTop()
       }
     })
 

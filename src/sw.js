@@ -4,15 +4,7 @@ import {
   createHandlerBoundToURL
 } from "workbox-precaching"
 import { clientsClaim } from "workbox-core"
-<<<<<<< HEAD
-import {
-  registerRoute,
-  setCatchHandler,
-  NavigationRoute
-} from "workbox-routing"
-=======
 import { registerRoute } from "workbox-routing"
->>>>>>> master
 import {
   NetworkFirst,
   // StaleWhileRevalidate,

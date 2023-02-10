@@ -244,6 +244,7 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
       >
         <div
           id="readerWrapper"
+          data-js="scrollToTop"
           class=" mx-auto grid max-h-full w-full overflow-hidden print:block  print:overflow-visible md:justify-center"
         >
           <div class=" sticky top-0 z-40 w-full   border-b border-b-neutral-200 bg-white">
