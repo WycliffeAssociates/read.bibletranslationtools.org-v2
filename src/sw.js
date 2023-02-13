@@ -235,7 +235,7 @@ if (import.meta.env.DEV) {
 // @ PROD ROUTES
 if (import.meta.env.PROD) {
   let precacheUrls = self.__WB_MANIFEST
-  console.log({ precacheUrls })
+  // console.log({ precacheUrls })
   // let route404 = location.origin.concat("/404")
   // const FALLBACK_STRATEGY = new CacheFirst()
 

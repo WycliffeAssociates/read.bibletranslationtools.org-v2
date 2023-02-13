@@ -12,7 +12,6 @@ export const onRequestGet: PagesFunction = async (context) => {
   // } = context
 
   const request: Request = context.request
-  // console.log({ request })
   const env: any = context.env
   const url = new URL(request.url)
   let user = url.searchParams?.get("user") as string

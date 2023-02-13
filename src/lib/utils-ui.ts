@@ -72,7 +72,6 @@ export function positionPreviewPane({
   })
 }
 export function debounce(callback: Function, wait: number) {
-  console.log("DEBOUNCING!")
   let timeoutId: number | null = null
   return (...args: any) => {
     window.clearTimeout(timeoutId)

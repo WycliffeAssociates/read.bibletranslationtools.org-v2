@@ -17,6 +17,7 @@ const [footnoteText, setFootnoteText] = createSignal("")
 const [currentScrollTop, setCurrentScrollTop] = createSignal(0)
 const [lastFocused, setLastFocused] =
   createSignal() as Signal<HTMLElement | null>
+const previewPaneDebounceWait = 375
 let previewCloseButton: HTMLButtonElement //ref
 
 // onMount(() => {
@@ -41,7 +42,6 @@ function focusWithinClose(ev: FocusEvent) {
   }
 }
 function reactToScrollingWhenNoteIsOpen(amount: number) {
-  console.log(amount)
   if (!showFootnote()) {
     return
   }
@@ -107,17 +107,19 @@ export function hoverOnCrossReferences() {
   let crossReferences = document.querySelectorAll("a[data-crossref='true']")
 
   function managePreviewPane(e: Event) {
+    setMousedIn(true)
     setTimeout(() => {
-      setMousedIn(true)
       let scrollPane = document.querySelector('[data-js="scrollToTop"]')
       if (scrollPane) {
         setCurrentScrollTop(scrollPane.scrollTop)
       }
       populatePreviewPane()
-    }, 400)
+    }, previewPaneDebounceWait)
 
     async function populatePreviewPane() {
-      if (!mousedIn()) return
+      if (!mousedIn()) {
+        return
+      }
       let target = e.target as HTMLAnchorElement
       let hashWithoutHashTag = target.dataset.hash
       let book = target.dataset.book
@@ -178,10 +180,13 @@ export function hoverOnCommentaryCrossReferences(user: string, repo: string) {
   let commentaryPopups = document.querySelectorAll("a[href*='popup']")
   commentaryPopups.forEach((link) => {
     link.addEventListener("click", manageLink)
-    link.addEventListener("mouseover", manageLink)
+    link.addEventListener("mouseenter", manageLink)
+    link.addEventListener("mouseout", () => {
+      setMousedIn(false)
+    })
   })
-
-  async function manageLink(e: Event) {
+  async function activateLink(e: Event) {
+    if (e.type == "mouseenter" && !mousedIn()) return
     e?.preventDefault()
     let target = e.target as HTMLAnchorElement
     let href = target.href
@@ -215,8 +220,15 @@ export function hoverOnCommentaryCrossReferences(user: string, repo: string) {
       link.addEventListener("click", manageLink)
     })
   }
+  async function manageLink(e: Event) {
+    if (e.type == "mouseenter") {
+      setMousedIn(true)
+      setTimeout(() => {
+        activateLink(e)
+      }, previewPaneDebounceWait)
+    }
+  }
 }
-
 export function hoverOnFootnotes() {
   let footnotes: NodeListOf<HTMLAnchorElement> = document.querySelectorAll(
     'a[href*="footnote-target"]'
@@ -226,13 +238,11 @@ export function hoverOnFootnotes() {
     if (ev.type == "mouseenter") {
       setMousedIn(true)
       setTimeout(() => {
-        console.log("timeout go!")
         doHoverNote()
-      }, 375)
+      }, previewPaneDebounceWait)
     }
     function doHoverNote() {
       if (!mousedIn()) return
-      console.log("DOING HOVER NOTE!")
       let target = ev.target as HTMLAnchorElement
       let rect = target.getBoundingClientRect()
       let last = target.href.split("-").pop()

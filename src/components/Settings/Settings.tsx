@@ -72,8 +72,7 @@ export default function Settings(props: settingsProps) {
         // debugger
       }
       Promise.all(promises).then((values) => {
-        console.log("all done")
-        console.log(values)
+        // console.log(values)
         // debugger
         setSavingOffline(false)
       })

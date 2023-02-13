@@ -109,8 +109,6 @@ export default function TranslationWords(props: twProps) {
       "a[data-crossref='true']"
     ) as NodeListOf<HTMLElement>
 
-    console.log({ crossReferences })
-
     let memoryDom = document.createElement("html")
     crossReferences.forEach((ref) => {
       let section = String(ref.dataset?.section)

@@ -18,7 +18,6 @@ export const onRequestGet: PagesFunction = async (context) => {
   const url = new URL(request.url)
   let user = url.searchParams?.get("user")
   let repo = url.searchParams?.get("repo")
-  console.log({ user, repo })
   if (!user || !repo || user == "undefined" || repo == "undefined") {
     return new Response(null, {
       status: 400,
@@ -32,7 +31,7 @@ export const onRequestGet: PagesFunction = async (context) => {
   let finalUrl = `${baseUrl}/${user}/${repo}/index.json`
   try {
     // http://localhost/u/WA-Catalog/en_ulb/index.json;
-    console.log(`fetching ${finalUrl}`)
+    // console.log(`fetching ${finalUrl}`)
     let response = await fetch(finalUrl, {
       headers: {
         "Content-Type": "application/json"
