@@ -95,8 +95,10 @@ export default function ReaderPane(props: ReaderPaneProps) {
       let searchParams = new URLSearchParams(window.location.search)
       searchParams.set("book", currentBook)
       searchParams.set("chapter", currentChap)
+      const hash = window.location.hash || ""
+      // debugger
       let newRelativePathQuery =
-        window.location.pathname + "?" + searchParams.toString()
+        window.location.pathname + "?" + searchParams.toString() + hash
       document.title = `${props.repositoryName}-${currentBook}-${currentChap}`
       history.pushState(
         {
@@ -114,6 +116,14 @@ export default function ReaderPane(props: ReaderPaneProps) {
         }
       })
       commonWrapper && commonWrapper.dispatchEvent(updateSwCache)
+
+      if (hash) {
+        let el = document.querySelector(hash)
+        el?.scrollIntoView({
+          block: "center",
+          inline: "start"
+        })
+      }
     }
     setLastPageVisited()
   }
