@@ -45,7 +45,7 @@ Assets not processed by Vite. Fonts, and PWA icons etc;
 - Styles - Any non tailwind based css
 - Translations - Each language gets a json file. These will be imported to application code lazily based on _consistent naming of language codes_. There should be an svg flag ([some ex. flags here](<[https://](https://github.com/OnTheGoSystems/SVG-flags-language-switcher)>)) of schema `code`.svg, and the `index.ts` file in the translations folder needs the bare minimum of its name and code added to the array as well.
 - Types - common or reused types. Other types are just next to source code as needed.
-- pwa.js - basic registration logic (separate from behavior) for SW.
+- pwa.js - basic registration logic (separate from behavior) for SW
 - sw.js - The custom service worker. Name and location must be consistent as placed in Astro.config
 
 ### Tests
