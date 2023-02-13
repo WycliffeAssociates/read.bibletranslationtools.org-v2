@@ -36,6 +36,6 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: read-bibleineverylanguage-org-v2 # e.g. 'my-project'
+          projectName: read-bibleineverylanguage-org
           directory: dist # e.g. 'dist'
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
