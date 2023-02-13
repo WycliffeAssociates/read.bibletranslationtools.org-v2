@@ -8,6 +8,8 @@ import {
   Suspense
 } from "solid-js"
 import { SvgSettings, SvgBook, LoadingSpinner } from "@components"
+import { BookList } from "./BookList"
+import { ChapterList } from "./ChapterList"
 import { clickOutside, debounce, escapeOut } from "@lib/utils-ui"
 
 // https://github.com/solidjs/solid/discussions/845
@@ -27,8 +29,7 @@ const Settings = lazy(async () => {
 import { useI18n } from "@solid-primitives/i18n"
 import type { Component } from "solid-js"
 import type { bibleEntryObj } from "../../customTypes/types"
-import type { storeType } from "../ReaderWrapper/ReaderWrapper"
-import { BookList } from "./BookList"
+import type { storeType } from "@components/ReaderWrapper/ReaderWrapper"
 import { BibleBookCategories } from "@lib/contants"
 interface MenuProps {
   storeInterface: storeType
@@ -37,6 +38,7 @@ interface MenuProps {
   repositoryName: string
 }
 const ReaderMenu: Component<MenuProps> = (props) => {
+  // ====MENU STATE
   const [t, { add, locale }] = useI18n()
   const [menuIsOpen, setMenuIsOpen] = createSignal(false)
   const [mobileTabOpen, setMobileTabOpen] = createSignal(
@@ -56,7 +58,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
       ? bibleMenuBooksByCategory.OT.push(book)
       : bibleMenuBooksByCategory.NT.push(book)
   })
-
+  // ====MENU FXNS
   const jumpToNewChapIdx = debounce(async (evt: InputEvent, value: string) => {
     const storeInterface = props.storeInterface
     const target = evt.target as HTMLInputElement
@@ -105,12 +107,6 @@ const ReaderMenu: Component<MenuProps> = (props) => {
     })
     togglePanel(false)
   }, 300)
-
-  // const restoreNumber = debounce((evt: InputEvent) => {
-  //   const target = evt.target as HTMLInputElement
-  //   if (!target) return
-  //   target.value = String(props.storeInterface.getStoreVal("currentChapter"))
-  // }, 400)
 
   const togglePanel = (bool?: boolean) => {
     let val = bool === false ? bool : !menuIsOpen()
@@ -242,47 +238,12 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                       </div>
                     </div>
                   </div>
-                  {/* chapters */}
-
-                  <div class="w-3/5">
-                    <div class="w-full">
-                      <h2 class="mt-2 text-2xl capitalize ltr:ml-2 rtl:mr-2 ">
-                        {t("chapters")}
-                      </h2>
-                      <div class="mt-2 w-full border-t border-neutral-200 pt-2">
-                        <div class="p-2">
-                          <ul class="grid max-h-[55vh] grid-cols-6 justify-start  gap-2 overflow-y-auto  pb-24">
-                            <For each={props.storeInterface.possibleChapters()}>
-                              {(book, idx) => (
-                                <li
-                                  class="w-full text-center text-xl"
-                                  data-testid="menuChapter"
-                                >
-                                  <button
-                                    data-testid="pickChapter"
-                                    classList={{
-                                      "w-full p-3 hover:bg-accent/10": true,
-                                      "text-blue-400": isActiveBookAndChap(
-                                        book.label
-                                      )
-                                    }}
-                                    // onClick={(e) => {
-                                    //   jumpToNewChapIdx(e, idx() + 1)
-                                    // }}
-                                    onClick={(e) => {
-                                      jumpToNewChapIdx(e, book.label)
-                                    }}
-                                  >
-                                    {book.label.replace(/^(0+)/, "")}
-                                  </button>
-                                </li>
-                              )}
-                            </For>
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <ChapterList
+                    storeInterface={props.storeInterface}
+                    isActiveBookAndChap={isActiveBookAndChap}
+                    jumpToNewChapIdx={jumpToNewChapIdx}
+                    isMobile={false}
+                  />
                 </div>
               </div>
               {/* //!END table and up menu */}
@@ -356,7 +317,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
               </ul>
               {/* MOBILE BOOKS */}
               <Show when={mobileTabOpen() == "book"}>
-                <div>
+                <div data-name="searchInput">
                   <label for="" class="block p-4">
                     <input
                       onInput={(e: InputEvent) => {
@@ -383,30 +344,12 @@ const ReaderMenu: Component<MenuProps> = (props) => {
               </Show>
               {/* MOBILE CHAPTERS */}
               <Show when={mobileTabOpen() == "chapter"}>
-                <div class="p-2">
-                  <p class="py-2 pl-2 text-2xl ">
-                    {props.storeInterface.getMenuBook()?.label}
-                  </p>
-                  <ul class="grid  h-[80vh] grid-cols-6 place-content-start gap-2 overflow-y-scroll pb-36 ">
-                    <For each={props.storeInterface.possibleChapters()}>
-                      {(book, idx) => (
-                        <li class="w-full text-center text-xl">
-                          <button
-                            classList={{
-                              "w-full p-3 hover:bg-accent/10": true,
-                              "text-blue-400": isActiveBookAndChap(book.label)
-                            }}
-                            onClick={(e) => {
-                              jumpToNewChapIdx(e, book.label)
-                            }}
-                          >
-                            {book.label.replace(/^(0+)/, "")}
-                          </button>
-                        </li>
-                      )}
-                    </For>
-                  </ul>
-                </div>
+                <ChapterList
+                  isActiveBookAndChap={isActiveBookAndChap}
+                  isMobile={true}
+                  jumpToNewChapIdx={jumpToNewChapIdx}
+                  storeInterface={props.storeInterface}
+                />
               </Show>
             </div>
           </Show>

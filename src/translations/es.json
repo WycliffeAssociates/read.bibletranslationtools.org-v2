@@ -21,7 +21,7 @@
   "cacheFirst": "Use una versión guardada primera, y la red si sea necesario",
   "cacheOnly": "Use solamente una versión guardada",
   "downloadPrintAll": "Descarga e imprime todo",
-  "downloadSource": "Descarga de la fuente",
+  "downloadSource": "Descargar código fuente (zip del repositorio)",
   "loading": "Descargando",
   "loadingBehavior": "Comportamiento de descargar",
   "ariaNavigateForwardsOneChapter": "Navegue un capitulo adelante",

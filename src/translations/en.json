@@ -22,7 +22,7 @@
   "cacheFirst": "Use saved version first and Internet if needed",
   "cacheOnly": "Use saved version only",
   "downloadPrintAll": "Print whole book",
-  "downloadSource": "Download source",
+  "downloadSource": "Download source (zip of repository)",
   "loading": "Loading",
   "loadingBehavior": "Loading behavior",
   "ariaNavigateForwardsOneChapter": "Navigate forwards one chapter",

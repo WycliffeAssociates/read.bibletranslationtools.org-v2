@@ -1,4 +1,3 @@
-import { BibleBookCategories } from "@lib/contants"
 import { useI18n } from "@solid-primitives/i18n"
 import { For, Show } from "solid-js"
 interface propsInterface {
