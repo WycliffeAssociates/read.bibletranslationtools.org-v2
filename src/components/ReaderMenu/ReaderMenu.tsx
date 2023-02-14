@@ -104,9 +104,17 @@ const ReaderMenu: Component<MenuProps> = (props) => {
       })
       storeInterface.mutateStore("currentBook", menuBook)
       storeInterface.mutateStore("currentChapter", String(chapter))
+      scrollToTop()
     })
     togglePanel(false)
   }, 300)
+
+  function scrollToTop() {
+    let scrollPane = document.querySelector('[data-js="scrollToTop"]')
+    if (scrollPane) {
+      scrollPane.scrollTop = 0
+    }
+  }
 
   const togglePanel = (bool?: boolean) => {
     let val = bool === false ? bool : !menuIsOpen()
