@@ -118,6 +118,9 @@ const ReaderMenu: Component<MenuProps> = (props) => {
 
   const togglePanel = (bool?: boolean) => {
     let val = bool === false ? bool : !menuIsOpen()
+    if (val == true && settingsAreOpen() && window.innerWidth < 640) {
+      setSettingsAreOpen(false)
+    }
     let menuBook = props.storeInterface.getStoreVal("menuBook") as string
     let currentBook = props.storeInterface.getStoreVal("currentBook") as string
     batch(() => {
@@ -127,6 +130,14 @@ const ReaderMenu: Component<MenuProps> = (props) => {
       }
       setMenuIsOpen(val)
     })
+  }
+  function manageOpenSettings() {
+    let newState = !settingsAreOpen()
+    setSettingsAreOpen(newState)
+    if (menuIsOpen() && newState == true && window.innerWidth < 640) {
+      setMenuIsOpen(false)
+    }
+    props.setPrintWholeBook(false)
   }
   function switchBooks(book: string) {
     props.storeInterface.mutateStore("menuBook", book)
@@ -262,10 +273,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                   class="rounded   py-2  px-5 outline outline-1 outline-gray-300 hover:outline-accent"
                   // todo: internationalize label
                   aria-label="Open Settings"
-                  onClick={() => {
-                    setSettingsAreOpen(!settingsAreOpen())
-                    props.setPrintWholeBook(false)
-                  }}
+                  onClick={manageOpenSettings}
                 >
                   <SvgSettings className="" />
                 </button>
