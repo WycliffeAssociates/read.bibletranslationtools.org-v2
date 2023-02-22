@@ -122,6 +122,7 @@ body.noscroll {
 #pageWrapper {
   height: var(--screenHeight);
   display: grid;
+  grid-template-rows: max-content;
   /* grid-template-rows: (100px, calc(var(--screenHeight) - 100px)); */
   @apply print:h-auto print:overflow-visible;
 }
