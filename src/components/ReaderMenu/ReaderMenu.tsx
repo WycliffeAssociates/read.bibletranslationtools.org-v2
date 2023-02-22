@@ -58,6 +58,24 @@ const ReaderMenu: Component<MenuProps> = (props) => {
       ? bibleMenuBooksByCategory.OT.push(book)
       : bibleMenuBooksByCategory.NT.push(book)
   })
+  const filteredMenuBookByCategory = () => {
+    let bibleMenuBooksByCategory: {
+      OT: any[]
+      NT: any[]
+    } = {
+      OT: [],
+      NT: []
+    }
+    let booksToSearch: Array<any> = searchQuery()
+      ? props.storeInterface.getStoreVal("searchedBooks")
+      : props.storeInterface.menuBookNames()
+    booksToSearch.forEach((book) => {
+      BibleBookCategories.OT.includes(book.slug.toUpperCase())
+        ? bibleMenuBooksByCategory.OT.push(book)
+        : bibleMenuBooksByCategory.NT.push(book)
+    })
+    return bibleMenuBooksByCategory
+  }
   // ====MENU FXNS
   const jumpToNewChapIdx = debounce(async (evt: InputEvent, value: string) => {
     const storeInterface = props.storeInterface
@@ -153,6 +171,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
   }
 
   const searchBooks = debounce((): void => {
+    console.log("HERE1")
     let allBooks = props.storeInterface.getStoreVal<bibleEntryObj[]>("text")
     let search = searchQuery().toLowerCase()
     !search && props.storeInterface.mutateStore("searchedBooks", allBooks)
@@ -250,7 +269,9 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                           <BookList
                             onClick={(book: string) => switchBooks(book)}
                             isActiveBook={isActiveBook}
-                            bibleMenuBooksByCategory={bibleMenuBooksByCategory}
+                            bibleMenuBooksByCategory={
+                              filteredMenuBookByCategory
+                            }
                             isMobile={false}
                           />
                         </div>
@@ -353,7 +374,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                       setMobileTabOpen("chapter")
                     }}
                     isActiveBook={isActiveBook}
-                    bibleMenuBooksByCategory={bibleMenuBooksByCategory}
+                    bibleMenuBooksByCategory={filteredMenuBookByCategory}
                     isMobile={true}
                   />
                 </div>

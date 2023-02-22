@@ -3,9 +3,9 @@ import { For, Show } from "solid-js"
 interface propsInterface {
   onClick: Function
   isActiveBook: Function
-  bibleMenuBooksByCategory: {
-    OT: Array<any>
-    NT: Array<any>
+  bibleMenuBooksByCategory: () => {
+    OT: any[]
+    NT: any[]
   }
   isMobile: Boolean
 }
@@ -17,18 +17,18 @@ export function BookList(props: propsInterface) {
   return (
     <Show
       when={
-        props.bibleMenuBooksByCategory.OT.length ||
-        props.bibleMenuBooksByCategory.NT.length
+        props.bibleMenuBooksByCategory().OT.length ||
+        props.bibleMenuBooksByCategory().NT.length
       }
     >
       <div class={outterClassNames}>
         {/* OT */}
-        <Show when={props.bibleMenuBooksByCategory.OT.length}>
+        <Show when={props.bibleMenuBooksByCategory().OT.length}>
           <span class="block px-4 pt-5 pb-1 text-xs uppercase italic text-gray-800">
             {t("oldTestament", undefined, "Old Testament")}
           </span>
           <ul class="" aria-label="">
-            <For each={props.bibleMenuBooksByCategory.OT}>
+            <For each={props.bibleMenuBooksByCategory().OT}>
               {(book, idx) => (
                 <li class="w-full">
                   <button
@@ -47,12 +47,12 @@ export function BookList(props: propsInterface) {
           </ul>
         </Show>
         {/* NT */}
-        <Show when={props.bibleMenuBooksByCategory.NT.length}>
+        <Show when={props.bibleMenuBooksByCategory().NT.length}>
           <span class="block px-4 pt-5 pb-1 text-xs uppercase italic text-gray-800">
             {t("newTestament", undefined, "New Testament")}
           </span>
           <ul>
-            <For each={props.bibleMenuBooksByCategory.NT}>
+            <For each={props.bibleMenuBooksByCategory().NT}>
               {(book, idx) => (
                 <li class="w-full">
                   <button
