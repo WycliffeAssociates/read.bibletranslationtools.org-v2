@@ -259,7 +259,7 @@ export default function Settings(props: settingsProps) {
               method="post"
             >
               <button class="sentenceCase inline-block hover:text-accent focus:text-accent">
-                Get usfm source
+                {t("downloadUsfmSource", undefined, "Download source USFM")}
               </button>
             </form>
           </li>
