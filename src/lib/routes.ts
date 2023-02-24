@@ -74,6 +74,17 @@ const FUNCTIONS_ROUTES = {
     base = base || supplyBaseLocation()
     return `${base}/getHtmlForCommentaryIndividualSection?user=${user}&repo=${repo}&file=${file}`
   },
+  downloadUsfmSrc: ({
+    user,
+    repo,
+    book
+  }: repo & {
+    book: string | undefined
+  }) => {
+    if (!book) return
+    base = base || supplyBaseLocation()
+    return `${base}/getUsfmSrcDownload?user=${user}&repo=${repo}&book=${book}`
+  },
   isValidRepo: ({ user, repo }: repo) => {
     base = base || supplyBaseLocation()
     return `${base}/isValidRepo?user=${user}&repo=${repo}`

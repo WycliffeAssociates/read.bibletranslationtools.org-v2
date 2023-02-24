@@ -1,5 +1,5 @@
 import { createSignal, For, Setter } from "solid-js"
-import type { tmSingle } from "@src/customTypes/types"
+import type { tmSingle } from "@customTypes/types"
 
 interface propsType {
   navigation: Array<tmSingle>

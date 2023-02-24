@@ -1,5 +1,5 @@
 import { FUNCTIONS_ROUTES } from "@lib/routes"
-import type { repoIndexObj } from "../customTypes/types"
+import type { repoIndexObj } from "@customTypes/types"
 
 interface baseApiInfo {
   user: string

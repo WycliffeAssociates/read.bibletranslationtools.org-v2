@@ -70,3 +70,13 @@ export const BibleBookCategories = {
     "REV"
   ]
 }
+interface sortOrderI {
+  [key: string]: number
+}
+const bibleBookSortOrder = Object.values(BibleBookCategories)
+  .flat()
+  .reduce((acc: sortOrderI, value: string, index: number) => {
+    acc[value] = index + 1
+    return acc
+  }, {})
+export { bibleBookSortOrder }

@@ -10,7 +10,7 @@ import type {
   bibleChapObj,
   bibleEntryObj,
   repoIndexObj
-} from "@src/customTypes/types"
+} from "@customTypes/types"
 import type { Accessor } from "solid-js"
 import { debounce } from "@lib/utils-ui"
 
@@ -36,7 +36,8 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
     languageCode: props.repoData.languageCode,
     resourceType: props.repoData.resourceType,
     textDirection: props.repoData.textDirection,
-    repoUrl: props.repoData.repoUrl
+    repoUrl: props.repoData.repoUrl,
+    downloadLinks: props.repoData.downloadLinks
   }
 
   const [readerStore, setReaderStore] = createStore(defaultStore)
@@ -359,16 +360,17 @@ export interface storeType {
   mutateStoreText: ({ book, chapter, val }: updateStoreTextParams) => void
   getStoreVal: <T>(
     key:
+      | "text"
       | "currentBook"
       | "currentChapter"
       | "menuBook"
       | "searchedBooks"
-      | "text"
       | "languageName"
       | "languageCode"
       | "resourceType"
       | "textDirection"
       | "repoUrl"
+      | "downloadLinks"
   ) => T
 
   allBibArr: Accessor<bibleEntryObj[]>

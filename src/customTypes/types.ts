@@ -71,6 +71,12 @@ export interface repoIndexObj {
   words: Array<wordsEntryObj> | null /* TW */
   navigation: Array<tmEntry> | null /* TM */
   repoUrl: string
+  downloadLinks:
+    | {
+        link: string
+        title: string
+      }[]
+    | []
 }
 
 export interface bibleSchemaPropsType {

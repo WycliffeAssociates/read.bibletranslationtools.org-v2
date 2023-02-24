@@ -2,12 +2,15 @@ import { get, set } from "idb-keyval"
 import { createSignal, onMount, Show, For, Setter } from "solid-js"
 import { useI18n } from "@solid-primitives/i18n"
 import type { storeType } from "../ReaderWrapper/ReaderWrapper"
+import type { repoIndexObj } from "@customTypes/types"
+import { FUNCTIONS_ROUTES } from "@lib/routes"
 
 interface settingsProps {
   fetchHtml: storeType["fetchHtml"]
   mutateStoreText: storeType["mutateStoreText"]
   currentBookObj: storeType["currentBookObj"]
   setPrintWholeBook: Setter<boolean>
+  downloadSourceUsfmArr: repoIndexObj["downloadLinks"]
   user: string
   repo: string
 }
@@ -31,6 +34,7 @@ export default function Settings(props: settingsProps) {
   } as const
   let options = Object.entries(cacheStrategies)
 
+  // February 24, 2023 - current unusued bc custom service worker strategy was causing some loading issues on really slow connections.Went back to an out the box one for in sw.js
   const [cacheStrategy, setCacheStrategy] = createSignal()
   onMount(async () => {
     const currentCacheStrategy = await get(cacheStrategyKey)
@@ -132,6 +136,9 @@ export default function Settings(props: settingsProps) {
     // fetch request for every chapter in current book
   }
 
+  // function getUsfmSource(event) {
+  //   event.preventDefault()
+  // }
   return (
     <>
       {/* This controls the loading behavior of Service Worker, for custom Strategy during runtime.  It needs some work as of Thursday February 09, 2023 03:50PM, so using the Race strategy that workbox gives and example of */}
@@ -195,8 +202,8 @@ export default function Settings(props: settingsProps) {
               </svg>
             </Show>
             {!savingOffline()
-              ? `${t("downloadWholeBook")}`
-              : `${t("saving")}...`}
+              ? `${t("saveForOfflineReading", {}, "Save for reading offline")}`
+              : `${t("saving", undefined, "Saving")}...`}
           </button>
         </li>
         <li class="my-2">
@@ -241,6 +248,22 @@ export default function Settings(props: settingsProps) {
             {t("downloadSource")}
           </a>
         </li>
+        <Show when={props.downloadSourceUsfmArr.length}>
+          <li class="my-2">
+            <form
+              action={FUNCTIONS_ROUTES.downloadUsfmSrc({
+                user: props.user,
+                repo: props.repo,
+                book: props.currentBookObj()?.slug
+              })}
+              method="post"
+            >
+              <button class="sentenceCase inline-block hover:text-accent focus:text-accent">
+                Get usfm source
+              </button>
+            </form>
+          </li>
+        </Show>
       </ul>
     </>
   )
