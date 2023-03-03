@@ -169,7 +169,6 @@ const ReaderMenu: Component<MenuProps> = (props) => {
   }
 
   const searchBooks = debounce((): void => {
-    console.log("HERE1")
     let allBooks = props.storeInterface.getStoreVal<bibleEntryObj[]>("text")
     let search = searchQuery().toLowerCase()
     !search && props.storeInterface.mutateStore("searchedBooks", allBooks)

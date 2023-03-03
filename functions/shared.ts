@@ -5,7 +5,6 @@ export async function getRepoIndexLocal(
   repo: string
 ): Promise<repoIndexObj | null> {
   try {
-    // http://localhost/u/WA-Catalog/en_ulb/index.json;
     let baseUrl = env.PIPELINE_API_URL_BASE
     let finalUrl = `${baseUrl}/${user}/${repo}/index.json`
     let response = await fetch(finalUrl)

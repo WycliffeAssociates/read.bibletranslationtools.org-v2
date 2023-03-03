@@ -76,20 +76,8 @@ export default function Settings(props: settingsProps) {
         // debugger
       }
       Promise.all(promises).then((values) => {
-        // console.log(values)
-        // debugger
         setSavingOffline(false)
       })
-
-      // htmlPagesToSaveInCache.forEach((url) => {
-      //   const event = new CustomEvent("addCurrentPageToSw", {
-      //     detail: {
-      //       url: url,
-      //       cacheName: "lr-pages"
-      //     }
-      //   })
-      //   commonWrapper.dispatchEvent(event)
-      // })
     }
   }
   async function makeApiCallsAndSaveToWorkingMemory(fetchingForSw = false) {

@@ -132,7 +132,6 @@ const initialDictModule = await import(
 const initialDict = {
   [preferredLocale]: initialDictModule.default
 }
-console.log(repoIndex.downloadLinks)
 ---
 
 <Layout
@@ -192,7 +191,4 @@ console.log(repoIndex.downloadLinks)
   window.addEventListener("load", secDocHeight)
   window.addEventListener("resize", secDocHeight)
   window.addEventListener("orientationchange", secDocHeight)
-  // window.addEventListener("popstate", (event) => {
-  //   console.log({ event })
-  // })
 </script>

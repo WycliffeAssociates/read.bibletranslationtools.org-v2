@@ -39,7 +39,6 @@ export const onRequestGet: PagesFunction = async (context) => {
     let baseUrl = env.PIPELINE_API_URL_BASE
     let finalUrl = `${baseUrl}/${user}/${repo}/${navSection}.html`
     let response = await fetch(finalUrl)
-    // E[foo*="bar"]
     let newResp = new Response(response.body, {
       headers: getHeaders(url)
     })
