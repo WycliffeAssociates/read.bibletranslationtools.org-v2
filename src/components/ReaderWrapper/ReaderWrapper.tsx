@@ -39,7 +39,6 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
     repoUrl: props.repoData.repoUrl,
     downloadLinks: props.repoData.downloadLinks
   }
-
   const [readerStore, setReaderStore] = createStore(defaultStore)
   const [printWholeBook, setPrintWholeBook] = createSignal(false)
 
@@ -60,6 +59,7 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
         label: string
         slug: string
       }[]
+    | bibleEntryObj[]
   >
 
   function mutateStore<T extends keyof mutateSimple>(
@@ -82,7 +82,7 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
         let currentChap = currentStore.text[currentBook].chapters.findIndex(
           (storeChap) => storeChap.label == chapter
         )
-        currentStore.text[currentBook].chapters[currentChap].text = val
+        currentStore.text[currentBook].chapters[currentChap].content = val
       })
     )
   }
@@ -152,13 +152,13 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
   }
   const wholeBookHtml = createMemo(() => {
     let currentBook = currentBookObj()
-    let html = currentBook?.chapters.map((chap) => chap.text).join("")
+    let html = currentBook?.chapters.map((chap) => chap.content).join("")
     return html || undefined
   })
   const HTML = createMemo(() => {
     let currentChap = currentChapObj()
     // const retVal = currentBook[readerStore.currentChapter]
-    return (currentChap && currentChap.text) || undefined
+    return (currentChap && currentChap.content) || undefined
   })
   const maxChapter = createMemo(() => {
     const bookObj = readerStore.text.find((storeBook) => {
@@ -272,6 +272,7 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
               setPrintWholeBook={setPrintWholeBook}
               user={props.user}
               repositoryName={props.repositoryName}
+              hasDownloadIndex={props.hasDownloadIndex}
             />
           </div>
           <ReaderPane
@@ -326,6 +327,7 @@ export interface ReaderWrapperProps {
   firstChapterToShow: string
   repoData: repoIndexObj
   initialDict: any /* todo change all initial dict types */
+  hasDownloadIndex: boolean
 }
 export interface storeType {
   mutateStore<
@@ -339,6 +341,7 @@ export interface storeType {
       | "resourceType"
       | "textDirection"
       | "repoUrl"
+      | "text"
   >(
     key: T,
 
@@ -355,6 +358,7 @@ export interface storeType {
       resourceType: string
       textDirection: string
       repoUrl: string
+      text: bibleEntryObj[]
     }[T]
   ): void
   mutateStoreText: ({ book, chapter, val }: updateStoreTextParams) => void

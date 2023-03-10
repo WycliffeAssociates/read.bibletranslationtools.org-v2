@@ -1,5 +1,5 @@
 import { FUNCTIONS_ROUTES } from "@lib/routes"
-import type { repoIndexObj } from "@customTypes/types"
+import type { downloadIndexI, repoIndexObj } from "@customTypes/types"
 
 interface baseApiInfo {
   user: string
@@ -90,6 +90,36 @@ export async function getRepoIndex({
       }
     })
     const data: repoIndexObj = await response.json()
+    if (typeof data == "string") {
+      return null
+    }
+    return data
+  } catch (error) {
+    console.error(error)
+    return null
+  }
+}
+export async function checkForOrDownloadWholeRepo({
+  user,
+  repo,
+  method
+}: baseApiInfo & {
+  method: "GET" | "HEAD"
+}): Promise<downloadIndexI | null | boolean> {
+  if (!user || !repo || !method) return null
+  let fetchUrl = FUNCTIONS_ROUTES.getWholeRepoDownload({ user, repo, method })
+  try {
+    const response = await fetch(fetchUrl)
+    if (method == "HEAD") {
+      let wasOk = response.ok
+      return wasOk
+    } else if (method == "GET") {
+      let data: downloadIndexI = await response.json()
+      return data
+    }
+    console.log({ response })
+    const data: downloadIndexI = await response.json()
+    console.log({ data })
     if (typeof data == "string") {
       return null
     }

@@ -235,6 +235,7 @@ export default function ReaderPane(props: ReaderPaneProps) {
             </Show>
             {/* top buttons */}
             <div
+              id="theText"
               ref={textRef}
               class="theText mx-auto mb-24 h-full  max-w-[85ch] overflow-y-auto bg-inherit pr-1 pt-2 text-lg leading-relaxed print:h-min print:overflow-y-visible  print:pb-4  sm:px-2 md:mr-auto md:ml-0 md:w-4/5 md:max-w-[75ch] md:text-2xl xl:mx-auto"
               innerHTML={props.storeInterface.HTML()}

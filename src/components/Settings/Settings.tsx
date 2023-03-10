@@ -4,15 +4,16 @@ import { useI18n } from "@solid-primitives/i18n"
 import type { storeType } from "../ReaderWrapper/ReaderWrapper"
 import type { repoIndexObj } from "@customTypes/types"
 import { FUNCTIONS_ROUTES } from "@lib/routes"
+import { downloadIndexI } from "@customTypes/types"
+import { checkForOrDownloadWholeRepo } from "@lib/api"
 
 interface settingsProps {
-  fetchHtml: storeType["fetchHtml"]
-  mutateStoreText: storeType["mutateStoreText"]
-  currentBookObj: storeType["currentBookObj"]
   setPrintWholeBook: Setter<boolean>
   downloadSourceUsfmArr: repoIndexObj["downloadLinks"]
   user: string
   repo: string
+  storeInterface: storeType
+  hasDownloadIndex: boolean
 }
 
 export default function Settings(props: settingsProps) {
@@ -55,8 +56,8 @@ export default function Settings(props: settingsProps) {
     // debugger
     setSavingOffline(true)
     let urlBase = window.location.origin
-    const chapters = props.currentBookObj()?.chapters
-    const bookSlug = props.currentBookObj()?.slug
+    const chapters = props.storeInterface.currentBookObj()?.chapters
+    const bookSlug = props.storeInterface.currentBookObj()?.slug
     if (!chapters || !chapters.length) return
     // todo: this query parameter scheme will only work for bible type schema
     let htmlPagesToSaveInCache = chapters.map((chap) => {
@@ -81,21 +82,21 @@ export default function Settings(props: settingsProps) {
     }
   }
   async function makeApiCallsAndSaveToWorkingMemory(fetchingForSw = false) {
-    let currentBookObj = props.currentBookObj()
+    let currentBookObj = props.storeInterface.currentBookObj()
     let promises: Array<Promise<string>> = []
     currentBookObj?.chapters.forEach((bibleChapObj) => {
       const promisedFetch = new Promise<string>(async (res, rej) => {
         if (!fetchingForSw) {
           if (bibleChapObj.text) return res(bibleChapObj.text) //already fetched
         }
-        let text = await props.fetchHtml({
+        let text = await props.storeInterface.fetchHtml({
           book: String(currentBookObj?.slug),
           chapter: bibleChapObj.label,
           skipAbort: true
         })
         if (text) {
           // ? batch mutate when done fetching or as we go?
-          props.mutateStoreText({
+          props.storeInterface.mutateStoreText({
             book: String(currentBookObj?.slug),
             chapter: String(bibleChapObj.label),
             val: String(text)
@@ -122,6 +123,69 @@ export default function Settings(props: settingsProps) {
       props.setPrintWholeBook(false)
     })
     // fetch request for every chapter in current book
+  }
+  async function saveEntireBookToSw() {
+    // fetch the download.json file
+    const downloadIndex = await checkForOrDownloadWholeRepo({
+      user: props.user,
+      repo: props.repo,
+      method: "GET"
+    })
+    if (
+      !downloadIndex ||
+      typeof downloadIndex != "object" ||
+      !downloadIndex.content.length
+    )
+      return
+
+    // response is same shape, so just add to working memory
+    let current = props.storeInterface.getStoreVal("text")
+    console.log({ current })
+    props.storeInterface.mutateStore("text", downloadIndex.content)
+
+    const htmlPage = document.querySelector("html")
+    const htmlClone = document.cloneNode(true) as Element
+    const textContainer = htmlClone.querySelector("#theText")
+    // save each to current memory in file
+    downloadIndex.content.forEach((book, bookIdx) => {
+      book.chapters.forEach((chapter, chapterIdx) => {
+        debugger
+        // /api/getHtmlForChap?user=AnaIglesias&repo=gl_1jn_text_reg&book=1jn&chapter=2
+        const apiUrl = `${window.location.origin}/api/getHtmlForChap?user=${props.user}&repo=${props.repo}&book=${book.slug}&chapter=${chapter.label}`
+        if (typeof chapter.content != "string") return
+        const content = chapter.content
+        const apiResponse = new Response(content, {
+          status: 200,
+          statusText: "OK",
+          headers: {
+            "Content-Type": "text/html"
+          }
+        })
+        caches.open("live-reader-api").then((cache) => {
+          cache.put(new URL(apiUrl), apiResponse)
+        })
+
+        // HTML request
+        // WycliffeAssociates/en_ulb
+        const htmlUrl = new URL(
+          `${window.location.origin}/${props.user}/${props.repo}&book=${book.slug}&chapter=${chapter.label}`
+        )
+        if (!textContainer) return
+        textContainer.innerHTML = chapter.content
+        const responseHtml = htmlClone.outerHTML
+        const htmlResponse = new Response(responseHtml, {
+          status: 200,
+          statusText: "OK",
+          headers: {
+            "Content-Type": "text/html"
+          }
+        })
+        caches.open("lr-pages").then((cache) => {
+          cache.put(new URL(htmlUrl), htmlResponse)
+        })
+      })
+    })
+    // put corresponding request in appropriate both HTML (lr-pages) and lr-api forms.  Lr-pages equals the current page, but we swap out the main text container.
   }
 
   // function getUsfmSource(event) {
@@ -242,7 +306,7 @@ export default function Settings(props: settingsProps) {
               action={FUNCTIONS_ROUTES.downloadUsfmSrc({
                 user: props.user,
                 repo: props.repo,
-                book: props.currentBookObj()?.slug
+                book: props.storeInterface.currentBookObj()?.slug
               })}
               method="post"
             >
@@ -250,6 +314,17 @@ export default function Settings(props: settingsProps) {
                 {t("downloadUsfmSource", undefined, "Download source USFM")}
               </button>
             </form>
+          </li>
+        </Show>
+        <Show when={props.hasDownloadIndex}>
+          <li class="my-2">
+            <button
+              class="sentenceCase inline-block hover:text-accent focus:text-accent"
+              onClick={saveEntireBookToSw}
+            >
+              Save entire book
+              {/* {t("downloadUsfmSource", undefined, "Save Entire Book")} */}
+            </button>
           </li>
         </Show>
       </ul>

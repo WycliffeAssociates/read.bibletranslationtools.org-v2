@@ -159,7 +159,7 @@ if (import.meta.env.DEV) {
         }),
         new ExpirationPlugin({
           purgeOnQuotaError: true,
-          maxEntries: 2000
+          maxEntries: 50000
         })
       ]
     })
@@ -190,7 +190,7 @@ if (import.meta.env.PROD) {
         }),
         new ExpirationPlugin({
           purgeOnQuotaError: true,
-          maxEntries: 2000
+          maxEntries: 50000
         })
       ]
     })
@@ -210,7 +210,7 @@ if (import.meta.env.PROD) {
         }),
         new ExpirationPlugin({
           purgeOnQuotaError: true,
-          maxEntries: 2000
+          maxEntries: 50000
         })
       ]
     })

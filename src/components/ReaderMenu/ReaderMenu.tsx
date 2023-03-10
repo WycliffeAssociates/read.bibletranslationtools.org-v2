@@ -34,6 +34,7 @@ interface MenuProps {
   setPrintWholeBook: Setter<boolean>
   user: string
   repositoryName: string
+  hasDownloadIndex: boolean
 }
 const ReaderMenu: Component<MenuProps> = (props) => {
   // ====MENU STATE
@@ -299,12 +300,11 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                   <div class="shadow-dark-700 absolute z-20 w-72 bg-neutral-100 p-4 text-right shadow-xl ltr:right-0 rtl:left-0">
                     <Suspense fallback={<LoadingSpinner />}>
                       <Settings
-                        fetchHtml={props.storeInterface.fetchHtml}
-                        mutateStoreText={props.storeInterface.mutateStoreText}
-                        currentBookObj={props.storeInterface.currentBookObj}
+                        storeInterface={props.storeInterface}
                         setPrintWholeBook={props.setPrintWholeBook}
                         user={props.user}
                         repo={props.repositoryName}
+                        hasDownloadIndex={props.hasDownloadIndex}
                         downloadSourceUsfmArr={props.storeInterface.getStoreVal(
                           "downloadLinks"
                         )}

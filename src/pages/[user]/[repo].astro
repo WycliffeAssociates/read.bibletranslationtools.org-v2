@@ -11,7 +11,8 @@ import {
   getTwSchemaHtml,
   getRepoIndex,
   isValidRepo,
-  getTmSchemaHtml
+  getTmSchemaHtml,
+  checkForOrDownloadWholeRepo
 } from "@lib/api"
 import {
   getBookAndChapterFromUrl,
@@ -43,6 +44,11 @@ user = String(user)
 
 // get of text and metadata
 const repoIndex = await getRepoIndex({ user, repo })
+const hasDownloadIndex = !!(await checkForOrDownloadWholeRepo({
+  user,
+  repo,
+  method: "HEAD"
+}))
 
 if (!repoIndex) return res404
 
@@ -152,6 +158,7 @@ const initialDict = {
           repositoryName={repo}
           preferredLocale={preferredLocale}
           initialDict={initialDict}
+          hasDownloadIndex={hasDownloadIndex}
         />
       )
     }

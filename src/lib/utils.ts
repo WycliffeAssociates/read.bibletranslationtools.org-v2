@@ -120,9 +120,9 @@ export function seedAndMutateInitialDataRepoIndex({
   if (!repoIndex.bible) return
   repoIndex.bible.forEach((repoBook) => {
     repoBook.chapters.forEach((repoChapter) => {
-      repoChapter.text = null
+      repoChapter.content = null
       if (repoBook.slug == book && repoChapter.label == chapter) {
-        repoChapter.text = initialHtml
+        repoChapter.content = initialHtml
       }
     })
   })

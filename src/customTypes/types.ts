@@ -61,6 +61,10 @@ export interface tmEntry {
   Label: string
   Children: Array<tmSingle>
 }
+export interface downloadIndexI {
+  content: bibleEntryObj[]
+  ByteCount: number
+}
 export interface repoIndexObj {
   languageName: string
   languageCode: string

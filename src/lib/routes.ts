@@ -81,6 +81,16 @@ const FUNCTIONS_ROUTES = {
     base = base || supplyBaseLocation()
     return `${base}/getUsfmSrcDownload?user=${user}&repo=${repo}&book=${book}`
   },
+  getWholeRepoDownload: ({
+    user,
+    repo,
+    method
+  }: repo & {
+    method: "GET" | "HEAD"
+  }) => {
+    base = base || supplyBaseLocation()
+    return `${base}/getWholeRepoDownload?user=${user}&repo=${repo}&method=${method}`
+  },
   isValidRepo: ({ user, repo }: repo) => {
     base = base || supplyBaseLocation()
     return `${base}/isValidRepo?user=${user}&repo=${repo}`
