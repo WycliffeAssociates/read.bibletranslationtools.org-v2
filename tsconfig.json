@@ -20,7 +20,7 @@
       "@assets/*": ["src/assets/*"],
       "@images/*": ["src/assets/images/*"],
       "@lib/*": ["src/lib/*"],
-      "@types/*": ["src/customTypes/*"],
+      "@customTypes/*": ["src/customTypes/*"],
       "@src/*": ["src/*"]
     }
   },

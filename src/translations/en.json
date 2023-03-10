@@ -5,7 +5,7 @@
   "code": "en",
   "download": "Download",
   "saving": "Saving",
-  "downloadWholeBook": "Download whole book",
+  "saveForOfflineReading": "Save for reading offline",
   "english": "English",
   "homeTitle": "Free Bible Translation Tools for the Global Chuch",
   "menu": "Menu",
@@ -28,5 +28,6 @@
   "ariaNavigateForwardsOneChapter": "Navigate forwards one chapter",
   "ariaNavigateBackwardsOneChapter": "Navigate backwards one chapter",
   "oldTestament": "Old Testament",
-  "newTestament": "New Testament"
+  "newTestament": "New Testament",
+  "downloadUsfmSource": "Download source USFM"
 }

@@ -1,6 +1,6 @@
 import { i18nDictKeysType, i18nDictMeta } from "@lib/i18n"
 // import { onCleanup } from "solid-js"
-import type { repoIndexObj } from "../customTypes/types"
+import type { repoIndexObj } from "@customTypes/types"
 
 /**
  * @param request an Astro request. The accepts language header will be referenced against existing locales

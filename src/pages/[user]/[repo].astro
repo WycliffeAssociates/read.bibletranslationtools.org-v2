@@ -164,7 +164,7 @@ const initialDict = {
     <!-- #=============== TM TEMPLATE  ============= -->
     {
       repoProps.templateType === "TM" && (
-        <div class="tm-wrapper px- mx-auto h-full  max-w-[1400px] ">
+        <div class="tm-wrapper  mx-auto h-full  max-w-[1400px] ">
           <TranslationManual
             client:load
             initialHtml={repoProps.initialHtml}
@@ -191,10 +191,4 @@ const initialDict = {
   window.addEventListener("load", secDocHeight)
   window.addEventListener("resize", secDocHeight)
   window.addEventListener("orientationchange", secDocHeight)
-  // window.addEventListener("popstate", (event) => {
-  //   console.log({ event })
-  // })
-  // function handleNav(details: any) {
-  //   console.log({ details })
-  // }
 </script>

@@ -1,5 +1,5 @@
 import { FUNCTIONS_ROUTES } from "@lib/routes"
-import type { repoIndexObj } from "../customTypes/types"
+import type { repoIndexObj } from "@customTypes/types"
 
 interface baseApiInfo {
   user: string
@@ -84,7 +84,6 @@ export async function getRepoIndex({
   if (!user || !repo) return null
   let fetchUrl = FUNCTIONS_ROUTES.getRepoIndex({ user, repo })
   try {
-    console.log(`fetching index; ${fetchUrl}`)
     const response = await fetch(fetchUrl, {
       headers: {
         "Content-Type": "application/json"
@@ -94,7 +93,6 @@ export async function getRepoIndex({
     if (typeof data == "string") {
       return null
     }
-    // console.log(`data:${data}`)
     return data
   } catch (error) {
     console.error(error)

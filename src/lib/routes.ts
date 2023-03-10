@@ -1,10 +1,6 @@
 let mode = import.meta.env.MODE
 const devUrl = import.meta.env.PUBLIC_FUNCTIONS_API_BASE
 let base: string | undefined
-// console.log(location)
-// todo: change to a production url:
-// read-dev.bibletranslationtools.org
-// local scripture rendering pipeline: http://127.0.0.1:8788/api
 
 interface getRepoHtmlType {
   user: string
@@ -73,6 +69,17 @@ const FUNCTIONS_ROUTES = {
   }: commentaryIndividual) => {
     base = base || supplyBaseLocation()
     return `${base}/getHtmlForCommentaryIndividualSection?user=${user}&repo=${repo}&file=${file}`
+  },
+  downloadUsfmSrc: ({
+    user,
+    repo,
+    book
+  }: repo & {
+    book: string | undefined
+  }) => {
+    if (!book) return
+    base = base || supplyBaseLocation()
+    return `${base}/getUsfmSrcDownload?user=${user}&repo=${repo}&book=${book}`
   },
   isValidRepo: ({ user, repo }: repo) => {
     base = base || supplyBaseLocation()

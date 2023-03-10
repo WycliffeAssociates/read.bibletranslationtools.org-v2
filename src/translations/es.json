@@ -5,7 +5,7 @@
   "code": "es",
   "download": "Descargar",
   "saving": "Guardando",
-  "downloadWholeBook": "Descargar el libro completo",
+  "saveForOfflineReading": "Guardar para leer sin conexión",
   "english": "English",
   "homeTitle": "Herramientas gratis de la Traducción de la Bible para la Iglesia Global",
   "print": "Imprimir",
@@ -27,5 +27,6 @@
   "ariaNavigateForwardsOneChapter": "Navegue un capitulo adelante",
   "ariaNavigateBackwardsOneChapter": "Navegue un capitulo atrás",
   "oldTestament": "El Antiguo Testamento",
-  "newTestament": "Nuevo Testamento"
+  "newTestament": "Nuevo Testamento",
+  "downloadUsfmSource": "Descargar fuente USFM"
 }

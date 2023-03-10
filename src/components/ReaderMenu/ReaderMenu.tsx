@@ -13,24 +13,22 @@ import { ChapterList } from "./ChapterList"
 import { clickOutside, debounce, escapeOut } from "@lib/utils-ui"
 
 // https://github.com/solidjs/solid/discussions/845
-// these are hacks (name doesn't matter) to keep typescript from stripping away "unused imports", but these are used directives below:
+// these are hacks (name doesn't matter) to keep typescript from stripping away "unused imports", but these are used as custom solid directives below:
 // @ts-ignore
 const clickout = clickOutside
 // @ts-ignore
 const escape = escapeOut
 
-// const Settings = lazy(() => {
-//   import("../Settings/Settings")
-// })
 const Settings = lazy(async () => {
   return import("../Settings/Settings")
 })
 
 import { useI18n } from "@solid-primitives/i18n"
 import type { Component } from "solid-js"
-import type { bibleEntryObj } from "../../customTypes/types"
+import type { bibleEntryObj } from "@customTypes/types"
 import type { storeType } from "@components/ReaderWrapper/ReaderWrapper"
 import { BibleBookCategories } from "@lib/contants"
+
 interface MenuProps {
   storeInterface: storeType
   setPrintWholeBook: Setter<boolean>
@@ -171,7 +169,6 @@ const ReaderMenu: Component<MenuProps> = (props) => {
   }
 
   const searchBooks = debounce((): void => {
-    console.log("HERE1")
     let allBooks = props.storeInterface.getStoreVal<bibleEntryObj[]>("text")
     let search = searchQuery().toLowerCase()
     !search && props.storeInterface.mutateStore("searchedBooks", allBooks)
@@ -308,6 +305,9 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                         setPrintWholeBook={props.setPrintWholeBook}
                         user={props.user}
                         repo={props.repositoryName}
+                        downloadSourceUsfmArr={props.storeInterface.getStoreVal(
+                          "downloadLinks"
+                        )}
                       />
                     </Suspense>
                   </div>
