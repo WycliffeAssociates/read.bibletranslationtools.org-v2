@@ -1,10 +1,11 @@
 // https://github.com/solidjs/solid/issues/804
 declare module "solid-js" {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface CustomEvents {
       changelanguage: CustomEvent<{
         language: string
-        newDict: any
+        newDict: Record<string, string>
         newDictCode: string
         addToOtherDict: boolean
       }>
@@ -20,25 +21,30 @@ declare module "solid-js" {
       }>
     }
     interface Directives {
-      clickOutside(el: HTMLElement, accessor: any): void
-      escapeOut(el: HTMLElement, accessor: any): void
+      clickOutside(el: HTMLElement, accessor: () => unknown): void
+      escapeOut(el: HTMLElement, accessor: () => unknown): void
     }
   }
 }
 
 // declare modu;
 
+export type i18nDictWithLangCode = Record<string, i18nDict>
+
+export type i18nDict = Record<string, string>
+
 export interface bibleChapObj {
   [index: string]: string | number | null
   number: string
   label: string
-  text: null | string
+  content: null | string
 }
 export interface bibleEntryObj {
-  [index: string]: any
+  // [index: string]: any
   slug: string
   label: string
   chapters: bibleChapObj[]
+  lastRendered: string
 }
 
 export interface wordsEntryObj {
@@ -75,12 +81,14 @@ export interface repoIndexObj {
   words: Array<wordsEntryObj> | null /* TW */
   navigation: Array<tmEntry> | null /* TM */
   repoUrl: string
+  lastRendered: string
   downloadLinks:
     | {
         link: string
         title: string
       }[]
     | []
+  wholeResourceByteCount: number
 }
 
 export interface bibleSchemaPropsType {
@@ -97,7 +105,7 @@ export interface TMRepoProps {
 }
 
 export interface commonRepoProps {
-  initialHtml: string
+  initialHtml: string | null
   pageTitle: string
   repoIndex: repoIndexObj
 }
@@ -116,5 +124,3 @@ export interface bibleSchemaProps extends commonRepoProps {
   chapter: string
   templateType: "BIBLE"
 }
-
-// todo: each repo as this extends: just define them in the if/else blocks: Take some time and actually thing about what makes the most sense for these types pleasesl

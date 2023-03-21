@@ -1,14 +1,15 @@
 import type { i18nDictKeysType } from "@lib/i18n"
 import { createI18nContext, I18nContext } from "@solid-primitives/i18n"
-import { createSignal, createMemo } from "solid-js"
+import { createSignal, createMemo, Show, onMount } from "solid-js"
 import type { JSX } from "solid-js"
 import { createStore, produce } from "solid-js/store"
 import { FUNCTIONS_ROUTES } from "@lib/routes"
-import { ReaderMenu, ReaderPane } from "@components"
+import { LoadingSpinner, ReaderMenu, ReaderPane } from "@components"
 
 import type {
   bibleChapObj,
   bibleEntryObj,
+  i18nDictWithLangCode,
   repoIndexObj
 } from "@customTypes/types"
 import type { Accessor } from "solid-js"
@@ -19,27 +20,34 @@ import { debounce } from "@lib/utils-ui"
 export default function ReaderWrapper(props: ReaderWrapperProps) {
   //======= Reader App state =============
   // ideally, context is a more native fit than this prop passing for something that is only rendering children, but not possible with Astro and the way islands are implmented.  Just a tradeoff.
-  if (!props.repoData.bible?.length) return null //can't do anything without bible, and to satisfy TS narrowing
 
-  let defaultStore = {
-    currentBook: props.firstBookKey,
-    currentChapter: props.firstChapterToShow,
-    menuBook: props.firstBookKey,
-    searchedBooks: props.repoData.bible.map((book) => {
-      return {
-        label: book.label,
-        slug: book.slug
-      }
-    }),
-    text: props.repoData.bible,
-    languageName: props.repoData.languageName,
-    languageCode: props.repoData.languageCode,
-    resourceType: props.repoData.resourceType,
-    textDirection: props.repoData.textDirection,
-    repoUrl: props.repoData.repoUrl,
-    downloadLinks: props.repoData.downloadLinks
+  // there is only the parent astro template passing ssr props. They aren't going to update, so we don't have to worry about the early return or the reactivity of props here.
+
+  // eslint-disable-next-line solid/reactivity, solid/components-return-once
+  const bibText = props.repoData.bible //ts can typecheck when assigned to a local variable.
+
+  const defaultStore = () => {
+    return {
+      currentBook: props.firstBookKey,
+      currentChapter: props.firstChapterToShow,
+      menuBook: props.firstBookKey,
+      searchableBooks: bibText?.map((book) => {
+        return {
+          label: book.label,
+          slug: book.slug
+        }
+      }),
+      text: bibText,
+      languageName: props.repoData.languageName,
+      languageCode: props.repoData.languageCode,
+      resourceType: props.repoData.resourceType,
+      textDirection: props.repoData.textDirection,
+      repoUrl: props.repoData.repoUrl,
+      downloadLinks: props.repoData.downloadLinks
+    }
   }
-  const [readerStore, setReaderStore] = createStore(defaultStore)
+  // eslint-disable-next-line solid/reactivity
+  const [readerStore, setReaderStore] = createStore(defaultStore())
   const [printWholeBook, setPrintWholeBook] = createSignal(false)
 
   // Wrappers and predefined functions for reading and mutating store;
@@ -60,6 +68,8 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
         slug: string
       }[]
     | bibleEntryObj[]
+    | null
+    | undefined
   >
 
   function mutateStore<T extends keyof mutateSimple>(
@@ -72,20 +82,23 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
       })
     )
   }
+  // type x = typeof mutateStore
 
   function mutateStoreText({ book, chapter, val }: updateStoreTextParams) {
     setReaderStore(
       produce((currentStore) => {
-        let currentBook = currentStore.text.findIndex(
+        if (!currentStore.text) return
+        const currentBook = currentStore.text.findIndex(
           (storeBib) => storeBib.slug == book
         )
-        let currentChap = currentStore.text[currentBook].chapters.findIndex(
+        const currentChap = currentStore.text[currentBook].chapters.findIndex(
           (storeChap) => storeChap.label == chapter
         )
         currentStore.text[currentBook].chapters[currentChap].content = val
       })
     )
   }
+
   function getStoreVal<T>(key: keyof typeof readerStore) {
     return readerStore[key] as T
   }
@@ -94,18 +107,21 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
     return readerStore.text
   })
   const getMenuBook = createMemo(() => {
-    let menuBook = readerStore.text.find((storeBib) => {
+    if (!readerStore.text) return
+    const menuBook = readerStore.text.find((storeBib) => {
       return storeBib.slug == readerStore.menuBook
     })
 
     return menuBook
   })
   const isOneBook = () => {
+    if (!readerStore.text) return
     return readerStore.text.length == 1
   }
   const currentBookObj = createMemo(() => {
     // return readerStore.text[readerStore.currentBook]
-    let currentBook = readerStore.text.find((storeBib) => {
+    if (!readerStore.text) return
+    const currentBook = readerStore.text.find((storeBib) => {
       return storeBib.slug == readerStore.currentBook
     })
     return currentBook
@@ -113,7 +129,7 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
 
   const currentChapObj = createMemo(() => {
     const currentBook = currentBookObj()
-    let currentChap = currentBook?.chapters.find(
+    const currentChap = currentBook?.chapters.find(
       (chap) => readerStore.currentChapter == chap.label
     )
     return currentChap
@@ -130,13 +146,13 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
     const isLastChapter =
       currentChapIdx && currentChapIdx == currentBook?.chapters.length - 1
 
-    let prevChapObj = isFirstChapter
+    const prevChapObj = isFirstChapter
       ? null
       : currentBook.chapters[currentChapIdx - 1]
-    let nextChapObj = isLastChapter
+    const nextChapObj = isLastChapter
       ? null
       : currentBook.chapters[currentChapIdx + 1]
-    let navParam = {
+    const navParam = {
       prev: prevChapObj?.label,
       next: nextChapObj?.label
     }
@@ -144,37 +160,46 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
   })
 
   function getChapObjFromGivenBook(bookSlug: string, chap: number | string) {
-    let book = readerStore.text.find((storeBib) => {
+    if (!readerStore.text) return
+    const book = readerStore.text.find((storeBib) => {
       return storeBib.slug == bookSlug
     })
-    let chapter = book?.chapters.find((bookChap) => bookChap.label == chap)
+    const chapter = book?.chapters.find((bookChap) => bookChap.label == chap)
     return chapter
   }
   const wholeBookHtml = createMemo(() => {
-    let currentBook = currentBookObj()
-    let html = currentBook?.chapters.map((chap) => chap.content).join("")
+    const currentBook = currentBookObj()
+    const html = currentBook?.chapters.map((chap) => chap.content).join("")
     return html || undefined
   })
   const HTML = createMemo(() => {
-    let currentChap = currentChapObj()
+    const currentChap = currentChapObj()
     // const retVal = currentBook[readerStore.currentChapter]
     return (currentChap && currentChap.content) || undefined
   })
   const maxChapter = createMemo(() => {
+    if (!readerStore.text) return
     const bookObj = readerStore.text.find((storeBook) => {
       return storeBook.slug == readerStore.menuBook
     })
     // const bookObj = readerStore.text[readerStore.menuBook]
     // const vals = Object.keys(bookObj).map((val) => Number(val))
     // return Math.max(...vals)
-    let last = bookObj && bookObj.chapters.length
+    const last = bookObj && bookObj.chapters.length
     return last
   })
   const menuBookNames = createMemo(() => {
-    return readerStore.searchedBooks
+    const val = readerStore.text?.map((book) => {
+      return {
+        label: book.label,
+        slug: book.slug
+      }
+    })
+    return val
   })
   const possibleChapters = createMemo(() => {
     // const chapters = Object.keys(readerStore.text[readerStore.menuBook])
+    if (!readerStore.text) return
     const bookObj = readerStore.text.find((storeBook) => {
       return storeBook.slug == readerStore.menuBook
     })
@@ -198,17 +223,17 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
       return controller.abort()
     }
     setIsFetching(true)
-    let nextUrl = FUNCTIONS_ROUTES.getRepoHtml({
+    const nextUrl = FUNCTIONS_ROUTES.getRepoHtml({
       user: props.user,
       repo: props.repositoryName,
       book: book,
       chapter: chapter
     })
     try {
-      let response = await fetch(nextUrl, {
+      const response = await fetch(nextUrl, {
         signal: signal
       })
-      let text = await response.text()
+      const text = await response.text()
       return text
     } catch (error) {
       console.error(error)
@@ -237,6 +262,8 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
     getMenuBook,
     navLinks
   }
+
+  // These functions sends a custom event of wrapper scroll position so that hover panes/tooltips disappear if you start scrolling away from them
   function reportScrollPosition(event: Event) {
     const target = event.target as HTMLElement
     const amount = target.scrollTop
@@ -254,20 +281,47 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
   }
   const notifyPreviewPaneOfScroll = debounce(reportScrollPosition, 20)
 
+  // we want a skeleton of the index, to pass along as a search param for saving offline.
+  // eslint-disable-next-line solid/reactivity, , @typescript-eslint/no-unused-vars
+  onMount(async () => {
+    if (props.wasPostRequest) {
+      const queryParams = new URLSearchParams(window.location.search)
+      const book = queryParams.get("book")
+      const chapter = queryParams.get("chapter")
+
+      const storeQueryParamBook = readerStore.text?.find((storeBib) => {
+        return storeBib.slug.toLowerCase() == String(book).toLowerCase()
+      })
+      if (!storeQueryParamBook || !chapter || !book) return
+      const storeQueryParamChapter =
+        storeQueryParamBook &&
+        storeQueryParamBook.chapters.find((chap) => chap.label == chapter)
+
+      mutateStore("currentBook", storeQueryParamBook.slug)
+      if (storeQueryParamChapter) {
+        mutateStore("currentChapter", storeQueryParamChapter.label)
+      }
+    }
+  })
+
   return (
-    <>
+    <Show
+      when={readerStore.text?.length}
+      fallback={<LoadingSpinner classNames="w-12 mx-auto my-8 text-accent" />}
+    >
       <I18nProvider
         locale={props.preferredLocale}
         initialDict={props.initialDict}
       >
         <div
-          onscroll={notifyPreviewPaneOfScroll}
+          onScroll={notifyPreviewPaneOfScroll}
           id="readerWrapper"
           data-js="scrollToTop"
           class=" mx-auto grid max-h-full w-full overflow-hidden print:block  print:overflow-visible md:justify-center"
         >
           <div class=" sticky top-0 z-40 w-full   border-b border-b-neutral-200 bg-white">
             <ReaderMenu
+              repoIndex={props.repoData}
               storeInterface={storeInterface}
               setPrintWholeBook={setPrintWholeBook}
               user={props.user}
@@ -285,16 +339,17 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
           />
         </div>
       </I18nProvider>
-    </>
+    </Show>
   )
 }
 
 interface i18Props {
   locale: i18nDictKeysType
   children: JSX.Element
-  initialDict: any
+  initialDict: i18nDictWithLangCode
 }
 function I18nProvider(props: i18Props) {
+  // eslint-disable-next-line solid/reactivity
   const value = createI18nContext(props.initialDict, props.locale)
 
   return (
@@ -326,49 +381,60 @@ export interface ReaderWrapperProps {
   firstBookKey: string
   firstChapterToShow: string
   repoData: repoIndexObj
-  initialDict: any /* todo change all initial dict types */
+  initialDict: i18Props["initialDict"]
   hasDownloadIndex: boolean
+  wasPostRequest: boolean
+  // isReqToGenerateOnClient: boolean
+  // resLevel: string | null
 }
 export interface storeType {
   mutateStore<
     T extends
-      | "currentBook"
+      | "text"
       | "currentChapter"
+      | "currentBook"
       | "menuBook"
-      | "searchedBooks"
+      | "searchableBooks"
       | "languageName"
       | "languageCode"
       | "resourceType"
       | "textDirection"
       | "repoUrl"
-      | "text"
   >(
     key: T,
-
     val: {
       currentBook: string
       currentChapter: string
       menuBook: string
-      searchedBooks: {
-        label: string
-        slug: string
-      }[]
+      searchableBooks:
+        | {
+            label: string
+            slug: string
+          }[]
+        | undefined
+      text: bibleEntryObj[] | null
       languageName: string
       languageCode: string
-      resourceType: string
+      resourceType: "bible" | "tn" | "tq" | "commentary" | "tw" | "tm"
       textDirection: string
       repoUrl: string
-      text: bibleEntryObj[]
+      downloadLinks:
+        | []
+        | {
+            link: string
+            title: string
+          }[]
     }[T]
   ): void
   mutateStoreText: ({ book, chapter, val }: updateStoreTextParams) => void
   getStoreVal: <T>(
     key:
+      | "searchableBooks"
       | "text"
       | "currentBook"
       | "currentChapter"
       | "menuBook"
-      | "searchedBooks"
+      | "searchableBooks"
       | "languageName"
       | "languageCode"
       | "resourceType"
@@ -377,8 +443,8 @@ export interface storeType {
       | "downloadLinks"
   ) => T
 
-  allBibArr: Accessor<bibleEntryObj[]>
-  isOneBook: () => boolean
+  allBibArr: () => bibleEntryObj[] | null
+  isOneBook: () => boolean | undefined
   currentBookObj: Accessor<bibleEntryObj | undefined>
   currentChapObj: Accessor<bibleChapObj | undefined>
   getChapObjFromGivenBook(
@@ -388,10 +454,11 @@ export interface storeType {
   HTML: Accessor<string | undefined>
   maxChapter: Accessor<number | undefined>
   menuBookNames: Accessor<
-    {
-      label: string
-      slug: string
-    }[]
+    | {
+        label: string
+        slug: string
+      }[]
+    | undefined
   >
   getMenuBook: Accessor<bibleEntryObj | undefined>
   possibleChapters: Accessor<bibleChapObj[] | undefined>

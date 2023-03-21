@@ -34,7 +34,7 @@ export function HamburgerSvg(props: { classNames?: string }) {
         d="M0.5 0H24.5V2.66667H0.5V0ZM0.5 6.66667H24.5V9.33333H0.5V6.66667ZM0.5 13.3333H24.5V16H0.5V13.3333Z"
         fill=""
         fill-opacity="0.8"
-      ></path>
+      />
     </svg>
   )
 }

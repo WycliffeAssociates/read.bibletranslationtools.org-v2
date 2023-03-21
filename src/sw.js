@@ -1,11 +1,7 @@
-import {
-  precacheAndRoute,
-  cleanupOutdatedCaches,
-  createHandlerBoundToURL
-} from "workbox-precaching"
+import { precacheAndRoute, cleanupOutdatedCaches } from "workbox-precaching"
 import { clientsClaim } from "workbox-core"
 import { registerRoute } from "workbox-routing"
-import { NetworkFirst, Strategy } from "workbox-strategies"
+import { NetworkFirst, Strategy, CacheFirst } from "workbox-strategies"
 import { CacheableResponsePlugin } from "workbox-cacheable-response"
 import { ExpirationPlugin } from "workbox-expiration"
 
@@ -47,12 +43,14 @@ async function tryLocalCache(handler, request) {
 // https://developer.chrome.com/docs/workbox/modules/workbox-strategies/#custom-cache-network-race-strategy
 class CacheNetworkRace extends Strategy {
   _handle(request, handler) {
-    const fetchAndCachePutDone = handler.fetchAndCachePut(request)
-    const cacheMatchDone = handler.cacheMatch(request)
+    const isPagesReq = handler._strategy.cacheName == "lr-pages"
 
-    return new Promise((resolve, reject) => {
-      fetchAndCachePutDone.then(resolve)
+    function regularRace(resolve, reject) {
+      const fetchAndCachePutDone = handler.fetchAndCachePut(request)
+      const cacheMatchDone = handler.cacheMatch(request)
+
       cacheMatchDone.then((response) => response && resolve(response))
+      fetchAndCachePutDone.then(resolve)
 
       // Reject if both network and cache error or find no response.
       Promise.allSettled([fetchAndCachePutDone, cacheMatchDone]).then(
@@ -66,11 +64,29 @@ class CacheNetworkRace extends Strategy {
           }
         }
       )
+    }
+
+    return new Promise((resolve, reject) => {
+      if (isPagesReq) {
+        const url = new URL(request.url)
+        let pathname = url.pathname
+        if (pathname.lastIndexOf("/") === pathname.length - 1) {
+          pathname = pathname.slice(0, -1)
+        }
+        const urlCompleteWithSearchParams = `${url.origin}${pathname}/complete`
+        handler.cacheMatch(urlCompleteWithSearchParams).then((successVal) => {
+          if (successVal) {
+            resolve(successVal)
+          } else {
+            regularRace(resolve, reject)
+          }
+        })
+      } else regularRace(resolve, reject)
     })
   }
 }
 
-// todo: debug this
+// todo: debug this. Having to use race strategy right now instead of giving variable run time control
 // todo: maybe instead of a custom strategy, see if you can read Index DB and use the outtheBox strategies to respond.
 // https://developer.chrome.com/docs/workbox/modules/workbox-strategies/#advanced-usage
 // On a throttled network, this consistetly has issues: Will need further troubleshooting.
@@ -130,14 +146,21 @@ if (import.meta.env.DEV) {
   // DEV... For testing the variableCacheNet strategy as desired
   // Can just return true
   registerRoute(
-    ({ request, url }) => {
+    ({ request }) => {
       if (request.mode == "navigate") return true
     },
     new NetworkFirst({
       cacheName: "all-dev"
       // plugins: [new CacheableResponsePlugin({statuses: [-1]})],
     })
-    // new variableCacheOrNetwork()
+    // new CacheFirst({
+    //   cacheName: "lr-pages"
+    //   // plugins: [new CacheableResponsePlugin({statuses: [-1]})],
+    // })
+    // new CacheNetworkRace({
+    //   cacheName: "lr-pages"
+    //   // plugins: [new CacheableResponsePlugin({statuses: [-1]})],
+    // })
   )
 
   //----- HTML DOCS ----
@@ -197,7 +220,7 @@ if (import.meta.env.PROD) {
   )
   // # API / Serverless responses
   registerRoute(
-    ({ request, url }) => {
+    ({ url }) => {
       if (url.href.includes("/api/")) {
         return true
       }
@@ -211,6 +234,25 @@ if (import.meta.env.PROD) {
         new ExpirationPlugin({
           purgeOnQuotaError: true,
           maxEntries: 50000
+        })
+      ]
+    })
+  )
+
+  // images
+  registerRoute(
+    ({ request, sameOrigin }) => {
+      return sameOrigin && request.destination === "image"
+    },
+    new CacheFirst({
+      cacheName: "live-reader-assets",
+      plugins: [
+        new CacheableResponsePlugin({
+          statuses: [200]
+        }),
+        new ExpirationPlugin({
+          purgeOnQuotaError: true,
+          maxEntries: 25
         })
       ]
     })

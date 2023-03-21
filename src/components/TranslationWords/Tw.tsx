@@ -9,17 +9,18 @@ import {
 } from "@lib/utils-ui"
 import { BeyondSmallNav, MobileTwNav } from "./TwNav"
 // these are hacks to keep typescript from stripping away "unused imports" the actual names are unimportant; These are solid custom directives;
-//@ts-ignore
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const clickout = clickOutside
-//@ts-ignore
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const escape = escapeOut
 
 export default function TranslationWords(props: twProps) {
-  let [searchTerm, setSearchTerm] = createSignal("")
-  let [sectionsHTML, setSectionsHTML] = createSignal({
-    [props.initialPage]: props.initialHtml
+  const [searchTerm, setSearchTerm] = createSignal("")
+  const [sectionsHTML, setSectionsHTML] = createSignal({
+    [props.initialPage]: props.initialHtml ? props.initialHtml : undefined
   })
-  let [activeSection, setActiveSection] = createSignal(props.initialPage)
+  const [activeSection, setActiveSection] = createSignal(props.initialPage)
   const [pos, setPos] = createSignal({
     x: "0px",
     y: "0px"
@@ -27,28 +28,32 @@ export default function TranslationWords(props: twProps) {
   const [showPreviewPane, setShowPreviewPane] = createSignal(false)
   const [previewPaneHtml, setpreviewPaneHtml] = createSignal("")
 
-  let allWords: Array<{
-    slug: string
-    label: string
-    section: string
-  }> = []
-  props.repoIndex.words?.forEach((word) => {
-    word.words.forEach((single) => {
-      allWords.push({
-        section: word.slug,
-        slug: single.slug,
-        label: single.label
+  const allWords = () => {
+    const wordsList: Array<{
+      slug: string
+      label: string
+      section: string
+    }> = []
+    props.repoIndex.words?.forEach((word) => {
+      word.words.forEach((single) => {
+        wordsList.push({
+          section: word.slug,
+          slug: single.slug,
+          label: single.label
+        })
+        return
       })
-      return
     })
-  })
-  allWords.sort((first, second) => {
-    let firstLabel = first.label.toUpperCase()
-    let secondLabel = second.label.toUpperCase()
-    return firstLabel > secondLabel ? 1 : firstLabel < secondLabel ? -1 : 0
-  })
+    wordsList.sort((first, second) => {
+      const firstLabel = first.label.toUpperCase()
+      const secondLabel = second.label.toUpperCase()
+      return firstLabel > secondLabel ? 1 : firstLabel < secondLabel ? -1 : 0
+    })
+    return wordsList
+  }
+
   const filteredWords = createMemo(() => {
-    return allWords.filter(
+    return allWords().filter(
       (word) =>
         word.slug.toLowerCase().includes(searchTerm().toLowerCase().trim()) ||
         word.label.toLowerCase().includes(searchTerm().toLowerCase().trim())
@@ -73,11 +78,12 @@ export default function TranslationWords(props: twProps) {
       document.getElementById(hash)?.scrollIntoView()
     }
     // not loaded page
-    let text = await fetchSection(section, hash)
+
+    const text = await fetchSection(section)
 
     if (text) {
-      let current = sectionsHTML()
-      let newVal = {
+      const current = sectionsHTML()
+      const newVal = {
         ...current,
         [section]: text
       }
@@ -86,9 +92,9 @@ export default function TranslationWords(props: twProps) {
     setActiveSection(section)
     document.getElementById(hash)?.scrollIntoView()
   }
-  async function fetchSection(section: string, hash: string) {
+  async function fetchSection(section: string) {
     try {
-      let newHTML = await getTwSchemaHtml({
+      const newHTML = await getTwSchemaHtml({
         navSection: section,
         user: props.user,
         repo: props.repo
@@ -105,29 +111,29 @@ export default function TranslationWords(props: twProps) {
   }
 
   function hoverOnCrossReferences() {
-    let crossReferences = document.querySelectorAll(
+    const crossReferences = document.querySelectorAll(
       "a[data-crossref='true']"
     ) as NodeListOf<HTMLElement>
 
-    let memoryDom = document.createElement("html")
+    const memoryDom = document.createElement("html")
     crossReferences.forEach((ref) => {
-      let section = String(ref.dataset?.section)
-      let hash = String(ref.dataset?.hash)
+      const section = String(ref.dataset?.section)
+      const hash = String(ref.dataset?.hash)
       ref.addEventListener("click", (ev) => {
         setShowPreviewPane(false)
         fetchSectionAndNav(ev, section, hash)
       })
       ref.addEventListener("mouseover", async (event) => {
         // GENERATE A DOM FROM AN
-        let existingHtml = sectionsHTML()[section]
+        const existingHtml = sectionsHTML()[section]
         if (existingHtml) {
           memoryDom.innerHTML = existingHtml
         } else {
-          let newSectionText = await fetchSection(section, hash)
+          const newSectionText = await fetchSection(section)
           if (!newSectionText) return
           // we had to fetch, so go ahead and stick in memory
-          let current = sectionsHTML()
-          let newVal = {
+          const current = sectionsHTML()
+          const newVal = {
             ...current,
             [section]: newSectionText
           }
@@ -136,9 +142,10 @@ export default function TranslationWords(props: twProps) {
         }
 
         // Get and Set html
-        let firstElWithHashId = memoryDom.querySelector(`#${hash}`)
+        const firstElWithHashId = memoryDom.querySelector(`#${hash}`)
 
-        let firstSib = firstElWithHashId && firstElWithHashId.nextElementSibling
+        const firstSib =
+          firstElWithHashId && firstElWithHashId.nextElementSibling
         if (!firstSib) return
         function truthyFunction(htmlNode: Element) {
           return (
@@ -147,11 +154,11 @@ export default function TranslationWords(props: twProps) {
             htmlNode.previousElementSibling.tagName === "HR"
           )
         }
-        let previewPaneHtml = getHtmlWithinSpan(firstSib, truthyFunction)
+        const previewPaneHtml = getHtmlWithinSpan(firstSib, truthyFunction)
         setpreviewPaneHtml(previewPaneHtml)
 
         // show and position:
-        let target = event.target as HTMLAnchorElement
+        const target = event.target as HTMLAnchorElement
         positionPreviewPane({
           target,
           previewPaneSelector: "#previewPane",

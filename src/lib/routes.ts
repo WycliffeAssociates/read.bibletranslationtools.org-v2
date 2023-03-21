@@ -1,4 +1,4 @@
-let mode = import.meta.env.MODE
+const mode = import.meta.env.MODE
 const devUrl = import.meta.env.PUBLIC_FUNCTIONS_API_BASE
 let base: string | undefined
 
@@ -37,7 +37,7 @@ function supplyBaseLocation() {
   if (!import.meta.env.PROD) {
     return devUrl
   } else if (typeof window !== "undefined" && import.meta.env.PROD) {
-    let clientBase = `${window.location.origin}/api`
+    const clientBase = `${window.location.origin}/api`
     return clientBase
   } else if (import.meta.env.CI) {
     console.log("using dev in ci")
@@ -80,6 +80,15 @@ const FUNCTIONS_ROUTES = {
     if (!book) return
     base = base || supplyBaseLocation()
     return `${base}/getUsfmSrcDownload?user=${user}&repo=${repo}&book=${book}`
+  },
+
+  getWholeBookJson: ({
+    user,
+    repo,
+    book
+  }: Pick<getRepoHtmlType, "book" | "repo" | "user">) => {
+    base = base || supplyBaseLocation()
+    return `${base}/getWholeBookJson?user=${user}&repo=${repo}&book=${book}`
   },
   getWholeRepoDownload: ({
     user,

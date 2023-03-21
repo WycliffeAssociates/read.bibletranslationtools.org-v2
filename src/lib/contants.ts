@@ -80,3 +80,14 @@ const bibleBookSortOrder = Object.values(BibleBookCategories)
     return acc
   }, {})
 export { bibleBookSortOrder }
+
+export const resourceSizeQueryParameters = {
+  book: "book",
+  whole: "whole"
+} as const
+
+export const CACHENAMES = {
+  complete: "row-completes",
+  lrApi: "live-reader-api",
+  lrPagesCache: "lr-pages"
+}

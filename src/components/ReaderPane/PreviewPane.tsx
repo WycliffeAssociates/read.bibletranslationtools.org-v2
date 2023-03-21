@@ -1,4 +1,4 @@
-import { createSignal, onMount, Show, Signal } from "solid-js"
+import { createSignal, Show, Signal } from "solid-js"
 import {
   clickOutside,
   escapeOut,
@@ -32,8 +32,8 @@ function closeModal() {
   setCurrentScrollTop(0)
 }
 function focusWithinClose(ev: FocusEvent) {
-  let currentTarget = ev.currentTarget as Node
-  let relatedTaret = ev.relatedTarget as Node
+  const currentTarget = ev.currentTarget as Node
+  const relatedTaret = ev.relatedTarget as Node
   if (!currentTarget) return
   if (!relatedTaret) return
 
@@ -53,9 +53,10 @@ function reactToScrollingWhenNoteIsOpen(amount: number) {
 
 export function PreviewPane() {
   // these are hacks to keep typescript from stripping away "unused imports"
-  // @ts-ignore
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const clickout = clickOutside
-  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const escape = escapeOut
   return (
     <Show when={showFootnote()}>
@@ -67,7 +68,9 @@ export function PreviewPane() {
         ) => {
           reactToScrollingWhenNoteIsOpen(e.detail.amount)
         }}
+        // eslint-disable-next-line solid/reactivity
         use:clickOutside={() => closeModal()}
+        // eslint-disable-next-line solid/reactivity
         use:escapeOut={() => closeModal()}
         onFocusOut={focusWithinClose}
         style={{ left: pos().x, top: pos().y }}
@@ -104,12 +107,12 @@ export function PreviewPane() {
 }
 
 export function hoverOnCrossReferences() {
-  let crossReferences = document.querySelectorAll("a[data-crossref='true']")
+  const crossReferences = document.querySelectorAll("a[data-crossref='true']")
 
   function managePreviewPane(e: Event) {
     setMousedIn(true)
     setTimeout(() => {
-      let scrollPane = document.querySelector('[data-js="scrollToTop"]')
+      const scrollPane = document.querySelector('[data-js="scrollToTop"]')
       if (scrollPane) {
         setCurrentScrollTop(scrollPane.scrollTop)
       }
@@ -120,10 +123,10 @@ export function hoverOnCrossReferences() {
       if (!mousedIn()) {
         return
       }
-      let target = e.target as HTMLAnchorElement
-      let hashWithoutHashTag = target.dataset.hash
-      let book = target.dataset.book
-      let chapter = target.dataset.chapter
+      const target = e.target as HTMLAnchorElement
+      const hashWithoutHashTag = target.dataset.hash
+      const book = target.dataset.book
+      const chapter = target.dataset.chapter
       let response: Response
       let text: string
 
@@ -138,7 +141,7 @@ export function hoverOnCrossReferences() {
       const newDom = document.createElement("html")
       newDom.innerHTML = text
       // '[id="#tn-chunk-gen-22-01"] not valid
-      let corresponding = newDom.querySelector(`[id="${hashWithoutHashTag}"]`)
+      const corresponding = newDom.querySelector(`[id="${hashWithoutHashTag}"]`)
       if (!corresponding) return
       // let htmlContainer: any[] = [corresponding]
 
@@ -149,7 +152,7 @@ export function hoverOnCrossReferences() {
           node.id.includes("tn-chunk")
         )
       }
-      let html = getHtmlWithinSpan(corresponding, truthyFunction)
+      const html = getHtmlWithinSpan(corresponding, truthyFunction)
       setFootnoteText(html)
 
       // positionion logic:
@@ -177,7 +180,7 @@ export function hoverOnCrossReferences() {
 export function hoverOnCommentaryCrossReferences(user: string, repo: string) {
   if (!document.querySelector("[data-resourcetype*='commentary']")) return
 
-  let commentaryPopups = document.querySelectorAll("a[href*='popup']")
+  const commentaryPopups = document.querySelectorAll("a[href*='popup']")
   commentaryPopups.forEach((link) => {
     link.addEventListener("click", manageLink)
     link.addEventListener("mouseenter", manageLink)
@@ -188,10 +191,10 @@ export function hoverOnCommentaryCrossReferences(user: string, repo: string) {
   async function activateLink(e: Event) {
     if (e.type == "mouseenter" && !mousedIn()) return
     e?.preventDefault()
-    let target = e.target as HTMLAnchorElement
-    let href = target.href
-    let fileParts = href.split("popup://")
-    let file = fileParts[1]
+    const target = e.target as HTMLAnchorElement
+    const href = target.href
+    const fileParts = href.split("popup://")
+    const file = fileParts[1]
     let text: string | undefined
     try {
       text = await getCommentarySectionHtml({ file, user, repo })
@@ -212,9 +215,9 @@ export function hoverOnCommentaryCrossReferences(user: string, repo: string) {
     previewCloseButton.focus()
 
     // To hook up links inside of the preview pane:
-    let previewPane = document.querySelector("#previewPane")
+    const previewPane = document.querySelector("#previewPane")
     if (!previewPane) return
-    let commentaryPopups = previewPane?.querySelectorAll("a[href*='popup']")
+    const commentaryPopups = previewPane?.querySelectorAll("a[href*='popup']")
     // if (!commentaryPopups.length) return
     commentaryPopups.forEach((link) => {
       link.addEventListener("click", manageLink)
@@ -230,11 +233,10 @@ export function hoverOnCommentaryCrossReferences(user: string, repo: string) {
   }
 }
 export function hoverOnFootnotes() {
-  let footnotes: NodeListOf<HTMLAnchorElement> = document.querySelectorAll(
+  const footnotes: NodeListOf<HTMLAnchorElement> = document.querySelectorAll(
     'a[href*="footnote-target"]'
   )
   function manageNote(ev: MouseEvent | FocusEvent) {
-    // debugger
     if (ev.type == "mouseenter") {
       setMousedIn(true)
       setTimeout(() => {
@@ -243,18 +245,18 @@ export function hoverOnFootnotes() {
     }
     function doHoverNote() {
       if (!mousedIn()) return
-      let target = ev.target as HTMLAnchorElement
-      let rect = target.getBoundingClientRect()
-      let last = target.href.split("-").pop()
+      const target = ev.target as HTMLAnchorElement
+      const rect = target.getBoundingClientRect()
+      const last = target.href.split("-").pop()
       setShowFootnote(true)
       setShowFootnote(true)
-      let previewPane = document.querySelector("#previewPane") //stick in DOM to measure it's vh client height. This runs quickly enough that you won't get some flashing before we position it;
+      const previewPane = document.querySelector("#previewPane") //stick in DOM to measure it's vh client height. This runs quickly enough that you won't get some flashing before we position it;
 
       if (!previewPane) return
-      let windowMidPoint = window.innerWidth / 2
-      let posX =
+      const windowMidPoint = window.innerWidth / 2
+      const posX =
         rect.x > windowMidPoint ? rect.x - 50 + "px" : rect.x + 50 + "px"
-      let posY =
+      const posY =
         rect.y > window.innerHeight / 2
           ? rect.y - previewPane.clientHeight
           : rect.y + 30
@@ -264,12 +266,12 @@ export function hoverOnFootnotes() {
       })
       // footnote-caller-1
       // footnote-target-1
-      let correspondingA = document.querySelector(
+      const correspondingA = document.querySelector(
         `a[href*="footnote-caller-${last}"]`
       )
       if (!correspondingA) return
-      let parent = correspondingA.parentElement?.parentElement
-      let footnoteText = parent ? parent.innerText : ""
+      const parent = correspondingA.parentElement?.parentElement
+      const footnoteText = parent ? parent.innerText : ""
       setFootnoteText(footnoteText)
     }
   }

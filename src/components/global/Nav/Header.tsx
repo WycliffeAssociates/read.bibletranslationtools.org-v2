@@ -1,9 +1,10 @@
-import type { i18nDictKeysType, i18nDictSubKeysType } from "@lib/i18n"
+import type { i18nDictKeysType } from "@lib/i18n"
 import { useI18n } from "@solid-primitives/i18n"
 import { MobileMenuOpen, HamburgerSvg } from "./MenuButtons"
 import { LoadingSpinner } from "@components"
 import { Index, createSignal, Show, lazy, Suspense } from "solid-js"
 import { I18nProvider, addDict } from "./I18nContext"
+import type { i18nDictWithLangCode } from "@customTypes/types"
 const LanguageChoices = lazy(() => import("./LanguageChoices"))
 
 interface HeaderProps {
@@ -12,13 +13,16 @@ interface HeaderProps {
   logoWebP: string
   preferredLocale: i18nDictKeysType
   linkBase: string
-  initialDict: any
+  initialDict: i18nDictWithLangCode
+  repoUrl: string
   // children: JSX.Element
 }
 
 export function UnwrappedHeader(props: HeaderProps) {
   // full signature
   const [t, { add, locale }] = useI18n()
+  // ignore due to seeding intial state
+  // eslint-disable-next-line solid/reactivity
   const [flagShowing, setFlagShowing] = createSignal(props.preferredLocale)
 
   const [mobileMenuOpen, setMobileMenuOpen] = createSignal(false)
@@ -28,7 +32,7 @@ export function UnwrappedHeader(props: HeaderProps) {
     let newDict, newDictCode
     let addToOtherDict = false
     if (lang !== props.preferredLocale) {
-      let dictCodeAndVal = await addDict(lang)
+      const dictCodeAndVal = await addDict(lang)
       newDict = dictCodeAndVal.newDict
       newDictCode = dictCodeAndVal.newDictCode
       add(newDictCode, newDict)
@@ -48,7 +52,7 @@ export function UnwrappedHeader(props: HeaderProps) {
         addToOtherDict
       }
     })
-    let menu = document.querySelector("#menu")
+    const menu = document.querySelector("#menu")
     menu && menu.dispatchEvent(changeLanguageEvent)
 
     setLanguagePickerOpen(false)
@@ -67,6 +71,7 @@ export function UnwrappedHeader(props: HeaderProps) {
   return (
     <nav class="w-full bg-darkAccent py-5 font-sans print:hidden">
       <div class="relative mx-auto flex max-w-[1400px] items-center justify-between px-4 text-white">
+        {/* https://developer.mozilla.org/en-US/docs/Learn/HTML/Multimedia_and_embedding/Responsive_images#use_modern_image_formats_boldly */}
         <picture>
           <source srcset={props.logoWebP} type="image/webp" />
           <source srcset={props.logo} type="image/jpeg" />
@@ -80,7 +85,7 @@ export function UnwrappedHeader(props: HeaderProps) {
         </picture>
 
         <button
-          onClick={(e) => manageMobileMenu()}
+          onClick={() => manageMobileMenu()}
           class="inline-flex items-center rounded-md border border-solid border-gray-100 px-6 py-2 capitalize rtl:flex-row-reverse md:hidden"
         >
           <Show when={!mobileMenuOpen()}>
@@ -100,11 +105,10 @@ export function UnwrappedHeader(props: HeaderProps) {
         >
           <ul class="flex flex-col ltr:pl-4 rtl:pr-4 md:flex-row">
             <Index each={props.menuItems}>
-              {(item) => {
-                let val = item() as i18nDictSubKeysType
+              {(menuItem) => {
                 return (
                   <li class="my-2 capitalize hover:text-secondary focus:text-secondary md:mx-4 md:my-0">
-                    <a href={`${props.linkBase}/${val}`}>{t(String(val))}</a>
+                    {<a href={props.repoUrl}>{t(String(menuItem()))}</a>}
                   </li>
                 )
               }}
@@ -114,7 +118,7 @@ export function UnwrappedHeader(props: HeaderProps) {
           {/* LANGUAGE PICKER PART OF MENU BUT ADJACENT TO THE NAV PARTS */}
           <div class="relative my-2 pl-4 md:my-0 md:ml-4 md:pl-0">
             <button
-              onClick={(e) => manageLanguagePickerToggle()}
+              onClick={() => manageLanguagePickerToggle()}
               data-js="languagePicker"
               class={`languagePicker relative inline-flex place-content-center hover:text-secondary rtl:flex-row-reverse ${
                 languagePickerOpen() ? "open" : ""
@@ -133,7 +137,7 @@ export function UnwrappedHeader(props: HeaderProps) {
             <Show when={languagePickerOpen()}>
               <Suspense
                 fallback={
-                  <div class="absolute left-0 top-full z-20  grid w-full place-content-center bg-darkAccent  py-2 pr-2 text-center md:left-auto md:mt-5 md:w-52 rtl:md:-right-full ">
+                  <div class="absolute left-0 top-full z-20  grid w-full place-content-center bg-darkAccent  py-2 pr-2 text-center md:left-[unset] md:right-0 md:mt-5 md:w-52 rtl:md:-right-full">
                     <LoadingSpinner />
                   </div>
                 }

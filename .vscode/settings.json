@@ -1,4 +1,14 @@
 {
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "astro", // Enable .astro
+    "typescript", // Enable .ts
+    "typescriptreact" // Enable .tsx
+  ],
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true
+  },
   "workbench.colorCustomizations": {
     "activityBar.activeBackground": "#6b6900",
     "activityBar.background": "#6b6900",

@@ -20,7 +20,7 @@ export async function getChapterHtml({
   chapter
 }: getRepoInfo): Promise<string | undefined> {
   if (!repo) return
-  let fetchUrl = FUNCTIONS_ROUTES.getRepoHtml({ user, repo, book, chapter })
+  const fetchUrl = FUNCTIONS_ROUTES.getRepoHtml({ user, repo, book, chapter })
   try {
     const response = await fetch(fetchUrl)
     const data = await response.text()
@@ -41,7 +41,7 @@ export async function getTwSchemaHtml({
   repo
 }: getNonBibleSchemaHtmlParams): Promise<string | undefined> {
   if (!repo || !user || !navSection) return
-  let fetchUrl = FUNCTIONS_ROUTES.getHtmlForTw({
+  const fetchUrl = FUNCTIONS_ROUTES.getHtmlForTw({
     user,
     repo,
     navSection
@@ -62,7 +62,7 @@ export async function getTmSchemaHtml({
   repo
 }: getNonBibleSchemaHtmlParams): Promise<string | undefined> {
   if (!repo || !user || !navSection) return
-  let fetchUrl = FUNCTIONS_ROUTES.getHtmlForTm({
+  const fetchUrl = FUNCTIONS_ROUTES.getHtmlForTm({
     user,
     repo,
     navSection
@@ -82,7 +82,7 @@ export async function getRepoIndex({
   repo
 }: baseApiInfo): Promise<repoIndexObj | null> {
   if (!user || !repo) return null
-  let fetchUrl = FUNCTIONS_ROUTES.getRepoIndex({ user, repo })
+  const fetchUrl = FUNCTIONS_ROUTES.getRepoIndex({ user, repo })
   try {
     const response = await fetch(fetchUrl, {
       headers: {
@@ -107,19 +107,17 @@ export async function checkForOrDownloadWholeRepo({
   method: "GET" | "HEAD"
 }): Promise<downloadIndexI | null | boolean> {
   if (!user || !repo || !method) return null
-  let fetchUrl = FUNCTIONS_ROUTES.getWholeRepoDownload({ user, repo, method })
+  const fetchUrl = FUNCTIONS_ROUTES.getWholeRepoDownload({ user, repo, method })
   try {
     const response = await fetch(fetchUrl)
     if (method == "HEAD") {
-      let wasOk = response.ok
+      const wasOk = response.ok
       return wasOk
     } else if (method == "GET") {
-      let data: downloadIndexI = await response.json()
+      const data: downloadIndexI = await response.json()
       return data
     }
-    console.log({ response })
     const data: downloadIndexI = await response.json()
-    console.log({ data })
     if (typeof data == "string") {
       return null
     }
@@ -137,8 +135,8 @@ export async function isValidRepo({
   if (typeof user !== "string" || typeof repo !== "string") return false
   const fetchUrl = FUNCTIONS_ROUTES.isValidRepo({ user, repo })
   try {
-    let response = await fetch(fetchUrl)
-    let isValid = await response.text()
+    const response = await fetch(fetchUrl)
+    const isValid = await response.text()
     return !!(isValid == "true") || !!(isValid !== "false")
   } catch (error) {
     console.error(error)
@@ -152,7 +150,7 @@ export async function getCommentarySectionHtml({
   repo
 }: commentaryIndividual): Promise<string | undefined> {
   if (!file || !user || !repo) return
-  let fetchUrl = FUNCTIONS_ROUTES.getHtmlForCommentaryIndividualSection({
+  const fetchUrl = FUNCTIONS_ROUTES.getHtmlForCommentaryIndividualSection({
     file,
     user,
     repo

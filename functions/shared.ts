@@ -5,10 +5,10 @@ export async function getRepoIndexLocal(
   repo: string
 ): Promise<repoIndexObj | null> {
   try {
-    let baseUrl = env.PIPELINE_API_URL_BASE
-    let finalUrl = `${baseUrl}/${user}/${repo}/index.json`
-    let response = await fetch(finalUrl)
-    let jsonval = await response.json()
+    const baseUrl = env.PIPELINE_API_URL_BASE
+    const finalUrl = `${baseUrl}/${user}/${repo}/index.json`
+    const response = await fetch(finalUrl)
+    const jsonval = await response.json()
     return jsonval as repoIndexObj
   } catch (error) {
     console.error(error)
@@ -22,7 +22,7 @@ export function getHeaders(url: URL) {
     "Access-Control-Allow-Origin"?: string
   }
   const allowedOrigins = ["localhost", "http://127.0.0.1"]
-  let headers: headersType = {
+  const headers: headersType = {
     "Content-Type": "text/html"
   }
   headers["Access-Control-Allow-Origin"] = "*"
@@ -35,31 +35,31 @@ export function getHeaders(url: URL) {
 
 export function handleRcLinks(element: Element, href: string, user: string) {
   if (!element || !href || !user) return
-  let linkUser = element.getAttribute("data-user") || user
-  let repo = element.getAttribute("data-repo")
+  const linkUser = element.getAttribute("data-user") || user
+  const repo = element.getAttribute("data-repo")
   if (!repo) return
-  let category = element.getAttribute("data-category")
-  let word = element.getAttribute("data-word")
-  let templateType = element.getAttribute("data-type")
+  const category = element.getAttribute("data-category")
+  const word = element.getAttribute("data-word")
+  const templateType = element.getAttribute("data-type")
   if (templateType === "tw") {
-    let newHref = `/${linkUser}/${repo}?section=${category}#${word}`
+    const newHref = `/${linkUser}/${repo}?section=${category}#${word}`
     element.setAttribute("href", newHref)
     element.setInnerContent(newHref)
   } else if (templateType === "tm") {
-    let initialPage = element.getAttribute("data-page")
-    let topic = element.getAttribute("data-topic")
-    let newHref = `/${linkUser}/${repo}?section=${initialPage}#${topic}`
+    const initialPage = element.getAttribute("data-page")
+    const topic = element.getAttribute("data-topic")
+    const newHref = `/${linkUser}/${repo}?section=${initialPage}#${topic}`
     element.setAttribute("href", newHref)
     element.setInnerContent(newHref)
   }
 }
 function handleInteralTnLinks(element: Element, href: string) {
-  let hashWithoutHashTag = href.split("#")[1]
-  let parts = hashWithoutHashTag.split("-")
-  let book = parts[2]
-  let chapter = parts[3]
+  const hashWithoutHashTag = href.split("#")[1]
+  const parts = hashWithoutHashTag.split("-")
+  const book = parts[2]
+  const chapter = parts[3]
 
-  let newUrl = `?book=${book}&chapter=${chapter}#${hashWithoutHashTag}`
+  const newUrl = `?book=${book}&chapter=${chapter}#${hashWithoutHashTag}`
   element.setAttribute("href", newUrl)
   element.setAttribute("data-chapter", chapter)
   element.setAttribute("data-book", book)
@@ -69,19 +69,19 @@ function handleInteralTnLinks(element: Element, href: string) {
 function handleTwLinks(element: Element, href: string) {
   if (!href) return
   if (href && href.includes("/u/")) return
-  let rep = href.replace(".html", "")
-  let parts = rep.split("#")
-  let section = parts[0]
-  let hash = parts[1]
-  let newUrl = `?section=${section}#${parts[1]}`
+  const rep = href.replace(".html", "")
+  const parts = rep.split("#")
+  const section = parts[0]
+  const hash = parts[1]
+  const newUrl = `?section=${section}#${parts[1]}`
   element.setAttribute("href", newUrl)
   element.setAttribute("data-section", section)
   element.setAttribute("data-hash", hash)
   element.setAttribute("data-crossref", "true")
 }
 function handleTMLinks(element: Element, href: string) {
-  let rep = href.replace(".html", "")
-  let prepended = `?section=${rep}`
+  const rep = href.replace(".html", "")
+  const prepended = `?section=${rep}`
   element.setAttribute("href", prepended)
 }
 
@@ -93,11 +93,11 @@ export class aTagHandler {
     this.functionContext = functionContext
   }
   element(element: Element) {
-    let href = element.getAttribute("href")
+    const href = element.getAttribute("href")
     if (!href) return
     if (this.functionContext == "TN") {
-      let rcLink = element.getAttribute("data-is-rc-link")
-      let isRcLink = rcLink != null || rcLink != undefined
+      const rcLink = element.getAttribute("data-is-rc-link")
+      const isRcLink = rcLink != null || rcLink != undefined
       if (href && isRcLink) {
         return handleRcLinks(element, href, this.user)
       }

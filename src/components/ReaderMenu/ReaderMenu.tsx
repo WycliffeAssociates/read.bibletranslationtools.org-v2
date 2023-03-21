@@ -2,21 +2,22 @@ import {
   createSignal,
   Show,
   batch,
-  For,
   Setter,
   lazy,
-  Suspense
+  Suspense,
+  createResource
 } from "solid-js"
 import { SvgSettings, SvgBook, LoadingSpinner } from "@components"
 import { BookList } from "./BookList"
 import { ChapterList } from "./ChapterList"
-import { clickOutside, debounce, escapeOut } from "@lib/utils-ui"
+import { clickOutside, escapeOut, debounce } from "@lib/utils-ui"
 
 // https://github.com/solidjs/solid/discussions/845
 // these are hacks (name doesn't matter) to keep typescript from stripping away "unused imports", but these are used as custom solid directives below:
-// @ts-ignore
+
+// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 const clickout = clickOutside
-// @ts-ignore
+// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 const escape = escapeOut
 
 const Settings = lazy(async () => {
@@ -25,9 +26,10 @@ const Settings = lazy(async () => {
 
 import { useI18n } from "@solid-primitives/i18n"
 import type { Component } from "solid-js"
-import type { bibleEntryObj } from "@customTypes/types"
+import type { bibleEntryObj, repoIndexObj } from "@customTypes/types"
 import type { storeType } from "@components/ReaderWrapper/ReaderWrapper"
 import { BibleBookCategories } from "@lib/contants"
+import { CACHENAMES } from "../../lib/contants"
 
 interface MenuProps {
   storeInterface: storeType
@@ -35,39 +37,50 @@ interface MenuProps {
   user: string
   repositoryName: string
   hasDownloadIndex: boolean
+  repoIndex: repoIndexObj
 }
 const ReaderMenu: Component<MenuProps> = (props) => {
   // ====MENU STATE
   const [t, { add, locale }] = useI18n()
   const [menuIsOpen, setMenuIsOpen] = createSignal(false)
+  const [temporarilyHideMenu, setTemporarilyHideMenu] = createSignal(false)
+  // eslint-disable-next-line solid/reactivity
+  const [savedInServiceWorker] = createResource(
+    () => props.storeInterface.currentBookObj(),
+    checkIfCurrentBookOrResIsSaved
+  )
+  const [savingOffline, setSavingOffline] = createSignal<
+    "IDLE" | "FINISHED" | "STARTED" | "ERROR"
+  >("IDLE")
+  const [savingWholeOffline, setSavingWholeOffline] = createSignal<
+    "IDLE" | "FINISHED" | "STARTED" | "ERROR"
+  >("IDLE")
+
+  // While maybe the most solid-like, creating state from new props is still an acceptable pattern in solid.
   const [mobileTabOpen, setMobileTabOpen] = createSignal(
+    // eslint-disable-next-line solid/reactivity
     props.storeInterface.isOneBook() ? "chapter" : "book"
   )
   const [settingsAreOpen, setSettingsAreOpen] = createSignal(false)
   const [searchQuery, setSearchQuery] = createSignal("")
-  let bibleMenuBooksByCategory: {
-    OT: any[]
-    NT: any[]
-  } = {
-    OT: [],
-    NT: []
-  }
-  props.storeInterface.menuBookNames().forEach((book) => {
-    BibleBookCategories.OT.includes(book.slug.toUpperCase())
-      ? bibleMenuBooksByCategory.OT.push(book)
-      : bibleMenuBooksByCategory.NT.push(book)
-  })
+
   const filteredMenuBookByCategory = () => {
-    let bibleMenuBooksByCategory: {
-      OT: any[]
-      NT: any[]
+    type bookType = {
+      label: string
+      slug: string
+    }
+    const bibleMenuBooksByCategory: {
+      OT: bookType[]
+      NT: bookType[]
     } = {
       OT: [],
       NT: []
     }
-    let booksToSearch: Array<any> = searchQuery()
-      ? props.storeInterface.getStoreVal("searchedBooks")
+    const booksToSearch = searchQuery()
+      ? props.storeInterface.getStoreVal("searchableBooks")
       : props.storeInterface.menuBookNames()
+
+    if (!booksToSearch || !Array.isArray(booksToSearch)) return
     booksToSearch.forEach((book) => {
       BibleBookCategories.OT.includes(book.slug.toUpperCase())
         ? bibleMenuBooksByCategory.OT.push(book)
@@ -75,12 +88,66 @@ const ReaderMenu: Component<MenuProps> = (props) => {
     })
     return bibleMenuBooksByCategory
   }
+
+  async function checkIfCurrentBookOrResIsSaved() {
+    const currentBook = props.storeInterface.currentBookObj()
+    if (!currentBook)
+      return {
+        wholeResponse: null,
+        wholeIsComplete: null,
+        wholeIsOutOfDate: null,
+        currentBooksIsDownloaded: null,
+        currentBookIsOutOfDate: null
+      }
+    const completeResourceCache = await caches.open(CACHENAMES.complete)
+    // const bookMatch = await completeResourceCache.match(
+    //   `${window.location.origin}/${props.user}/${props.repositoryName}/${currentBook.slug}`
+    // )
+    const wholeMatch = await completeResourceCache.match(
+      `${window.location.origin}/${props.user}/${props.repositoryName}`
+    )
+    let wholeIsOutOfDate = null
+    let wholeIsComplete = null
+    let currentBooksIsDownloaded = null
+    let currentBookIsOutOfDate = null
+
+    if (wholeMatch) {
+      const lastGenHeader = wholeMatch.headers?.get("X-Last-Generated")
+      wholeIsOutOfDate = lastGenHeader
+        ? lastGenHeader < props.repoIndex.lastRendered
+        : null
+
+      const currentBookIsDownloadedJson =
+        wholeMatch.headers?.get("X-Complete-Books") || ""
+      const completeBooks = JSON.parse(currentBookIsDownloadedJson)
+      const currentBookFromHeader =
+        Array.isArray(completeBooks) &&
+        completeBooks.find((book) => book.slug == currentBook.slug)
+      if (currentBookFromHeader) {
+        currentBooksIsDownloaded = true
+        currentBookIsOutOfDate =
+          currentBookFromHeader.lastRendered < currentBook.lastRendered
+      }
+
+      wholeIsComplete = wholeMatch.headers?.get("X-Is-Complete") == "1"
+    }
+    return {
+      wholeResponse: wholeMatch,
+      wholeIsComplete,
+      wholeIsOutOfDate,
+      currentBooksIsDownloaded,
+      currentBookIsOutOfDate
+    }
+  }
+
   // ====MENU FXNS
+  // eslint disabled.  Not the most solid like maybe, but I didn't turn on this eslint rule until after deploy of this project, and was learning solid.  This is stable however.  The values of the reactive dependencies are being used in JSX. This is a derived function really, but the rules wants to be sure that we are aware that its deps aren't auto-tracked here.
+  // eslint-disable-next-line solid/reactivity
   const jumpToNewChapIdx = debounce(async (evt: InputEvent, value: string) => {
     const storeInterface = props.storeInterface
     const target = evt.target as HTMLInputElement
     const menuBook = storeInterface.getStoreVal("menuBook") as string
-    let chapter: string = value ? value : target.value
+    const chapter: string = value ? value : target.value
     // validate
     // let chapter: string | number = value ? Number(value) : Number(target?.value)
 
@@ -92,25 +159,25 @@ const ReaderMenu: Component<MenuProps> = (props) => {
       return
     }
 
-    let currentBookObj = props.storeInterface.currentBookObj()
+    const currentBookObj = props.storeInterface.currentBookObj()
     // handles index offset:
-    let existingChap = currentBookObj
+    const existingChap = currentBookObj
       ? props.storeInterface.getChapObjFromGivenBook(
           currentBookObj.slug,
           chapter
         )
       : null
 
-    // go to in memory text
-    if (existingChap?.text) {
-      storeInterface.mutateStore("currentChapter", String(chapter))
+    let text: string | false | void
+    if (existingChap?.content) {
+      // return storeInterface.mutateStore("currentChapter", String(chapter))
+      text = existingChap.content
+    } else {
+      text = await storeInterface.fetchHtml({
+        book: menuBook,
+        chapter: String(chapter)
+      })
     }
-
-    // fetch new and nav
-    let text = await storeInterface.fetchHtml({
-      book: menuBook,
-      chapter: String(chapter)
-    })
     // Early bail, no text given
     if (!text) return
     batch(() => {
@@ -127,19 +194,21 @@ const ReaderMenu: Component<MenuProps> = (props) => {
   }, 300)
 
   function scrollToTop() {
-    let scrollPane = document.querySelector('[data-js="scrollToTop"]')
+    const scrollPane = document.querySelector('[data-js="scrollToTop"]')
     if (scrollPane) {
       scrollPane.scrollTop = 0
     }
   }
 
   const togglePanel = (bool?: boolean) => {
-    let val = bool === false ? bool : !menuIsOpen()
+    const val = bool === false ? bool : !menuIsOpen()
     if (val == true && settingsAreOpen() && window.innerWidth < 640) {
       setSettingsAreOpen(false)
     }
-    let menuBook = props.storeInterface.getStoreVal("menuBook") as string
-    let currentBook = props.storeInterface.getStoreVal("currentBook") as string
+    const menuBook = props.storeInterface.getStoreVal("menuBook") as string
+    const currentBook = props.storeInterface.getStoreVal(
+      "currentBook"
+    ) as string
     batch(() => {
       // IF someone opens the menu, clicks a book but not chapter, and then changes mind and closes menu, some oddness could happen.  Keeping them in sync here;
       if (menuBook != currentBook) {
@@ -149,41 +218,46 @@ const ReaderMenu: Component<MenuProps> = (props) => {
     })
   }
   function manageOpenSettings() {
-    let newState = !settingsAreOpen()
+    if (savingOffline() == "STARTED" || savingWholeOffline() == "STARTED") {
+      return setTemporarilyHideMenu(!temporarilyHideMenu())
+    }
+    const newState = !settingsAreOpen()
     setSettingsAreOpen(newState)
     if (menuIsOpen() && newState == true && window.innerWidth < 640) {
       setMenuIsOpen(false)
     }
+    setTemporarilyHideMenu(false)
     props.setPrintWholeBook(false)
   }
   function switchBooks(book: string) {
     props.storeInterface.mutateStore("menuBook", book)
   }
   function isActiveBookAndChap(label: string) {
-    let menuBook = props.storeInterface.getMenuBook()
-    let currentBook = props.storeInterface.currentBookObj()
-    let currentChap = props.storeInterface.currentChapObj()
+    const menuBook = props.storeInterface.getMenuBook()
+    const currentBook = props.storeInterface.currentBookObj()
+    const currentChap = props.storeInterface.currentChapObj()
     return currentChap?.label == label && menuBook?.label == currentBook?.label
   }
   function isActiveBook(book: string) {
     return props.storeInterface.getStoreVal("currentBook") == book
   }
 
+  // eslint-disable-next-line solid/reactivity
   const searchBooks = debounce((): void => {
-    let allBooks = props.storeInterface.getStoreVal<bibleEntryObj[]>("text")
-    let search = searchQuery().toLowerCase()
-    !search && props.storeInterface.mutateStore("searchedBooks", allBooks)
-    let filtered = allBooks.filter(
+    const allBooks = props.storeInterface.getStoreVal<bibleEntryObj[]>("text")
+    const search = searchQuery().toLowerCase()
+    !search && props.storeInterface.mutateStore("searchableBooks", allBooks)
+    const filtered = allBooks.filter(
       (book) =>
         book.label.toLowerCase().includes(search) ||
         book.slug.toLowerCase().includes(search)
     )
-    props.storeInterface.mutateStore("searchedBooks", filtered)
+    props.storeInterface.mutateStore("searchableBooks", filtered)
   }, 400)
 
   function setLanguageFromCustomEvent(
     langCode: string,
-    newDict: any,
+    newDict: Record<string, string>,
     newDictCode: string,
     addToOtherDict: boolean
   ) {
@@ -201,7 +275,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
         on:changelanguage={(
           e: CustomEvent<{
             language: string
-            newDict: any
+            newDict: Record<string, string>
             newDictCode: string
             addToOtherDict: boolean
           }>
@@ -223,10 +297,10 @@ const ReaderMenu: Component<MenuProps> = (props) => {
             <div class="my-2 flex w-4/5 justify-between overflow-hidden  rounded-lg bg-neutral-200 outline outline-1 outline-gray-300 hover:outline-accent">
               <button
                 class="flex w-full flex-grow items-center justify-between rounded-md ltr:pl-4 rtl:pr-4"
-                onClick={(e) => togglePanel()}
+                onClick={() => togglePanel()}
               >
                 <span class="flex items-center">
-                  <SvgBook className="fill-dark-900 inline-block  fill-current ltr:mr-2 rtl:ml-2" />
+                  <SvgBook classNames="fill-dark-900 inline-block  fill-current ltr:mr-2 rtl:ml-2" />
                   <span class="text-xl capitalize">
                     {props.storeInterface.currentBookObj()?.label}
                   </span>
@@ -265,6 +339,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                             />
                           </label>
                           <BookList
+                            // eslint-disable-next-line solid/reactivity
                             onClick={(book: string) => switchBooks(book)}
                             isActiveBook={isActiveBook}
                             bibleMenuBooksByCategory={
@@ -290,16 +365,25 @@ const ReaderMenu: Component<MenuProps> = (props) => {
               <div class=" relative w-max rounded-md ltr:ml-auto rtl:mr-auto ">
                 <button
                   class="rounded   py-2  px-5 outline outline-1 outline-gray-300 hover:outline-accent"
-                  // todo: internationalize label
-                  aria-label="Open Settings"
+                  aria-label={t("openSettings", {}, "open settings")}
                   onClick={manageOpenSettings}
                 >
-                  <SvgSettings className="" />
+                  <SvgSettings classNames="" />
                 </button>
                 <Show when={settingsAreOpen()}>
-                  <div class="shadow-dark-700 absolute z-20 w-72 bg-neutral-100 p-4 text-right shadow-xl ltr:right-0 rtl:left-0">
-                    <Suspense fallback={<LoadingSpinner />}>
+                  <div
+                    class={`shadow-dark-700 absolute z-20 w-72 bg-neutral-100 p-4 text-right shadow-xl ltr:right-0 rtl:left-0 md:w-96 ${
+                      temporarilyHideMenu() && "hidden"
+                    }`}
+                  >
+                    <Suspense
+                      fallback={
+                        <LoadingSpinner classNames="w-12 mx-auto text-accent" />
+                      }
+                    >
                       <Settings
+                        repoIndex={props.repoIndex}
+                        savedInServiceWorker={savedInServiceWorker}
                         storeInterface={props.storeInterface}
                         setPrintWholeBook={props.setPrintWholeBook}
                         user={props.user}
@@ -308,6 +392,10 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                         downloadSourceUsfmArr={props.storeInterface.getStoreVal(
                           "downloadLinks"
                         )}
+                        savingOffline={savingOffline}
+                        setSavingOffline={setSavingOffline}
+                        savingWholeOffline={savingWholeOffline}
+                        setSavingWholeOffline={setSavingWholeOffline}
                       />
                     </Suspense>
                   </div>
@@ -369,6 +457,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                     />
                   </label>
                   <BookList
+                    // eslint-disable-next-line solid/reactivity
                     onClick={(bookSlug: string) => {
                       switchBooks(bookSlug)
                       setMobileTabOpen("chapter")

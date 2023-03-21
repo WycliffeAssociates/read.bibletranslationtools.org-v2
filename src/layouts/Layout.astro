@@ -3,6 +3,7 @@ export interface Props {
   title: string
   use100vh?: boolean
   textDir: string
+  repoUrl: string
 }
 // imports
 import { pwaInfo } from "virtual:pwa-info"
@@ -11,10 +12,10 @@ import { Nav } from "@components"
 import { getPreferredLangFromHeader } from "@lib/utils"
 
 // data
-const { title, use100vh, textDir } = Astro.props
+const { title, use100vh, textDir, repoUrl } = Astro.props
 
 const preferredLocale = getPreferredLangFromHeader(Astro.request)
-let initialDictModule = await import(`../translations/${preferredLocale}.json`)
+let initialDictModule = await import(`../translations/${preferredLocale}.js`)
 const initialDict = {
   [preferredLocale]: initialDictModule.default
 }
@@ -56,7 +57,11 @@ const initialDict = {
   </head>
   <body>
     <div class={use100vh ? "print:block print:pb-20" : ""} id="pageWrapper">
-      <Nav preferredLocale={preferredLocale} initialDict={initialDict} />
+      <Nav
+        preferredLocale={preferredLocale}
+        initialDict={initialDict}
+        repoUrl={repoUrl}
+      />
       <slot />
       <!-- <ReloadPrompt /> -->
     </div>

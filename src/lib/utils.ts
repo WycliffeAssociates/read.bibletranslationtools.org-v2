@@ -9,17 +9,17 @@ import type { repoIndexObj } from "@customTypes/types"
 export function getPreferredLangFromHeader(request: Request): i18nDictKeysType {
   const defaultLocale = "en"
   if (!request) return defaultLocale
-  let langs = request.headers.get("Accept-Language")
+  const langs = request.headers.get("Accept-Language")
   if (!langs) return defaultLocale
-  let langsArr = langs.split(",").map((lang) => {
-    let arr = lang.split(";")
+  const langsArr = langs.split(",").map((lang) => {
+    const arr = lang.split(";")
     return arr[0]
   })
   let preferredLocale = defaultLocale //default
   for (let i = 0; i < langsArr.length; i++) {
     //   let val = item() as i18nDictSubKeysType
     const langKey = langsArr[i] as i18nDictKeysType
-    let matchedLocale = i18nDictMeta.find((locale) => locale.code === langKey)
+    const matchedLocale = i18nDictMeta.find((locale) => locale.code === langKey)
     if (matchedLocale) {
       preferredLocale = langKey
       break
@@ -49,10 +49,12 @@ export function getBookAndChapterFromUrl({
       chapter: ""
     }
   }
-  let matchingBook = repoIndex.bible?.find(
-    (repoBook) => repoBook.slug == book || repoBook.label == book
+  const matchingBook = repoIndex.bible?.find(
+    (repoBook) =>
+      repoBook.slug.toLowerCase() == String(book).toLowerCase() ||
+      repoBook.label.toLowerCase() == String(book).toLowerCase()
   )
-  let matchingChapter =
+  const matchingChapter =
     matchingBook &&
     matchingBook.chapters.find((chapterObj) => chapterObj.label == chapter)
   if (!book || !matchingBook) {
@@ -62,8 +64,8 @@ export function getBookAndChapterFromUrl({
     // there is a book, and chap provided but this verfies that it is a a valid book/chap ;  Only set chap to null cause we can still use the book
     chapter = null
   }
-  let firstBookToRender = matchingBook || repoIndex.bible[0] //use first Key;
-  let firstChapterToShow = matchingChapter || firstBookToRender.chapters[0]
+  const firstBookToRender = matchingBook || repoIndex.bible[0] //use first Key;
+  const firstChapterToShow = matchingChapter || firstBookToRender.chapters[0]
 
   return {
     book: firstBookToRender.slug || "",
@@ -81,9 +83,9 @@ export function getTwQueryParamOrDefault({
   repoIndex
 }: nonBibSchemaI): string | void {
   if (!repoIndex.words?.length) return
-  let defaultNavParam = repoIndex.words[0].slug
+  const defaultNavParam = repoIndex.words[0].slug
   if (!repoIndex || !navParam) return defaultNavParam
-  let match = repoIndex.words.find((wordObj) => wordObj.slug === navParam)
+  const match = repoIndex.words.find((wordObj) => wordObj.slug === navParam)
   if (match) {
     return match.slug
   } else {
@@ -95,8 +97,8 @@ export function getTmQueryParamOrDefault({
   repoIndex
 }: nonBibSchemaI): string | void {
   if (!repoIndex.navigation?.length) return
-  let defaultNavParam = repoIndex.navigation[0].File?.replace(".html", "")
-  let matchingObj = repoIndex.navigation.find((topLevelNavObj) => {
+  const defaultNavParam = repoIndex.navigation[0].File?.replace(".html", "")
+  const matchingObj = repoIndex.navigation.find((topLevelNavObj) => {
     return topLevelNavObj.File.replace(".html", "") == navParam
   })
   return matchingObj && matchingObj.File
@@ -108,7 +110,7 @@ interface reshapeBibleIndexI {
   repoIndex: repoIndexObj
   book: string
   chapter: string
-  initialHtml: string
+  initialHtml: string | null
 }
 
 export function seedAndMutateInitialDataRepoIndex({
