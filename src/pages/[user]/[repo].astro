@@ -50,9 +50,7 @@ let wasPostRequest = false
 // POST REQUESTS COME FROM SETTINGS ACTION WHEN SAVING ENTIRE BOOK OFFLINE..POST BODY IS AN ALREADY DOWNLOADED INDEX AND CONTENT FOR THIS RESOURCE.
 if (Astro.request.method === "POST") {
   try {
-    console.time("post")
     const body = Astro.request.body
-    // console.log({ body })
     if (!body) return
 
     const arrBuff = await Astro.request.arrayBuffer()
@@ -60,43 +58,9 @@ if (Astro.request.method === "POST") {
     const decodedU8 = gunzipSync(u8Array)
     const decodedRepoIndex = JSON.parse(strFromU8(decodedU8)) as repoIndexObj
     if (!decodedRepoIndex) return
-    console.log({ decodedRepoIndex })
     repoIndex = decodedRepoIndex
     wasPostRequest = true
     hasDownloadIndex = true
-
-    //@ =============== ATTEMPT 2  =============
-    // let stringData = ""
-    // const deflater = new DecodeUTF8((data, final) => {
-    //   console.log({ data })
-    //   stringData += data
-    // })
-    // const adcs = new AsyncGunzip((err, dataUint8, final) => {
-    //   deflater.push(dataUint8, final)
-    // })
-    // const dcs = new Gunzip((chunk, final) => {
-    //   console.log({ chunk })
-    //   deflater.push(chunk, final)
-    // })
-    // const reader = body.getReader()
-    // // console.log("here1")
-    // await reader.read().then(function processChunk({ done, value }) {
-    //   console.log({ value })
-
-    //   if (done) {
-    //     return
-    //   }
-    //   // pass the chunk to the Gunzip transform stream
-    //   dcs.push(value, done)
-    //   // read the next chunk
-    //   reader.read().then(processChunk)
-    // })
-    // // console.log("here3")
-
-    // const parsed = JSON.parse(stringData)
-    // console.log({ parsed })
-
-    console.timeEnd("post")
   } catch (error) {
     console.error(error)
     return new Response(null, {
@@ -104,10 +68,9 @@ if (Astro.request.method === "POST") {
     })
   }
 }
-console.time("rest")
+
 // NORMAL GET SCENARIO
 if (!repoIndex) {
-  console.log("HERE!")
   repoIndex = await getRepoIndex({ user, repo })
   hasDownloadIndex = !!(await checkForOrDownloadWholeRepo({
     user,
@@ -206,9 +169,7 @@ const preferredLocale = getPreferredLangFromHeader(Astro.request)
 const initialDictModule = await import(
   `../../translations/${preferredLocale}.js`
 )
-console.timeEnd("wholeReq")
 
-console.timeEnd("rest")
 const initialDict = {
   [preferredLocale]: initialDictModule.default
 }
