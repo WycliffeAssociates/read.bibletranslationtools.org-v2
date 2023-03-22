@@ -4,13 +4,11 @@ import type { storeType } from "../ReaderWrapper/ReaderWrapper"
 import type { bibleEntryObj, repoIndexObj } from "@customTypes/types"
 import { FUNCTIONS_ROUTES } from "@lib/routes"
 import { checkForOrDownloadWholeRepo } from "@lib/api"
-import {
-  compressToEncodedURIComponent,
-  decompressFromEncodedURIComponent
-} from "lz-string"
+
 import { CACHENAMES } from "@lib/contants"
 import pLimit from "p-limit"
 import { LoadingSpinner } from "@components"
+import { gzipSync, strToU8 } from "fflate"
 
 interface settingsProps {
   setPrintWholeBook: Setter<boolean>
@@ -70,11 +68,8 @@ export default function Settings(props: settingsProps) {
       const wholeResourceMatch = props.savedInServiceWorker()?.wholeResponse
       let indexToPostWith
       if (wholeResourceMatch) {
-        const bodyText = await wholeResourceMatch.text()
-        const originalRepoIndex = JSON.parse(
-          decompressFromEncodedURIComponent(bodyText)
-        ) as repoIndexObj
-
+        const originalRepoIndex =
+          (await wholeResourceMatch.json()) as repoIndexObj
         const bib = originalRepoIndex.bible
         if (!bib) return
         const correspondingBook = bib?.findIndex(
@@ -111,7 +106,12 @@ export default function Settings(props: settingsProps) {
       const wholeResUrl = new URL(
         `${window.location.origin}/${props.user}/${props.repo}`
       )
-      const ssrPostPayload = compressDataAndGetEncodedIndex(indexToPostWith)
+
+      const ssrPostPayload = JSON.stringify(indexToPostWith)
+      // compress to minimize transfer to try to avoid CF timeouts
+      const gzippedPayload = gzipSync(strToU8(ssrPostPayload), {
+        level: 7
+      })
 
       await rowWholeResourcesCache.put(
         wholeResUrl,
@@ -133,13 +133,16 @@ export default function Settings(props: settingsProps) {
         props.storeInterface.getStoreVal("currentChapter")
       )
 
+      console.time("fetch from astro")
       const htmlSsrUrlRes = await fetch(htmlSsrUrl, {
         method: "POST",
-        body: ssrPostPayload,
+        body: gzippedPayload,
         headers: {
           "Content-Type": "text/html"
         }
       })
+      console.timeEnd("fetch from astro")
+
       // will overwrite any existing /complete, but should be fine since it augments existing downloaded books or downloaded whole
       if (htmlSsrUrlRes.ok) {
         await lrPagesCache.put(
@@ -208,12 +211,6 @@ export default function Settings(props: settingsProps) {
     }
   }
 
-  function compressDataAndGetEncodedIndex(data: object) {
-    const compressed = compressToEncodedURIComponent(JSON.stringify(data))
-
-    return compressed
-  }
-
   function getHtmlSsrUrl(bookSlug: string, chapter: string) {
     return new URL(
       `${window.location.origin}/${props.user}/${props.repo}?book=${bookSlug}&chapter=${chapter}`
@@ -276,8 +273,11 @@ export default function Settings(props: settingsProps) {
       // compress the current index. WE are going to pass it in body of post req so response doesn't have to fetch it.
       const indexClone = structuredClone(props.repoIndex)
       indexClone.bible = downloadIndex.content
-      const ssrPostPayload = compressDataAndGetEncodedIndex(indexClone)
+      // const ssrPostPayload = compressDataAndGetEncodedIndex(indexClone)
 
+      const ssrPostPayload = JSON.stringify(indexClone)
+      // compress to minimize transfer to try to avoid CF timeouts
+      const gzippedPayload = gzipSync(strToU8(ssrPostPayload))
       // eslint-disable-next-line solid/reactivity
       const rowWholeResourcesCache = await caches.open(CACHENAMES.complete)
       const lrApiCache = await caches.open(CACHENAMES.lrApi)
@@ -295,7 +295,7 @@ export default function Settings(props: settingsProps) {
       })
       await rowWholeResourcesCache.put(
         swUrl,
-        new Response(ssrPostPayload, {
+        new Response(gzippedPayload, {
           status: 200,
           statusText: "OK",
           headers: {
@@ -312,34 +312,61 @@ export default function Settings(props: settingsProps) {
         props.storeInterface.getStoreVal("currentBook"),
         props.storeInterface.getStoreVal("currentChapter")
       )
-      const htmlSsrUrlRes = await fetch(htmlSsrUrl, {
+      fetch(htmlSsrUrl, {
         method: "POST",
-        body: ssrPostPayload,
+        body: gzippedPayload,
         headers: {
-          "Content-Type": "text/html"
+          "Content-Type": "text/html",
+          "Accept-Encoding": "gzip"
         }
-      })
+      }).then(async (htmlSsrUrlRes) => {
+        const num = 3
+        if (htmlSsrUrlRes.ok && num > 4) {
+          const blob = await htmlSsrUrlRes.blob()
+          const size = blob.size
 
-      // We will save each html page below, but we are saving one SSR reponse under a URL that the user shouldn't naturally arrive at (e.g. /complete). When processing a document request, it will check to see if there is a match for /origin/user/repo/complete, and serve this (offline ready) response here.
+          await lrPagesCache.put(
+            `${window.location.origin}/${props.user}/${props.repo}/complete`,
+            new Response(blob, {
+              status: 200,
+              statusText: "OK",
+              headers: {
+                "Content-Type": "text/html",
+                "X-Last-Generated": props.repoIndex.lastRendered,
+                "Content-Length": String(size)
+              }
+            })
+          )
+        } else {
+          const smallIndex = JSON.stringify(props.repoIndex)
+          // compress to minimize transfer to try to avoid CF timeouts
+          const gzippedPayload = gzipSync(strToU8(smallIndex))
 
-      if (htmlSsrUrlRes.ok) {
-        const blob = await htmlSsrUrlRes.blob()
-        const size = blob.size
-        // debugger
-
-        await lrPagesCache.put(
-          `${window.location.origin}/${props.user}/${props.repo}/complete`,
-          new Response(blob, {
-            status: 200,
-            statusText: "OK",
+          const smallerHtmlSsrUrlRes = await fetch(htmlSsrUrl, {
+            method: "POST",
+            body: gzippedPayload,
             headers: {
               "Content-Type": "text/html",
-              "X-Last-Generated": props.repoIndex.lastRendered,
-              "Content-Length": String(size)
+              "Accept-Encoding": "gzip"
             }
           })
-        )
-      }
+          const blob = await smallerHtmlSsrUrlRes.blob()
+          const size = blob.size
+          await lrPagesCache.put(
+            `${window.location.origin}/${props.user}/${props.repo}/complete`,
+            new Response(blob, {
+              status: 200,
+              statusText: "OK",
+              headers: {
+                "Content-Type": "text/html",
+                "X-Last-Generated": props.repoIndex.lastRendered,
+                "Content-Length": String(size)
+              }
+            })
+          )
+        }
+      })
+      // We will save each html page below, but we are saving one SSR reponse under a URL that the user shouldn't naturally arrive at (e.g. /complete). When processing a document request, it will check to see if there is a match for /origin/user/repo/complete, and serve this (offline ready) response here.
 
       const promises: Array<Promise<unknown>> = []
       // on large enough resources, occasionally ran into memory error when saving 1000+ calls, so this is to throttle the writing to sw a bit to avoid memory overflows.

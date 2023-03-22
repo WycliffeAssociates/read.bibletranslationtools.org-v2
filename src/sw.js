@@ -149,18 +149,18 @@ if (import.meta.env.DEV) {
     ({ request }) => {
       if (request.mode == "navigate") return true
     },
-    new NetworkFirst({
-      cacheName: "all-dev"
-      // plugins: [new CacheableResponsePlugin({statuses: [-1]})],
-    })
+    // new NetworkFirst({
+    //   cacheName: "all-dev"
+    //   // plugins: [new CacheableResponsePlugin({statuses: [-1]})],
+    // })
     // new CacheFirst({
     //   cacheName: "lr-pages"
     //   // plugins: [new CacheableResponsePlugin({statuses: [-1]})],
     // })
-    // new CacheNetworkRace({
-    //   cacheName: "lr-pages"
-    //   // plugins: [new CacheableResponsePlugin({statuses: [-1]})],
-    // })
+    new CacheNetworkRace({
+      cacheName: "lr-pages"
+      // plugins: [new CacheableResponsePlugin({statuses: [-1]})],
+    })
   )
 
   //----- HTML DOCS ----

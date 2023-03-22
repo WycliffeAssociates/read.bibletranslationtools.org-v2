@@ -27,8 +27,8 @@ import type {
   bibleSchemaProps,
   repoIndexObj
 } from "@src/customTypes/types"
-import { decompressFromEncodedURIComponent } from "lz-string"
-
+import { gunzipSync, strFromU8, Gunzip, DecodeUTF8, AsyncGunzip } from "fflate"
+console.time("wholeReq")
 setOriginUrl(Astro.url.origin)
 let { repo, user } = Astro.params
 
@@ -49,19 +49,65 @@ let hasDownloadIndex = false
 let wasPostRequest = false
 // POST REQUESTS COME FROM SETTINGS ACTION WHEN SAVING ENTIRE BOOK OFFLINE..POST BODY IS AN ALREADY DOWNLOADED INDEX AND CONTENT FOR THIS RESOURCE.
 if (Astro.request.method === "POST") {
-  const body = Astro.request.body
-  if (!body) return
-  const bodyText = await Astro.request.text()
-  const bodyJson = JSON.parse(
-    decompressFromEncodedURIComponent(bodyText)
-  ) as repoIndexObj
-  if (!bodyJson) return
-  repoIndex = bodyJson
-  wasPostRequest = true
-  hasDownloadIndex = true
+  try {
+    console.time("post")
+    const body = Astro.request.body
+    // console.log({ body })
+    if (!body) return
+
+    const arrBuff = await Astro.request.arrayBuffer()
+    const u8Array = new Uint8Array(arrBuff)
+    const decodedU8 = gunzipSync(u8Array)
+    const decodedRepoIndex = JSON.parse(strFromU8(decodedU8)) as repoIndexObj
+    if (!decodedRepoIndex) return
+    console.log({ decodedRepoIndex })
+    repoIndex = decodedRepoIndex
+    wasPostRequest = true
+    hasDownloadIndex = true
+
+    //@ =============== ATTEMPT 2  =============
+    // let stringData = ""
+    // const deflater = new DecodeUTF8((data, final) => {
+    //   console.log({ data })
+    //   stringData += data
+    // })
+    // const adcs = new AsyncGunzip((err, dataUint8, final) => {
+    //   deflater.push(dataUint8, final)
+    // })
+    // const dcs = new Gunzip((chunk, final) => {
+    //   console.log({ chunk })
+    //   deflater.push(chunk, final)
+    // })
+    // const reader = body.getReader()
+    // // console.log("here1")
+    // await reader.read().then(function processChunk({ done, value }) {
+    //   console.log({ value })
+
+    //   if (done) {
+    //     return
+    //   }
+    //   // pass the chunk to the Gunzip transform stream
+    //   dcs.push(value, done)
+    //   // read the next chunk
+    //   reader.read().then(processChunk)
+    // })
+    // // console.log("here3")
+
+    // const parsed = JSON.parse(stringData)
+    // console.log({ parsed })
+
+    console.timeEnd("post")
+  } catch (error) {
+    console.error(error)
+    return new Response(null, {
+      status: 500
+    })
+  }
 }
+console.time("rest")
 // NORMAL GET SCENARIO
 if (!repoIndex) {
+  console.log("HERE!")
   repoIndex = await getRepoIndex({ user, repo })
   hasDownloadIndex = !!(await checkForOrDownloadWholeRepo({
     user,
@@ -160,7 +206,9 @@ const preferredLocale = getPreferredLangFromHeader(Astro.request)
 const initialDictModule = await import(
   `../../translations/${preferredLocale}.js`
 )
+console.timeEnd("wholeReq")
 
+console.timeEnd("rest")
 const initialDict = {
   [preferredLocale]: initialDictModule.default
 }
@@ -227,3 +275,7 @@ const initialDict = {
   window.addEventListener("resize", secDocHeight)
   window.addEventListener("orientationchange", secDocHeight)
 </script>
+<!-- 110ms on en_ulb -->
+<!--  69.204ms with stream ulb -->
+<!-- 274 / 277 on en_tn_lite with stream -->
+<!-- 242.077ms / 266 on en_tn_lite with arrbuff -->

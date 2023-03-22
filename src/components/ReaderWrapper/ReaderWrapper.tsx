@@ -1,10 +1,11 @@
 import type { i18nDictKeysType } from "@lib/i18n"
 import { createI18nContext, I18nContext } from "@solid-primitives/i18n"
-import { createSignal, createMemo, Show, onMount } from "solid-js"
+import { createSignal, createMemo, Show, onMount, batch } from "solid-js"
 import type { JSX } from "solid-js"
 import { createStore, produce } from "solid-js/store"
 import { FUNCTIONS_ROUTES } from "@lib/routes"
 import { LoadingSpinner, ReaderMenu, ReaderPane } from "@components"
+import { strFromU8, gunzipSync } from "fflate"
 
 import type {
   bibleChapObj,
@@ -14,6 +15,7 @@ import type {
 } from "@customTypes/types"
 import type { Accessor } from "solid-js"
 import { debounce } from "@lib/utils-ui"
+import { CACHENAMES } from "@lib/contants"
 
 // types are a little verbose up here: See them at the bottom:
 
@@ -50,6 +52,9 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
   const [readerStore, setReaderStore] = createStore(defaultStore())
   const [printWholeBook, setPrintWholeBook] = createSignal(false)
 
+  // eslint-disable-next-line solid/reactivity
+  const [doRender, setDoRender] = createSignal(!props.wasPostRequest)
+
   // Wrappers and predefined functions for reading and mutating store;
   // # Limit to the non object keys: E.g. string or string[]
   // https://javascript.plainenglish.io/typescript-essentials-conditionally-filter-types-488705bfbf56
@@ -82,7 +87,6 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
       })
     )
   }
-  // type x = typeof mutateStore
 
   function mutateStoreText({ book, chapter, val }: updateStoreTextParams) {
     setReaderStore(
@@ -119,7 +123,6 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
     return readerStore.text.length == 1
   }
   const currentBookObj = createMemo(() => {
-    // return readerStore.text[readerStore.currentBook]
     if (!readerStore.text) return
     const currentBook = readerStore.text.find((storeBib) => {
       return storeBib.slug == readerStore.currentBook
@@ -174,7 +177,7 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
   })
   const HTML = createMemo(() => {
     const currentChap = currentChapObj()
-    // const retVal = currentBook[readerStore.currentChapter]
+
     return (currentChap && currentChap.content) || undefined
   })
   const maxChapter = createMemo(() => {
@@ -182,9 +185,7 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
     const bookObj = readerStore.text.find((storeBook) => {
       return storeBook.slug == readerStore.menuBook
     })
-    // const bookObj = readerStore.text[readerStore.menuBook]
-    // const vals = Object.keys(bookObj).map((val) => Number(val))
-    // return Math.max(...vals)
+
     const last = bookObj && bookObj.chapters.length
     return last
   })
@@ -198,7 +199,6 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
     return val
   })
   const possibleChapters = createMemo(() => {
-    // const chapters = Object.keys(readerStore.text[readerStore.menuBook])
     if (!readerStore.text) return
     const bookObj = readerStore.text.find((storeBook) => {
       return storeBook.slug == readerStore.menuBook
@@ -240,7 +240,6 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
       return false
     } finally {
       setIsFetching(false)
-      // return;
     }
   }
 
@@ -281,32 +280,57 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
   }
   const notifyPreviewPaneOfScroll = debounce(reportScrollPosition, 20)
 
-  // we want a skeleton of the index, to pass along as a search param for saving offline.
-  // eslint-disable-next-line solid/reactivity, , @typescript-eslint/no-unused-vars
+  // Most if this page was the result response of being saved offline, we'll need to adjust the navigation for the query parameters here.  There may be the conditional need to load data from the service worker too if the post request failed when passing a large body.
   onMount(async () => {
     if (props.wasPostRequest) {
       const queryParams = new URLSearchParams(window.location.search)
       const book = queryParams.get("book")
       const chapter = queryParams.get("chapter")
+      const isCompleteText = readerStore.text?.every((book) => {
+        return book.chapters.every((chap) => {
+          return !!chap.content
+        })
+      })
+      let completeText = readerStore.text
 
-      const storeQueryParamBook = readerStore.text?.find((storeBib) => {
+      if (!isCompleteText) {
+        const rowWholeResourcesCache = await caches.open(CACHENAMES.complete)
+        const wholeResource = await rowWholeResourcesCache.match(
+          `${window.location.origin}/${props.user}/${props.repositoryName}`
+        )
+        if (!wholeResource) return
+        const arrBuff = await wholeResource.arrayBuffer()
+        const u8Array = new Uint8Array(arrBuff)
+        const decodedU8 = gunzipSync(u8Array)
+        const decodedRepoIndex = JSON.parse(
+          strFromU8(decodedU8)
+        ) as repoIndexObj
+        completeText = decodedRepoIndex.bible
+      }
+      const storeQueryParamBook = completeText?.find((storeBib) => {
         return storeBib.slug.toLowerCase() == String(book).toLowerCase()
       })
-      if (!storeQueryParamBook || !chapter || !book) return
+      if (!storeQueryParamBook || !chapter || !book) return setDoRender(true)
       const storeQueryParamChapter =
         storeQueryParamBook &&
         storeQueryParamBook.chapters.find((chap) => chap.label == chapter)
-
-      mutateStore("currentBook", storeQueryParamBook.slug)
-      if (storeQueryParamChapter) {
-        mutateStore("currentChapter", storeQueryParamChapter.label)
-      }
+      batch(() => {
+        mutateStore("text", completeText)
+        mutateStore("currentBook", storeQueryParamBook.slug)
+        if (storeQueryParamChapter) {
+          mutateStore("currentChapter", storeQueryParamChapter.label)
+        }
+      })
+      setDoRender(true)
+      // setIsFetchingSwData(false)
+    } else {
+      setDoRender(true)
     }
   })
 
   return (
     <Show
-      when={readerStore.text?.length}
+      when={doRender()}
       fallback={<LoadingSpinner classNames="w-12 mx-auto my-8 text-accent" />}
     >
       <I18nProvider

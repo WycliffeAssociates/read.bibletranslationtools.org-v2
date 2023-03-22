@@ -29,6 +29,7 @@
     "@astrojs/tailwind": "^3.0.1",
     "@solid-primitives/i18n": "^1.2.0",
     "astro": "^2.0.14",
+    "fflate": "^0.7.4",
     "idb-keyval": "^6.2.0",
     "lz-string": "^1.5.0",
     "p-limit": "^4.0.0",

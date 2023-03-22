@@ -119,14 +119,16 @@ const ReaderMenu: Component<MenuProps> = (props) => {
 
       const currentBookIsDownloadedJson =
         wholeMatch.headers?.get("X-Complete-Books") || ""
-      const completeBooks = JSON.parse(currentBookIsDownloadedJson)
-      const currentBookFromHeader =
-        Array.isArray(completeBooks) &&
-        completeBooks.find((book) => book.slug == currentBook.slug)
-      if (currentBookFromHeader) {
-        currentBooksIsDownloaded = true
-        currentBookIsOutOfDate =
-          currentBookFromHeader.lastRendered < currentBook.lastRendered
+      if (currentBookIsDownloadedJson) {
+        const completeBooks = JSON.parse(currentBookIsDownloadedJson)
+        const currentBookFromHeader =
+          Array.isArray(completeBooks) &&
+          completeBooks.find((book) => book.slug == currentBook.slug)
+        if (currentBookFromHeader) {
+          currentBooksIsDownloaded = true
+          currentBookIsOutOfDate =
+            currentBookFromHeader.lastRendered < currentBook.lastRendered
+        }
       }
 
       wholeIsComplete = wholeMatch.headers?.get("X-Is-Complete") == "1"
