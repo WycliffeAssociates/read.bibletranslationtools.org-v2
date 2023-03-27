@@ -13,7 +13,7 @@ import { checkForOrDownloadWholeRepo } from "@lib/api"
 import { CACHENAMES } from "@lib/contants"
 import pLimit from "p-limit"
 import { LoadingSpinner } from "@components"
-import { gzipSync, strToU8 } from "fflate"
+import { gunzipSync, gzipSync, strFromU8, strToU8 } from "fflate"
 
 interface settingsProps {
   setPrintWholeBook: Setter<boolean>
@@ -58,8 +58,12 @@ export default function Settings(props: settingsProps) {
       const wholeResourceMatch = props.savedInServiceWorker()?.wholeResponse
       let indexToPostWith
       if (wholeResourceMatch) {
-        const originalRepoIndex =
-          (await wholeResourceMatch.json()) as repoIndexObj
+        const arrBuff = await wholeResourceMatch.arrayBuffer()
+        const u8Array = new Uint8Array(arrBuff)
+        const decodedU8 = gunzipSync(u8Array)
+        const originalRepoIndex = JSON.parse(
+          strFromU8(decodedU8)
+        ) as repoIndexObj
         const bib = originalRepoIndex.bible
         if (!bib) return
         const correspondingBook = bib?.findIndex(
