@@ -307,16 +307,27 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
         ) as repoIndexObj
         completeText = decodedRepoIndex.bible
       }
-      const storeQueryParamBook = completeText?.find((storeBib) => {
+      let storeQueryParamBook = completeText?.find((storeBib) => {
         return storeBib.slug.toLowerCase() == String(book).toLowerCase()
       })
-      if (!storeQueryParamBook || !chapter || !book) return setDoRender(true)
-      const storeQueryParamChapter =
+      let storeQueryParamChapter =
         storeQueryParamBook &&
         storeQueryParamBook.chapters.find((chap) => chap.label == chapter)
+      if (!storeQueryParamBook || !chapter || !book) return setDoRender(true)
+      if (!storeQueryParamChapter?.content) {
+        // fallback to first available contents
+        storeQueryParamBook = completeText?.find((storeBib) => {
+          return storeBib.chapters.find((chap) => !!chap.content)
+        })
+        storeQueryParamChapter = storeQueryParamBook?.chapters.find(
+          (chap) => !!chap.content
+        )
+      }
       batch(() => {
         mutateStore("text", completeText)
-        mutateStore("currentBook", storeQueryParamBook.slug)
+        if (storeQueryParamBook) {
+          mutateStore("currentBook", storeQueryParamBook.slug)
+        }
         if (storeQueryParamChapter) {
           mutateStore("currentChapter", storeQueryParamChapter.label)
         }
