@@ -283,45 +283,51 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
   // Most if this page was the result response of being saved offline, we'll need to adjust the navigation for the query parameters here.  There may be the conditional need to load data from the service worker too if the post request failed when passing a large body.
   onMount(async () => {
     if (props.wasPostRequest) {
-      const queryParams = new URLSearchParams(window.location.search)
-      const book = queryParams.get("book")
-      const chapter = queryParams.get("chapter")
-      const isCompleteText = readerStore.text?.every((book) => {
-        return book.chapters.every((chap) => {
-          return !!chap.content
+      try {
+        const queryParams = new URLSearchParams(window.location.search)
+        const book = queryParams.get("book")
+        const chapter = queryParams.get("chapter")
+        const isCompleteText = readerStore.text?.every((book) => {
+          return book.chapters.every((chap) => {
+            return !!chap.content
+          })
         })
-      })
-      let completeText = readerStore.text
+        let completeText = readerStore.text
 
-      if (!isCompleteText) {
-        const rowWholeResourcesCache = await caches.open(CACHENAMES.complete)
-        const wholeResource = await rowWholeResourcesCache.match(
-          `${window.location.origin}/${props.user}/${props.repositoryName}`
-        )
-        if (!wholeResource) return
-        const arrBuff = await wholeResource.arrayBuffer()
-        const u8Array = new Uint8Array(arrBuff)
-        const decodedU8 = gunzipSync(u8Array)
-        const decodedRepoIndex = JSON.parse(
-          strFromU8(decodedU8)
-        ) as repoIndexObj
-        completeText = decodedRepoIndex.bible
-      }
-      const storeQueryParamBook = completeText?.find((storeBib) => {
-        return storeBib.slug.toLowerCase() == String(book).toLowerCase()
-      })
-      if (!storeQueryParamBook || !chapter || !book) return setDoRender(true)
-      const storeQueryParamChapter =
-        storeQueryParamBook &&
-        storeQueryParamBook.chapters.find((chap) => chap.label == chapter)
-      batch(() => {
-        mutateStore("text", completeText)
-        mutateStore("currentBook", storeQueryParamBook.slug)
-        if (storeQueryParamChapter) {
-          mutateStore("currentChapter", storeQueryParamChapter.label)
+        if (!isCompleteText) {
+          const rowWholeResourcesCache = await caches.open(CACHENAMES.complete)
+          const wholeResource = await rowWholeResourcesCache.match(
+            `${window.location.origin}/${props.user}/${props.repositoryName}`
+          )
+          if (!wholeResource) return
+          const arrBuff = await wholeResource.arrayBuffer()
+          const u8Array = new Uint8Array(arrBuff)
+          const decodedU8 = gunzipSync(u8Array)
+          const decodedRepoIndex = JSON.parse(
+            strFromU8(decodedU8)
+          ) as repoIndexObj
+          completeText = decodedRepoIndex.bible
         }
-      })
-      setDoRender(true)
+        const storeQueryParamBook = completeText?.find((storeBib) => {
+          return storeBib.slug.toLowerCase() == String(book).toLowerCase()
+        })
+        if (!storeQueryParamBook || !chapter || !book) return setDoRender(true)
+        const storeQueryParamChapter =
+          storeQueryParamBook &&
+          storeQueryParamBook.chapters.find((chap) => chap.label == chapter)
+        batch(() => {
+          mutateStore("text", completeText)
+          mutateStore("currentBook", storeQueryParamBook.slug)
+          if (storeQueryParamChapter) {
+            mutateStore("currentChapter", storeQueryParamChapter.label)
+          }
+        })
+        setDoRender(true)
+      } catch (error) {
+        console.error(error)
+        // in the event that there is invalid gzip data in the cache or something, just fire  reload
+        window.location.reload()
+      }
       // setIsFetchingSwData(false)
     } else {
       setDoRender(true)

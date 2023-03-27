@@ -38,7 +38,7 @@ async function tryLocalCache(handler: StrategyHandler, request: Request) {
     }
   } catch (error) {
     // network fallback and put
-    console.log(error)
+    console.error(error)
     return
   }
 }

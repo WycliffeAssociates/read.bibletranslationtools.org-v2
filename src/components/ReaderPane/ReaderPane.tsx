@@ -128,7 +128,6 @@ export default function ReaderPane(props: ReaderPaneProps) {
     dir,
     chapNum
   }: fetchReaderParams) {
-    debugger
     event && event.preventDefault()
     const currentBook = props.storeInterface.getStoreVal<string>("currentBook")
 
