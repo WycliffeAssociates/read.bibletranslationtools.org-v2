@@ -99,13 +99,11 @@ export default function Settings(props: settingsProps) {
 
       const ssrPostPayload = JSON.stringify(indexToPostWith)
       // compress to minimize transfer to try to avoid CF timeouts
-      const gzippedPayload = gzipSync(strToU8(ssrPostPayload), {
-        level: 7
-      })
+      const gzippedPayload = gzipSync(strToU8(ssrPostPayload))
 
       await rowWholeResourcesCache.put(
         wholeResUrl,
-        new Response(ssrPostPayload, {
+        new Response(gzippedPayload, {
           status: 200,
           statusText: "OK",
           headers: {
@@ -123,7 +121,6 @@ export default function Settings(props: settingsProps) {
         props.storeInterface.getStoreVal("currentChapter")
       )
 
-      console.time("fetch from astro")
       const htmlSsrUrlRes = await fetch(htmlSsrUrl, {
         method: "POST",
         body: gzippedPayload,
@@ -131,7 +128,6 @@ export default function Settings(props: settingsProps) {
           "Content-Type": "text/html"
         }
       })
-      console.timeEnd("fetch from astro")
 
       // will overwrite any existing /complete, but should be fine since it augments existing downloaded books or downloaded whole
       if (htmlSsrUrlRes.ok) {
