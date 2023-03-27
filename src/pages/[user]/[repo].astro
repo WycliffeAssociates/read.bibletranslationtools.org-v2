@@ -27,8 +27,8 @@ import type {
   bibleSchemaProps,
   repoIndexObj
 } from "@src/customTypes/types"
-import { gunzipSync, strFromU8, Gunzip, DecodeUTF8, AsyncGunzip } from "fflate"
-console.time("wholeReq")
+import { gunzipSync, strFromU8 } from "fflate"
+
 setOriginUrl(Astro.url.origin)
 let { repo, user } = Astro.params
 
@@ -236,7 +236,3 @@ const initialDict = {
   window.addEventListener("resize", secDocHeight)
   window.addEventListener("orientationchange", secDocHeight)
 </script>
-<!-- 110ms on en_ulb -->
-<!--  69.204ms with stream ulb -->
-<!-- 274 / 277 on en_tn_lite with stream -->
-<!-- 242.077ms / 266 on en_tn_lite with arrbuff -->

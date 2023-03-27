@@ -21,6 +21,14 @@ File/Folder tree below:
   Notes, bible, questions, and commentary share a template:
   Words and Manual have their own;
 
+  Example links: 
+  - Bible = http://localhost:3000/WycliffeAssociates/en_ulb
+  - TN = http://localhost:3000/WycliffeAssociates/en_tn
+  - TQ = http://localhost:3000/WycliffeAssociates/en_tq
+  - BC = http://localhost:3000/WycliffeAssociates/en_bc
+  - TW = http://localhost:3000/WycliffeAssociates/en_tw
+  - TM = http://localhost:3000/WycliffeAssociates/en_tm
+
 ## Folders
 
 ### Functions
@@ -29,7 +37,7 @@ These are [cloudflare pages functions](https://developers.cloudflare.com/pages/p
 
 ### Playwright
 
-This is the folder that serves as the browser shell for any component testing (note )
+This is the folder that serves as the browser shell for any component testing
 
 ### Public
 
@@ -46,7 +54,7 @@ Assets not processed by Vite. Fonts, and PWA icons etc;
 - Translations - Each language gets a json file. These will be imported to application code lazily based on _consistent naming of language codes_. There should be an svg flag ([some ex. flags here](<[https://](https://github.com/OnTheGoSystems/SVG-flags-language-switcher)>)) of schema `code`.svg, and the `index.ts` file in the translations folder needs the bare minimum of its name and code added to the array as well.
 - Types - common or reused types. Other types are just next to source code as needed.
 - pwa.js - basic registration logic (separate from behavior) for SW
-- sw.js - The custom service worker. Name and location must be consistent as placed in Astro.config
+- sw.ts - The custom service worker. Name and location must be consistent as placed in Astro.config
 
 ### Tests
 

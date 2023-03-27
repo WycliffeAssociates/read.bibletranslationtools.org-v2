@@ -26,10 +26,12 @@ export default function TranslationManual(props: tmProps) {
           navIsOpen() ? "overflow-hidden" : "overflow-y-scroll"
         }`}
       >
-        <div
-          class={`theText mr-auto h-full w-full max-w-[70ch] md:w-4/5 lg:w-3/5`}
-          innerHTML={props.initialHtml}
-        ></div>
+        {props.initialHtml && (
+          <div
+            class={`theText mr-auto h-full w-full max-w-[70ch] md:w-4/5 lg:w-3/5`}
+            innerHTML={props.initialHtml}
+          />
+        )}
         {props.repoIndex.navigation?.length && (
           <div class="h-full w-0  md:sticky md:top-0 md:w-2/5 md:bg-transparent lg:w-1/5">
             <Show when={navIsOpen()}>

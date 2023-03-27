@@ -49,15 +49,21 @@ export function getBookAndChapterFromUrl({
       chapter: ""
     }
   }
+  const firstBibBook = repoIndex.bible[0] //use first Key;
+  const firstBibBookChap = chapter || firstBibBook.chapters[0].label
+  const bookToSearch = book || firstBibBook.slug
+  // most things in app use slug.  But for initial render, its fine to check for if the whole book label was passed instead of only slug
   const matchingBook = repoIndex.bible?.find(
     (repoBook) =>
-      repoBook.slug.toLowerCase() == String(book).toLowerCase() ||
-      repoBook.label.toLowerCase() == String(book).toLowerCase()
+      repoBook.slug.toLowerCase() == bookToSearch.toLowerCase() ||
+      repoBook.label.toLowerCase() == firstBibBook.label.toLowerCase()
   )
   const matchingChapter =
     matchingBook &&
-    matchingBook.chapters.find((chapterObj) => chapterObj.label == chapter)
-  if (!book || !matchingBook) {
+    matchingBook.chapters.find(
+      (chapterObj) => chapterObj.label == firstBibBookChap
+    )
+  if (!matchingBook) {
     book = null
     chapter = null
   } else if (chapter && !matchingChapter) {
@@ -106,7 +112,7 @@ export function getTmQueryParamOrDefault({
     : defaultNavParam
 }
 
-interface reshapeBibleIndexI {
+interface IReshapeBibleIndex {
   repoIndex: repoIndexObj
   book: string
   chapter: string
@@ -118,7 +124,7 @@ export function seedAndMutateInitialDataRepoIndex({
   book,
   chapter,
   initialHtml
-}: reshapeBibleIndexI): void {
+}: IReshapeBibleIndex): void {
   if (!repoIndex.bible) return
   repoIndex.bible.forEach((repoBook) => {
     repoBook.chapters.forEach((repoChapter) => {

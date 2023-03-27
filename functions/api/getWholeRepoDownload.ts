@@ -1,9 +1,9 @@
+import type { IcfEnv } from "@customTypes/types"
 import { getHeaders, allParamsAreValid } from "functions/shared"
 
 export const onRequestGet: PagesFunction = async (context) => {
   const request: Request = context.request
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const env: any = context.env
+  const env = context.env as IcfEnv & typeof context.env
   const url = new URL(request.url)
   const user = url.searchParams?.get("user") as string
   const repo = url.searchParams?.get("repo")
@@ -27,7 +27,9 @@ export const onRequestGet: PagesFunction = async (context) => {
       method: method == "GET" ? "GET" : "HEAD"
     })
     if (!response.ok || response.status == 404) {
-      throw new Error("404")
+      return new Response(null, {
+        status: 404
+      })
     }
     return new Response(response.body, {
       headers: {

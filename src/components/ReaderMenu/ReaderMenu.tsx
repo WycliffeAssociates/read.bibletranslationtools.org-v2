@@ -26,7 +26,11 @@ const Settings = lazy(async () => {
 
 import { useI18n } from "@solid-primitives/i18n"
 import type { Component } from "solid-js"
-import type { bibleEntryObj, repoIndexObj } from "@customTypes/types"
+import type {
+  bibleEntryObj,
+  IBibleMenuBooksByCategory,
+  repoIndexObj
+} from "@customTypes/types"
 import type { storeType } from "@components/ReaderWrapper/ReaderWrapper"
 import { BibleBookCategories } from "@lib/contants"
 import { CACHENAMES } from "../../lib/contants"
@@ -65,14 +69,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
   const [searchQuery, setSearchQuery] = createSignal("")
 
   const filteredMenuBookByCategory = () => {
-    type bookType = {
-      label: string
-      slug: string
-    }
-    const bibleMenuBooksByCategory: {
-      OT: bookType[]
-      NT: bookType[]
-    } = {
+    const bibleMenuBooksByCategory: IBibleMenuBooksByCategory = {
       OT: [],
       NT: []
     }
@@ -161,19 +158,15 @@ const ReaderMenu: Component<MenuProps> = (props) => {
       return
     }
 
-    const currentBookObj = props.storeInterface.currentBookObj()
-    // handles index offset:
-    const existingChap = currentBookObj
-      ? props.storeInterface.getChapObjFromGivenBook(
-          currentBookObj.slug,
-          chapter
-        )
-      : null
+    const menuBookObj = props.storeInterface.getChapObjFromGivenBook(
+      menuBook,
+      chapter
+    )
 
     let text: string | false | void
-    if (existingChap?.content) {
+    if (menuBookObj?.content) {
       // return storeInterface.mutateStore("currentChapter", String(chapter))
-      text = existingChap.content
+      text = menuBookObj.content
     } else {
       text = await storeInterface.fetchHtml({
         book: menuBook,

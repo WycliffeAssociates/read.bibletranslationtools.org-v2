@@ -8,7 +8,7 @@ module.exports = {
     browser: true,
     node: true
   },
-  ignorePatterns: ["functions/*.js"],
+  ignorePatterns: ["functions/*.js", "dist/**/*", "playwright-report/**/*"],
   plugins: ["@typescript-eslint", "solid"],
   extends: [
     "plugin:astro/recommended",

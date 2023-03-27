@@ -3,7 +3,6 @@
 // export { default as Card } from "./Card.astro"
 // @ts-ignore
 export { default as Card } from "./Card.astro"
-// @ts-ignore
 export { default as TestComponent } from "./Test"
 // @ts-ignore
 export { default as Nav } from "./global/Nav/Nav.astro"

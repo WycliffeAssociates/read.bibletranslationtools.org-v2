@@ -1,5 +1,6 @@
 import { getHeaders, allParamsAreValid } from "functions/shared"
 import { bibleBookSortOrder } from "@lib/contants"
+import type { IcfEnv } from "@customTypes/types"
 
 export const onRequestPost: PagesFunction = async (context) => {
   // Contents of context object
@@ -13,8 +14,8 @@ export const onRequestPost: PagesFunction = async (context) => {
   // } = context
 
   const request: Request = context.request
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const env: any = context.env
+
+  const env = context.env as IcfEnv & typeof context.env
   const url = new URL(request.url)
   const user = url.searchParams?.get("user") as string
   const repo = url.searchParams?.get("repo")

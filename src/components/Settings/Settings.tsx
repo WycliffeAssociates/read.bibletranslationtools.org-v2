@@ -1,7 +1,12 @@
 import { createSignal, Show, Setter, Accessor, Resource } from "solid-js"
 import { useI18n } from "@solid-primitives/i18n"
 import type { storeType } from "../ReaderWrapper/ReaderWrapper"
-import type { bibleEntryObj, repoIndexObj } from "@customTypes/types"
+import type {
+  bibleEntryObj,
+  ILoadingTextEnums,
+  ISavedInServiceWorkerStatus,
+  repoIndexObj
+} from "@customTypes/types"
 import { FUNCTIONS_ROUTES } from "@lib/routes"
 import { checkForOrDownloadWholeRepo } from "@lib/api"
 
@@ -17,27 +22,12 @@ interface settingsProps {
   repo: string
   storeInterface: storeType
   hasDownloadIndex: boolean
-  savedInServiceWorker: Resource<
-    | {
-        wholeResponse: null
-        wholeIsComplete: null
-        wholeIsOutOfDate: null
-        currentBooksIsDownloaded: null
-        currentBookIsOutOfDate: null
-      }
-    | {
-        wholeResponse: Response | undefined
-        wholeIsComplete: boolean | null
-        wholeIsOutOfDate: boolean | null
-        currentBooksIsDownloaded: boolean | null
-        currentBookIsOutOfDate: boolean | null
-      }
-  >
+  savedInServiceWorker: Resource<ISavedInServiceWorkerStatus>
   repoIndex: repoIndexObj
-  savingOffline: Accessor<"IDLE" | "FINISHED" | "STARTED" | "ERROR">
-  setSavingOffline: Setter<"IDLE" | "FINISHED" | "STARTED" | "ERROR">
-  savingWholeOffline: Accessor<"IDLE" | "FINISHED" | "STARTED" | "ERROR">
-  setSavingWholeOffline: Setter<"IDLE" | "FINISHED" | "STARTED" | "ERROR">
+  savingOffline: Accessor<ILoadingTextEnums>
+  setSavingOffline: Setter<ILoadingTextEnums>
+  savingWholeOffline: Accessor<ILoadingTextEnums>
+  setSavingWholeOffline: Setter<ILoadingTextEnums>
 }
 
 export default function Settings(props: settingsProps) {
@@ -176,13 +166,6 @@ export default function Settings(props: settingsProps) {
           content
         )
         lrApiCache.put(apiReq, apiRes)
-
-        // // add html to cache. Response will include js to fetch compressed chapter above onMount instead of through blob/storage/cf api
-        // if (htmlSsrUrlRes.ok) {
-        //   const htmlUrl = getHtmlSsrUrl(bookSlug, chapter.label)
-        //   const htmlResClone = htmlSsrUrlRes.clone()
-        //   lrPagesCache.put(htmlUrl, htmlResClone)
-        // }
       })
       props.setSavingOffline("FINISHED")
     } catch (error) {
@@ -319,6 +302,7 @@ export default function Settings(props: settingsProps) {
           "Content-Type": "text/html",
           "Accept-Encoding": "gzip"
         }
+        // eslint-disable-next-line solid/reactivity
       }).then(async (htmlSsrUrlRes) => {
         const num = 3
         if (htmlSsrUrlRes.ok && num > 4) {

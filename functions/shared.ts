@@ -1,6 +1,8 @@
-import type { repoIndexObj } from "../src/customTypes/types"
+import type { IcfEnv, repoIndexObj } from "../src/customTypes/types"
+type envType = IcfEnv
+
 export async function getRepoIndexLocal(
-  env: any,
+  env: envType,
   user: string,
   repo: string
 ): Promise<repoIndexObj | null> {
@@ -21,15 +23,11 @@ export function getHeaders(url: URL) {
     "Content-Type": string
     "Access-Control-Allow-Origin"?: string
   }
-  const allowedOrigins = ["localhost", "http://127.0.0.1"]
+  // note, if want to activate cors for just this site, could do so here based on a list of allowed Origins
   const headers: headersType = {
     "Content-Type": "text/html"
   }
   headers["Access-Control-Allow-Origin"] = "*"
-
-  // if (allowedOrigins.some((origin) => url.origin.includes(origin))) {
-  //   headers["Access-Control-Allow-Origin"] = "*"
-  // }
   return headers
 }
 
@@ -111,7 +109,7 @@ export class aTagHandler {
     }
   }
 }
-export function allParamsAreValid(params: Array<any>) {
+export function allParamsAreValid(params: Array<string | null>) {
   if (!params || !params.length) return
   if (
     params.some(

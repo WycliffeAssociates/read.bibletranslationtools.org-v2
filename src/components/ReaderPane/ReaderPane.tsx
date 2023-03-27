@@ -50,7 +50,6 @@ export default function ReaderPane(props: ReaderPaneProps) {
         hoverOnFootnotes()
         hoverOnCrossReferences()
         hoverOnCommentaryCrossReferences(props.user, props.repositoryName)
-        //
         pushHistory(
           props.storeInterface.getStoreVal("currentBook"),
           props.storeInterface.getStoreVal("currentChapter")

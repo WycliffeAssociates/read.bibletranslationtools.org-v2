@@ -1,20 +1,14 @@
+import type { IBibleMenuBooksByCategory } from "@customTypes/types"
 import { useI18n } from "@solid-primitives/i18n"
 import { For, Show } from "solid-js"
 
 interface propsInterface {
   onClick: (book: string) => void
   isActiveBook: (book: string) => boolean
-  bibleMenuBooksByCategory: () =>
-    | {
-        OT: { label: string; slug: string }[]
-        NT: { label: string; slug: string }[]
-      }
-    | undefined
+  bibleMenuBooksByCategory: () => IBibleMenuBooksByCategory | undefined
   isMobile: boolean
 }
 export function BookList(props: propsInterface) {
-  // signature
-  // const [t, { add, locale }] = useI18n()
   const [t] = useI18n()
   const outterClassNames = () => {
     return props.isMobile

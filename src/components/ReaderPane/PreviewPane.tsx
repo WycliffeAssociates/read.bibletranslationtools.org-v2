@@ -20,11 +20,6 @@ const [lastFocused, setLastFocused] =
 const previewPaneDebounceWait = 375
 let previewCloseButton: HTMLButtonElement //ref
 
-// onMount(() => {
-//   let scrollPane = document.querySelector('[data-js="scrollToTop"]')
-//   scrollPane.ad
-// })
-
 function closeModal() {
   setShowFootnote(false)
   lastFocused()?.focus()
@@ -174,7 +169,6 @@ export function hoverOnCrossReferences() {
     ref.addEventListener("mouseout", () => {
       setMousedIn(false)
     })
-    // ref.addEventListener("focus", populatePreviewPane)
   })
 }
 export function hoverOnCommentaryCrossReferences(user: string, repo: string) {
@@ -281,11 +275,6 @@ export function hoverOnFootnotes() {
     note.addEventListener("mouseout", () => {
       setMousedIn(false)
     })
-    // note.addEventListener("focus", manageNote)
-
-    // note.addEventListener("mouseout", () => {
-    //   setShowFootnote(false)
-    // })
     note.addEventListener("focusout", () => setMousedIn(false))
   })
 }

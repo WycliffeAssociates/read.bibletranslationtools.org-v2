@@ -67,7 +67,7 @@ export interface tmEntry {
   Label: string
   Children: Array<tmSingle>
 }
-export interface downloadIndexI {
+export interface IDownloadIndex {
   content: bibleEntryObj[]
   ByteCount: number
 }
@@ -124,3 +124,22 @@ export interface bibleSchemaProps extends commonRepoProps {
   chapter: string
   templateType: "BIBLE"
 }
+type bookType = {
+  label: string
+  slug: string
+}
+export interface IBibleMenuBooksByCategory {
+  OT: bookType[]
+  NT: bookType[]
+}
+export interface IcfEnv {
+  PIPELINE_API_URL_BASE: string
+}
+export interface ISavedInServiceWorkerStatus {
+  wholeResponse: null | Response | undefined
+  wholeIsComplete: null | boolean
+  wholeIsOutOfDate: null | boolean
+  currentBooksIsDownloaded: null | boolean
+  currentBookIsOutOfDate: null | boolean
+}
+export type ILoadingTextEnums = "IDLE" | "FINISHED" | "STARTED" | "ERROR"

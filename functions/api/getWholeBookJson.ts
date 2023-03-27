@@ -1,8 +1,9 @@
+import type { IcfEnv } from "@customTypes/types"
 import { getHeaders, allParamsAreValid } from "functions/shared"
 
 export const onRequestGet: PagesFunction = async (context) => {
   const request: Request = context.request
-  const env: any = context.env
+  const env = context.env as IcfEnv & typeof context.env
   const url = new URL(request.url)
   const user = url.searchParams?.get("user") as string
   const repo = url.searchParams?.get("repo")
@@ -15,7 +16,6 @@ export const onRequestGet: PagesFunction = async (context) => {
     })
   }
   try {
-    // http://localhost/u/WA-Catalog/en_ulb/index.json;
     const baseUrl = env.PIPELINE_API_URL_BASE
     const finalUrl = `${baseUrl}/${user}/${repo}/${book}/whole.json`
 
@@ -28,7 +28,11 @@ export const onRequestGet: PagesFunction = async (context) => {
           "Content-Type": "application/json"
         }
       })
-    } else throw new Error("that file does not exist for this repo")
+    }
+    return new Response(null, {
+      status: 404,
+      statusText: "that file does not exist for this repo"
+    })
   } catch (error) {
     console.error(error)
     return new Response(null, {
