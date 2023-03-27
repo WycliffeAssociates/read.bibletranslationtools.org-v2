@@ -26,4 +26,4 @@ pnpm-debug.log*
 /playwright/.cache/
 ignore-notes.md
 [[path]].js
-functions/[[path]].js
+/functions/\[\[path\]\].js
