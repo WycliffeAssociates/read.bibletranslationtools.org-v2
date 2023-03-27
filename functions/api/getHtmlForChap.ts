@@ -41,7 +41,6 @@ export const onRequestGet: PagesFunction = async (context) => {
       .on("a[href*='tn-chunk-']", handler)
       .on("a[data-is-rc-link]", handler)
       .transform(newResp)
-    return newResp
   } catch (error) {
     console.error(error)
     return new Response(null, {

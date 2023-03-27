@@ -52,7 +52,7 @@ export default function NavButtonLinks(props: navProps) {
             class={`${
               props.dir == "BACK" ? backwardClassA : forwardClassNamesA
             }`}
-            onClick={() => props.onClick && props.onClick()}
+            onClick={(e) => props.onClick && props.onClick(e)}
           >
             {props.icon}
           </a>

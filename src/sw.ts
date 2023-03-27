@@ -51,7 +51,6 @@ class CacheNetworkRace extends Strategy {
   ): Promise<Response | undefined> {
     const isPagesReq =
       request.mode == "navigate" && this.cacheName == "lr-pages"
-    console.log({ isPagesReq })
     function regularRace(
       resolve: (
         value: Response | PromiseLike<Response | undefined> | undefined
