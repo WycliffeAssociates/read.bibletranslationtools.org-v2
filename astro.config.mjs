@@ -30,7 +30,7 @@ export default defineConfig({
     AstroPWA({
       /* your pwa options */
       srcDir: "src",
-      filename: "sw.js",
+      filename: "sw.ts",
       strategies: "injectManifest",
       registerType: "autoUpdate",
       manifest: manifest,

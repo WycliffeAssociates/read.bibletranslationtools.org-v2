@@ -1,38 +1,42 @@
 import { onCleanup, Setter } from "solid-js"
 
+/* @===============  UI UTILS   =============   */
+
 export function getHtmlWithinSpan(
   node: Element,
-  predicate: (element: Element) => Boolean
+  predicate: (element: Element) => boolean
 ): string {
-  let truthyFunction = predicate
-  let htmlBucket: Array<Element> = []
+  const truthyFunction = predicate
+  const htmlBucket: Array<Element> = []
 
   function recursivelyGatherDomUntil(
     node: Element,
-    predicate: (element: Element) => Boolean
+    predicate: (element: Element) => boolean
   ) {
     if (predicate(node)) {
       return htmlBucket
     } else {
       htmlBucket.push(node)
-      let nextNode = node.nextElementSibling as Element
+      const nextNode = node.nextElementSibling as Element
       if (!nextNode) return htmlBucket
-      let newPredicate = () => truthyFunction(nextNode)
+      const newPredicate = () => truthyFunction(nextNode)
       recursivelyGatherDomUntil(nextNode, newPredicate)
     }
   }
   recursivelyGatherDomUntil(node, predicate)
-  let outerHtml = htmlBucket.map((el) => el.outerHTML).join("")
+  const outerHtml = htmlBucket.map((el) => el.outerHTML).join("")
   return outerHtml
 }
 
 /* @===============  CUSTOM SOLID DIRECTIVES  =============   */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function clickOutside(el: Element, accessor: () => any) {
   const onClick = (e: Event) => !el.contains(e.target as Node) && accessor()?.()
   document.body.addEventListener("click", onClick)
   onCleanup(() => document.body.removeEventListener("click", onClick))
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function escapeOut(el: Element, accessor: () => any) {
   const onKeypress = (e: KeyboardEvent) => {
     e.key === "Escape" && accessor()?.()
@@ -56,13 +60,13 @@ export function positionPreviewPane({
   previewPaneSetter,
   setPos
 }: positionPreviewPaneParams) {
-  let rect = target.getBoundingClientRect()
+  const rect = target.getBoundingClientRect()
   previewPaneSetter(true)
-  let previewPane = document.querySelector(previewPaneSelector) //stick in DOM to measure it's vh client height. This runs quickly enough that you won't get some flashing before we position it;
+  const previewPane = document.querySelector(previewPaneSelector) //stick in DOM to measure it's vh client height. This runs quickly enough that you won't get some flashing before we position it;
   if (!previewPane) return previewPaneSetter(false)
-  let windowMidPoint = window.innerWidth / 2
-  let posX = rect.x > windowMidPoint ? rect.x - 50 + "px" : rect.x + 50 + "px"
-  let posY =
+  const windowMidPoint = window.innerWidth / 2
+  const posX = rect.x > windowMidPoint ? rect.x - 50 + "px" : rect.x + 50 + "px"
+  const posY =
     rect.y > window.innerHeight / 2
       ? rect.y - previewPane.clientHeight
       : rect.y + 30
@@ -71,12 +75,17 @@ export function positionPreviewPane({
     y: posY + "px"
   })
 }
-export function debounce(callback: Function, wait: number) {
+export function debounce(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  callback: (...params: any[]) => void,
+  wait: number
+) {
   let timeoutId: number | null = null
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (...args: any) => {
     window.clearTimeout(timeoutId)
     timeoutId = window.setTimeout(() => {
-      callback.apply(null, args)
+      callback(...args)
     }, wait)
   }
 }

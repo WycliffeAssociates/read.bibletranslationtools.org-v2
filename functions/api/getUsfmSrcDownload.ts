@@ -1,5 +1,6 @@
 import { getHeaders, allParamsAreValid } from "functions/shared"
 import { bibleBookSortOrder } from "@lib/contants"
+import type { IcfEnv } from "@customTypes/types"
 
 export const onRequestPost: PagesFunction = async (context) => {
   // Contents of context object
@@ -13,11 +14,12 @@ export const onRequestPost: PagesFunction = async (context) => {
   // } = context
 
   const request: Request = context.request
-  const env: any = context.env
+
+  const env = context.env as IcfEnv & typeof context.env
   const url = new URL(request.url)
-  let user = url.searchParams?.get("user") as string
-  let repo = url.searchParams?.get("repo")
-  let book = url.searchParams?.get("book") as string //type guard in if statement beneath; Cast here to satisfy typescript that I'm going to ensure that they are valid params
+  const user = url.searchParams?.get("user") as string
+  const repo = url.searchParams?.get("repo")
+  const book = url.searchParams?.get("book") as string //type guard in if statement beneath; Cast here to satisfy typescript that I'm going to ensure that they are valid params
 
   if (!allParamsAreValid([user, repo, book])) {
     return new Response(null, {
@@ -28,14 +30,14 @@ export const onRequestPost: PagesFunction = async (context) => {
 
   try {
     // http://localhost/u/WA-Catalog/en_ulb/index.json;
-    let baseUrl = env.PIPELINE_API_URL_BASE
-    let finalUrl = `${baseUrl}/${user}/${repo}/source.usfm`
-    let response = await fetch(finalUrl)
+    const baseUrl = env.PIPELINE_API_URL_BASE
+    const finalUrl = `${baseUrl}/${user}/${repo}/source.usfm`
+    const response = await fetch(finalUrl)
 
     const fileName = `${
       bibleBookSortOrder[book?.toUpperCase()]
     }-${book?.toUpperCase()}`
-    let newResp = new Response(response.body, {
+    const newResp = new Response(response.body, {
       headers: {
         ...getHeaders(url),
         "Content-Type": "application/octet-stream",

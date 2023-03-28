@@ -1,4 +1,4 @@
-import type { JSXElement } from "solid-js"
+import { JSXElement, Show } from "solid-js"
 import { useI18n } from "@solid-primitives/i18n"
 
 interface navProps {
@@ -8,7 +8,7 @@ interface navProps {
   repo?: string
   book?: string
   chapter?: string
-  onClick?: (...args: any[]) => any
+  onClick?: (...args: any) => unknown
   icon?: JSXElement
   dir?: "BACK" | "FORWARD"
   // children: JSXElement
@@ -28,32 +28,36 @@ const forwardClassNamesA =
 export default function NavButtonLinks(props: navProps) {
   const [t] = useI18n()
 
-  if (props.fallback) {
-    return (
-      <div class="hidden h-full  w-16 flex-shrink-0 print:hidden sm:block">
-        {" "}
-      </div>
-    )
-  }
   return (
-    <div
-      class={`${
-        props.dir == "BACK" ? backwardClassNamesDiv : forwardClassNamesDiv
-      }`}
-    >
-      <a
-        data-testid={props.dir !== "BACK" ? "NavForwardBtn" : "NavBackBtn"}
-        aria-label={
-          props.dir !== "BACK"
-            ? t("ariaNavigateForwardsOneChapter")
-            : t("ariaNavigateBackwardsOneChapter")
-        }
-        href={`/${props.user}/${props.repo}/?book=${props.book}&chapter=${props.chapter}`}
-        class={`${props.dir == "BACK" ? backwardClassA : forwardClassNamesA}`}
-        onClick={props.onClick}
-      >
-        {props.icon}
-      </a>
-    </div>
+    <>
+      <Show when={props.fallback}>
+        <div class="hidden h-full  w-16 flex-shrink-0 print:hidden sm:block">
+          {" "}
+        </div>
+      </Show>
+      <Show when={!props.fallback}>
+        <div
+          class={`${
+            props.dir == "BACK" ? backwardClassNamesDiv : forwardClassNamesDiv
+          }`}
+        >
+          <a
+            data-testid={props.dir !== "BACK" ? "NavForwardBtn" : "NavBackBtn"}
+            aria-label={
+              props.dir !== "BACK"
+                ? t("ariaNavigateForwardsOneChapter")
+                : t("ariaNavigateBackwardsOneChapter")
+            }
+            href={`/${props.user}/${props.repo}/?book=${props.book}&chapter=${props.chapter}`}
+            class={`${
+              props.dir == "BACK" ? backwardClassA : forwardClassNamesA
+            }`}
+            onClick={(e) => props.onClick && props.onClick(e)}
+          >
+            {props.icon}
+          </a>
+        </div>
+      </Show>
+    </>
   )
 }

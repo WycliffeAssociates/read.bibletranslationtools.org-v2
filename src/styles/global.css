@@ -7,6 +7,7 @@
   --scrollbarBG: rgb(242, 242, 242);
   --thumbBG: var(--color-accent);
   --screenHeight: 100vh;
+  --marginIncrement: 0.25rem;
 }
 /* Fluid font size variables, for browsers that support clamp */
 /* link */ /* https://www.fluid-type-scale.com/calculate?minFontSize=18&minWidth=300&minRatio=1.067&maxFontSize=18&maxWidth=1200&maxRatio=1.2&steps=sm%2Cbase%2Cmd%2Clg%2Cxl%2Cxxl%2Cxxxl&baseStep=base&prefix=font-size&decimals=2&includeFallbacks=on&useRems=on&remValue=16&previewFont=Inter */
@@ -156,12 +157,29 @@ body.noscroll {
 .theText h4 {
   font-size: var(--font-size-base);
 }
-.theText p {
+.theText p,
+.theText li {
   font-size: var(--font-size-base);
 }
 .theText li p {
   display: inline;
 }
+.theText ol {
+  list-style-type: decimal !important;
+  list-style-position: inside;
+}
+.theText ol li {
+  margin-inline-start: var(--marginIncrement);
+}
+.theText ol li ul,
+.theText ol li ol {
+  margin-inline-start: calc(var(--marginIncrement) * 4);
+}
+.theText ol li ul li,
+.theText ol li ol li {
+  margin-inline-start: calc(var(--marginIncrement) * 6);
+}
+
 .theText h1,
 .theText h2,
 .theText h3,
@@ -294,6 +312,7 @@ a[href*="footnote-target"] {
   line-break: normal;
   display: block;
   margin-inline-start: 1.5em;
+  line-height: 1.3;
 }
 
 .poetry-2 {
@@ -301,6 +320,7 @@ a[href*="footnote-target"] {
   line-break: normal;
   display: block;
   margin-inline-start: 3em;
+  line-height: 1.3;
 }
 
 .poetry-3 {
@@ -308,6 +328,7 @@ a[href*="footnote-target"] {
   line-break: normal;
   display: block;
   margin-inline-start: 4.5em;
+  line-height: 1.3;
 }
 
 .poetry-outdent-1 {
