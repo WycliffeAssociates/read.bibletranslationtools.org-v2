@@ -55,15 +55,14 @@ export default function Settings(props: settingsProps) {
       const lrApiCache = await caches.open(CACHENAMES.lrApi)
       const lrPagesCache = await caches.open(CACHENAMES.lrPagesCache)
       //
-      const wholeResourceMatch = props.savedInServiceWorker()?.wholeResponse
+      const wholeResourceMatch = props
+        .savedInServiceWorker()
+        ?.wholeResponse?.clone()
       let indexToPostWith
       if (wholeResourceMatch) {
-        const arrBuff = await wholeResourceMatch.arrayBuffer()
-        const u8Array = new Uint8Array(arrBuff)
-        const decodedU8 = gunzipSync(u8Array)
-        const originalRepoIndex = JSON.parse(
-          strFromU8(decodedU8)
-        ) as repoIndexObj
+        const originalRepoIndex = await getRepoIndexFromSavedWhole()
+        if (!originalRepoIndex || !originalRepoIndex.bible)
+          throw new Error("problem fetching repoIndex from service worker")
         const bib = originalRepoIndex.bible
         if (!bib) return
         const correspondingBook = bib?.findIndex(
@@ -177,18 +176,40 @@ export default function Settings(props: settingsProps) {
       }, 6000)
     }
   }
+
+  async function getRepoIndexFromSavedWhole() {
+    // clone the response bc in the case that someone clicks save whole and then save book and the print book, or whatever, they may want to access the response multiple times, and you can only read the body once.
+    const wholeResourceMatch = props
+      .savedInServiceWorker()
+      ?.wholeResponse?.clone()
+    if (!wholeResourceMatch) return
+    const arrBuff = await wholeResourceMatch.arrayBuffer()
+    const u8Array = new Uint8Array(arrBuff)
+    const decodedU8 = gunzipSync(u8Array)
+    const originalRepoIndex = JSON.parse(strFromU8(decodedU8)) as repoIndexObj
+    return originalRepoIndex
+  }
+
   async function getWholeBook() {
     try {
+      const originalRepoIndex = await getRepoIndexFromSavedWhole()
       const bookSlug = props.storeInterface.currentBookObj()?.slug
-      if (!bookSlug) return
-      const wholeBookUrl = FUNCTIONS_ROUTES.getWholeBookJson({
-        user: props.user,
-        repo: props.repo,
-        book: bookSlug
-      })
-      const wholeBookRes = await fetch(wholeBookUrl)
-      const data: bibleEntryObj = await wholeBookRes.json()
-      return data
+      if (originalRepoIndex) {
+        const matchingBook = originalRepoIndex?.bible?.find(
+          (book) => book.slug == bookSlug
+        )
+        return matchingBook
+      } else {
+        if (!bookSlug) return
+        const wholeBookUrl = FUNCTIONS_ROUTES.getWholeBookJson({
+          user: props.user,
+          repo: props.repo,
+          book: bookSlug
+        })
+        const wholeBookRes = await fetch(wholeBookUrl)
+        const data: bibleEntryObj = await wholeBookRes.json()
+        return data
+      }
     } catch (error) {
       console.error(error)
     }
