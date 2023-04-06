@@ -34,6 +34,7 @@ import type {
 import type { storeType } from "@components/ReaderWrapper/ReaderWrapper"
 import { BibleBookCategories } from "@lib/contants"
 import { CACHENAMES } from "../../lib/contants"
+import { getRepoIndex } from "@lib/api"
 
 interface MenuProps {
   storeInterface: storeType
@@ -107,13 +108,28 @@ const ReaderMenu: Component<MenuProps> = (props) => {
     let wholeIsComplete = null
     let currentBooksIsDownloaded = null
     let currentBookIsOutOfDate = null
-
+    let repoIndex: repoIndexObj | null = null
     if (wholeMatch) {
       const lastGenHeader = wholeMatch.headers?.get("X-Last-Generated")
       wholeIsOutOfDate = lastGenHeader
         ? lastGenHeader < props.repoIndex.lastRendered
         : null
 
+      if (navigator.onLine) {
+        // when we have internet, see if there is a newer version of the whole or the book by getting the latest repoIndex from blob storage and checking its timestamps against the saved service worker timestamp.
+        try {
+          repoIndex = await getRepoIndex({
+            user: props.user,
+            repo: props.repositoryName
+          })
+          // frepoIndex?.lastRendered higher (e.g. "2023-04-06T16:47:31.7484775Z" > "2023-04-05T20:44:06.3942103Z") than currentBook from sw response.
+          wholeIsOutOfDate = repoIndex?.lastRendered
+            ? repoIndex?.lastRendered > props.repoIndex.lastRendered
+            : null
+        } catch (error) {
+          console.error(error)
+        }
+      }
       const currentBookIsDownloadedJson =
         wholeMatch.headers?.get("X-Complete-Books") || ""
       if (currentBookIsDownloadedJson) {
@@ -121,10 +137,21 @@ const ReaderMenu: Component<MenuProps> = (props) => {
         const currentBookFromHeader =
           Array.isArray(completeBooks) &&
           completeBooks.find((book) => book.slug == currentBook.slug)
+        //
         if (currentBookFromHeader) {
           currentBooksIsDownloaded = true
+          // saved Res is Younger than currentBook loaded
           currentBookIsOutOfDate =
             currentBookFromHeader.lastRendered < currentBook.lastRendered
+          if (repoIndex) {
+            const freshlyFetchedBook = repoIndex.bible?.find(
+              (book) => book.slug == currentBook.slug
+            )
+            // freshly fetched is older than currentBook from sw response.
+            currentBookIsOutOfDate = freshlyFetchedBook
+              ? freshlyFetchedBook.lastRendered > currentBook.lastRendered
+              : null
+          }
         }
       }
 
