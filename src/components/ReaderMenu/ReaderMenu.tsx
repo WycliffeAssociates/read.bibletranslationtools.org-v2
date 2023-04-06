@@ -122,8 +122,9 @@ const ReaderMenu: Component<MenuProps> = (props) => {
             user: props.user,
             repo: props.repositoryName
           })
+          // frepoIndex?.lastRendered higher (e.g. "2023-04-06T16:47:31.7484775Z" > "2023-04-05T20:44:06.3942103Z") than currentBook from sw response.
           wholeIsOutOfDate = repoIndex?.lastRendered
-            ? repoIndex?.lastRendered < props.repoIndex.lastRendered
+            ? repoIndex?.lastRendered > props.repoIndex.lastRendered
             : null
         } catch (error) {
           console.error(error)
@@ -136,16 +137,19 @@ const ReaderMenu: Component<MenuProps> = (props) => {
         const currentBookFromHeader =
           Array.isArray(completeBooks) &&
           completeBooks.find((book) => book.slug == currentBook.slug)
+        //
         if (currentBookFromHeader) {
           currentBooksIsDownloaded = true
+          // saved Res is Younger than currentBook loaded
           currentBookIsOutOfDate =
             currentBookFromHeader.lastRendered < currentBook.lastRendered
           if (repoIndex) {
             const freshlyFetchedBook = repoIndex.bible?.find(
               (book) => book.slug == currentBook.slug
             )
+            // freshly fetched is older than currentBook from sw response.
             currentBookIsOutOfDate = freshlyFetchedBook
-              ? freshlyFetchedBook.lastRendered < currentBook.lastRendered
+              ? freshlyFetchedBook.lastRendered > currentBook.lastRendered
               : null
           }
         }
