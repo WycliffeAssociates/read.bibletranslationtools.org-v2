@@ -3,7 +3,7 @@ import { registerSW } from "virtual:pwa-register"
 // 5 minute
 const intervalMS = 5 * 60 * 1000
 // https://vite-pwa-org.netlify.app/guide/periodic-sw-updates.html#periodic-service-worker-updates
-const updateSW = registerSW({
+registerSW({
   onRegisteredSW(swUrl, r) {
     r &&
       setInterval(async () => {

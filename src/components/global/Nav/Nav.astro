@@ -1,12 +1,20 @@
 ---
+import type { i18nDictWithLangCode } from "@customTypes/types"
 const linkBase = "https://bibleineverylanguage.org"
 import type { i18nDictKeysType } from "@lib/i18n"
 export interface Props {
   preferredLocale: i18nDictKeysType
-  initialDict: any
+  initialDict: i18nDictWithLangCode
+  repoUrl: string
 }
-const menu = ["processes", "resources", "translations", "tools", "support"]
-const { preferredLocale, initialDict } = Astro.props
+const menu = [
+  "processes",
+  "resources",
+  "translations",
+  "tools",
+  "support",
+]
+const { preferredLocale, initialDict, repoUrl } = Astro.props
 import Logo from "@images/logo.png"
 import LogoWebP from "@images/logo.webp"
 import { Header } from "./Header"
@@ -19,6 +27,7 @@ import { Header } from "./Header"
     logo={Logo}
     logoWebP={LogoWebP}
     menuItems={menu}
+    repoUrl={repoUrl}
     preferredLocale={preferredLocale}
     linkBase={linkBase}
     initialDict={initialDict}

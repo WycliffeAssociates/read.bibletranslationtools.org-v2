@@ -1,31 +1,14 @@
-import { createSignal, For, Setter } from "solid-js"
-import type { tmSingle } from "@src/customTypes/types"
+import { createSignal, For, Setter, Switch, Match } from "solid-js"
+import type { tmSingle } from "@customTypes/types"
 
 interface propsType {
   navigation: Array<tmSingle>
   initialPage: string
-  isNested?: Boolean
+  isNested?: boolean
   setNavIsOpen: Setter<boolean>
 }
 
 export function TMNav(props: propsType) {
-  let isNested = !!props.isNested
-  // function getToggleAriaAttrs(index: number, isExpanded: boolean) {
-  //   return {
-  //     id: `accordion_btn_${index}`,
-  //     "aria-controls": `region_${index}`,
-  //     "aria-expanded": isExpanded
-  //   }
-  // }
-
-  // function getCollapseAriaAttrs(index: number) {
-  //   return {
-  //     id: `region_${index}`,
-  //     role: "region",
-  //     "aria-labelledby": `accordion_btn_${index}`
-  //   }
-  // }
-
   return (
     <nav>
       <ul>
@@ -36,7 +19,7 @@ export function TMNav(props: propsType) {
                 setNavIsOpen={props.setNavIsOpen}
                 initialPage={props.initialPage}
                 navObj={navObj}
-                isNested={isNested}
+                isNested={!!props.isNested}
               />
             )
           }}
@@ -53,17 +36,23 @@ interface NavSectionProps {
   setNavIsOpen: Setter<boolean>
 }
 function NavSection(props: NavSectionProps) {
-  const isOpenFromProps =
-    !props.isNested &&
-    props.navObj.File.replace(".html", "") === props.initialPage
-  const [isOpen, setIsOpen] = createSignal(isOpenFromProps)
+  function isOpenFromProps() {
+    return (
+      !props.isNested &&
+      props.navObj.File.replace(".html", "") === props.initialPage
+    )
+  }
+  // eslint-disable-next-line solid/reactivity
+  const [isOpen, setIsOpen] = createSignal(isOpenFromProps())
 
-  let heightRef: any
+  let heightRef: HTMLDivElement | undefined
   function heightRefFxn() {
-    let val = isOpen() ? `height: auto; ` : `height: 0;`
+    const val = isOpen() ? `height: auto; ` : `height: 0;`
     return val
   }
-  const hasChildren = props.navObj.Children.length
+  const hasChildren = () => {
+    return props.navObj.Children.length
+  }
   return (
     <li class="navSection">
       <div class="flex">
@@ -81,7 +70,7 @@ function NavSection(props: NavSectionProps) {
           }}
           class="flex"
         >
-          {hasChildren ? (
+          {hasChildren() ? (
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -101,7 +90,7 @@ function NavSection(props: NavSectionProps) {
           ) : null}
         </button>
       </div>
-      {hasChildren ? (
+      {hasChildren() ? (
         <div
           class={`accordion-transition`}
           style={heightRefFxn()}
@@ -122,29 +111,35 @@ function NavSection(props: NavSectionProps) {
 }
 
 function NavSingleLink(props: NavSectionProps) {
-  let href = props.navObj.Slug
-    ? `?section=${props.navObj.File.replace(".html", "")}#${props.navObj.Slug}`
-    : `?section=${props.navObj.File.replace(".html", "")}`
+  const href = () =>
+    props.navObj.Slug
+      ? `?section=${props.navObj.File.replace(".html", "")}#${
+          props.navObj.Slug
+        }`
+      : `?section=${props.navObj.File.replace(".html", "")}`
 
-  const isSameSection =
+  const isSameSection = () =>
     props.initialPage === props.navObj.File.replace(".html", "")
+
   function onClick() {
     document.body.classList.remove("noscroll")
     props.setNavIsOpen(false)
   }
-  if (isSameSection && !props.navObj.Slug) {
-    return <span class="text-gray-800">{props.navObj.Label}</span>
-  } else if (isSameSection && props.navObj.Slug) {
-    return (
-      <a onClick={onClick} class=" text-blue-700" href={href}>
-        {props.navObj.Label}
-      </a>
-    )
-  } else if (!isSameSection) {
-    return (
-      <a onClick={onClick} class="text-blue-700" href={href}>
-        {props.navObj.Label}
-      </a>
-    )
-  } else return <p> whoops!</p>
+  return (
+    <Switch>
+      <Match when={isSameSection() && !props.navObj.Slug}>
+        <span class="text-gray-800">{props.navObj.Label}</span>
+      </Match>
+      <Match when={isSameSection() && props.navObj.Slug}>
+        <a onClick={onClick} class=" text-blue-700" href={href()}>
+          {props.navObj.Label}
+        </a>
+      </Match>
+      <Match when={!isSameSection()}>
+        <a onClick={onClick} class="text-blue-700" href={href()}>
+          {props.navObj.Label}
+        </a>
+      </Match>
+    </Switch>
+  )
 }

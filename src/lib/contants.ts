@@ -70,3 +70,24 @@ export const BibleBookCategories = {
     "REV"
   ]
 }
+interface sortOrderI {
+  [key: string]: number
+}
+const bibleBookSortOrder = Object.values(BibleBookCategories)
+  .flat()
+  .reduce((acc: sortOrderI, value: string, index: number) => {
+    acc[value] = index + 1
+    return acc
+  }, {})
+export { bibleBookSortOrder }
+
+export const resourceSizeQueryParameters = {
+  book: "book",
+  whole: "whole"
+} as const
+
+export const CACHENAMES = {
+  complete: "row-completes",
+  lrApi: "live-reader-api",
+  lrPagesCache: "lr-pages"
+}

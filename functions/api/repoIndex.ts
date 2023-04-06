@@ -1,3 +1,4 @@
+import type { IcfEnv } from "@customTypes/types"
 import { getHeaders } from "functions/shared"
 
 export const onRequestGet: PagesFunction = async (context) => {
@@ -12,12 +13,11 @@ export const onRequestGet: PagesFunction = async (context) => {
   // } = context
 
   const request: Request = context.request
-  // console.log({ request })
-  const env: any = context.env
+  const env = context.env as IcfEnv & typeof context.env
 
   const url = new URL(request.url)
-  let user = url.searchParams?.get("user")
-  let repo = url.searchParams?.get("repo")
+  const user = url.searchParams?.get("user")
+  const repo = url.searchParams?.get("repo")
   if (!user || !repo || user == "undefined" || repo == "undefined") {
     return new Response(null, {
       status: 400,
@@ -27,12 +27,11 @@ export const onRequestGet: PagesFunction = async (context) => {
 
   let returnValue
 
-  let baseUrl = env.PIPELINE_API_URL_BASE
-  let finalUrl = `${baseUrl}/${user}/${repo}/index.json`
+  const baseUrl = env.PIPELINE_API_URL_BASE
+  const finalUrl = `${baseUrl}/${user}/${repo}/index.json`
   try {
     // http://localhost/u/WA-Catalog/en_ulb/index.json;
-    // console.log(`fetching ${finalUrl}`)
-    let response = await fetch(finalUrl, {
+    const response = await fetch(finalUrl, {
       headers: {
         "Content-Type": "application/json"
       }
@@ -43,8 +42,7 @@ export const onRequestGet: PagesFunction = async (context) => {
       headers: getHeaders(url)
     })
   } catch (error) {
-    console.log(error)
-    console.log(`Fetch for ${finalUrl} failed.`)
+    console.error(error)
     return new Response(null, {
       status: 404,
       statusText: `Fetch for ${finalUrl} failed.`

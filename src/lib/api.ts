@@ -1,5 +1,5 @@
 import { FUNCTIONS_ROUTES } from "@lib/routes"
-import type { repoIndexObj } from "../customTypes/types"
+import type { IDownloadIndex, repoIndexObj } from "@customTypes/types"
 
 interface baseApiInfo {
   user: string
@@ -20,7 +20,7 @@ export async function getChapterHtml({
   chapter
 }: getRepoInfo): Promise<string | undefined> {
   if (!repo) return
-  let fetchUrl = FUNCTIONS_ROUTES.getRepoHtml({ user, repo, book, chapter })
+  const fetchUrl = FUNCTIONS_ROUTES.getRepoHtml({ user, repo, book, chapter })
   try {
     const response = await fetch(fetchUrl)
     const data = await response.text()
@@ -41,7 +41,7 @@ export async function getTwSchemaHtml({
   repo
 }: getNonBibleSchemaHtmlParams): Promise<string | undefined> {
   if (!repo || !user || !navSection) return
-  let fetchUrl = FUNCTIONS_ROUTES.getHtmlForTw({
+  const fetchUrl = FUNCTIONS_ROUTES.getHtmlForTw({
     user,
     repo,
     navSection
@@ -62,7 +62,7 @@ export async function getTmSchemaHtml({
   repo
 }: getNonBibleSchemaHtmlParams): Promise<string | undefined> {
   if (!repo || !user || !navSection) return
-  let fetchUrl = FUNCTIONS_ROUTES.getHtmlForTm({
+  const fetchUrl = FUNCTIONS_ROUTES.getHtmlForTm({
     user,
     repo,
     navSection
@@ -82,9 +82,8 @@ export async function getRepoIndex({
   repo
 }: baseApiInfo): Promise<repoIndexObj | null> {
   if (!user || !repo) return null
-  let fetchUrl = FUNCTIONS_ROUTES.getRepoIndex({ user, repo })
+  const fetchUrl = FUNCTIONS_ROUTES.getRepoIndex({ user, repo })
   try {
-    console.log(`fetching index; ${fetchUrl}`)
     const response = await fetch(fetchUrl, {
       headers: {
         "Content-Type": "application/json"
@@ -94,7 +93,33 @@ export async function getRepoIndex({
     if (typeof data == "string") {
       return null
     }
-    // console.log(`data:${data}`)
+    return data
+  } catch (error) {
+    console.error(error)
+    return null
+  }
+}
+export async function checkForOrDownloadWholeRepo({
+  user,
+  repo,
+  method
+}: baseApiInfo & {
+  method: "GET" | "HEAD"
+}): Promise<IDownloadIndex | null | boolean> {
+  if (!user || !repo || !method) return null
+  const fetchUrl = FUNCTIONS_ROUTES.getWholeRepoDownload({ user, repo, method })
+  try {
+    const response = await fetch(fetchUrl)
+    if (method == "HEAD") {
+      return response.ok
+    } else if (method == "GET") {
+      const data: IDownloadIndex = await response.json()
+      return data
+    }
+    const data: IDownloadIndex = await response.json()
+    if (typeof data == "string") {
+      return null
+    }
     return data
   } catch (error) {
     console.error(error)
@@ -109,8 +134,8 @@ export async function isValidRepo({
   if (typeof user !== "string" || typeof repo !== "string") return false
   const fetchUrl = FUNCTIONS_ROUTES.isValidRepo({ user, repo })
   try {
-    let response = await fetch(fetchUrl)
-    let isValid = await response.text()
+    const response = await fetch(fetchUrl)
+    const isValid = await response.text()
     return !!(isValid == "true") || !!(isValid !== "false")
   } catch (error) {
     console.error(error)
@@ -124,7 +149,7 @@ export async function getCommentarySectionHtml({
   repo
 }: commentaryIndividual): Promise<string | undefined> {
   if (!file || !user || !repo) return
-  let fetchUrl = FUNCTIONS_ROUTES.getHtmlForCommentaryIndividualSection({
+  const fetchUrl = FUNCTIONS_ROUTES.getHtmlForCommentaryIndividualSection({
     file,
     user,
     repo
