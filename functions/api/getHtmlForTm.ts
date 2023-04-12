@@ -1,3 +1,4 @@
+import type { IcfEnv } from "@customTypes/types"
 import {
   getRepoIndexLocal,
   getHeaders,
@@ -17,11 +18,11 @@ export const onRequestGet: PagesFunction = async (context) => {
   // } = context
 
   const request: Request = context.request
-  const env: any = context.env
+  const env = context.env as IcfEnv & typeof context.env
   const url = new URL(request.url)
-  let user = url.searchParams?.get("user") as string
-  let repo = url.searchParams?.get("repo") as string
-  let navSection = url.searchParams?.get("navSection")
+  const user = url.searchParams?.get("user") as string
+  const repo = url.searchParams?.get("repo") as string
+  const navSection = url.searchParams?.get("navSection")
 
   if (!allParamsAreValid([user, repo, navSection])) {
     return new Response(null, {
@@ -31,20 +32,19 @@ export const onRequestGet: PagesFunction = async (context) => {
   }
   // Used to rewrite A links via files Names
   const repoIndex = await getRepoIndexLocal(env, user, repo)
-  let possibleFiles =
+  const possibleFiles =
     repoIndex && repoIndex.navigation?.map((navOb) => navOb.File)
 
   try {
     // http://localhost/u/WA-Catalog/en_ulb/index.json;
-    let baseUrl = env.PIPELINE_API_URL_BASE
-    let finalUrl = `${baseUrl}/${user}/${repo}/${navSection}.html`
-    let response = await fetch(finalUrl)
-    // E[foo*="bar"]
-    let newResp = new Response(response.body, {
+    const baseUrl = env.PIPELINE_API_URL_BASE
+    const finalUrl = `${baseUrl}/${user}/${repo}/${navSection}.html`
+    const response = await fetch(finalUrl)
+    const newResp = new Response(response.body, {
       headers: getHeaders(url)
     })
     // return newResp
-    let htmlRewriter = new HTMLRewriter()
+    const htmlRewriter = new HTMLRewriter()
     const handler = new aTagHandler(user, "TM")
     // This line is to transform Hrefs inside the manual from absolute whatever.html into query parameters on the same origin such as
     // <a href="?section=intro#translate-terms">Terms to Know</a>

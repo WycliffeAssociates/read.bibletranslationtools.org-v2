@@ -1,7 +1,8 @@
+import { getHeaders, allParamsAreValid } from "functions/shared"
+import { bibleBookSortOrder } from "@lib/contants"
 import type { IcfEnv } from "@customTypes/types"
-import { getHeaders, aTagHandler, allParamsAreValid } from "functions/shared"
 
-export const onRequestGet: PagesFunction = async (context) => {
+export const onRequestPost: PagesFunction = async (context) => {
   // Contents of context object
   // const {
   //   request, // same as existing Worker API
@@ -13,41 +14,37 @@ export const onRequestGet: PagesFunction = async (context) => {
   // } = context
 
   const request: Request = context.request
+
   const env = context.env as IcfEnv & typeof context.env
-
   const url = new URL(request.url)
-  const user = url.searchParams?.get("user") as string //invariants are checked below
+  const user = url.searchParams?.get("user") as string
   const repo = url.searchParams?.get("repo")
-  const navSection = url.searchParams?.get("navSection")
+  const book = url.searchParams?.get("book") as string //type guard in if statement beneath; Cast here to satisfy typescript that I'm going to ensure that they are valid params
 
-  if (!allParamsAreValid([user, repo, navSection])) {
+  if (!allParamsAreValid([user, repo, book])) {
     return new Response(null, {
       status: 400,
       statusText: "Missing parameters"
     })
   }
 
-  class imgTagHandler {
-    element(element: Element) {
-      element.setAttribute("loading", "lazy")
-    }
-  }
-
   try {
     // http://localhost/u/WA-Catalog/en_ulb/index.json;
     const baseUrl = env.PIPELINE_API_URL_BASE
-    const finalUrl = `${baseUrl}/${user}/${repo}/${navSection}.html`
+    const finalUrl = `${baseUrl}/${user}/${repo}/source.usfm`
     const response = await fetch(finalUrl)
-    // E[foo*="bar"]
+
+    const fileName = `${
+      bibleBookSortOrder[book?.toUpperCase()]
+    }-${book?.toUpperCase()}`
     const newResp = new Response(response.body, {
-      headers: getHeaders(url)
+      headers: {
+        ...getHeaders(url),
+        "Content-Type": "application/octet-stream",
+        "content-disposition": `attachment; filename=${fileName}.usfm`
+      }
     })
-    const aHandler = new aTagHandler(user, "TW")
-    return new HTMLRewriter()
-      .on("a[data-is-rc-link]", aHandler)
-      .on("a[href*='html']", aHandler)
-      .on("img[src*='content.bibletranslationtools.org'", new imgTagHandler())
-      .transform(newResp)
+    return newResp
   } catch (error) {
     console.error(error)
     return new Response(null, {

@@ -1,4 +1,4 @@
-import { createSignal, Show } from "solid-js"
+import { createSignal, For, Show } from "solid-js"
 interface mobileTwNavProps {
   filteredWords: () => {
     slug: string
@@ -10,6 +10,7 @@ interface mobileTwNavProps {
 }
 export function MobileTwNav(props: mobileTwNavProps) {
   const [mobileNavIsOpen, setMobileNavIsOpen] = createSignal(false)
+
   return (
     <>
       <div
@@ -64,32 +65,34 @@ export function MobileTwNav(props: mobileTwNavProps) {
                 type="text"
                 class="mx-auto ml-1 inline-block w-11/12 rounded-full border  p-1 py-4 pl-10  text-darkAccent "
                 placeholder="Search words.."
-                onInput={props.searchWords}
-                onFocus={(e) => setMobileNavIsOpen(true)}
+                onInput={(ev) => props.searchWords(ev)}
+                onFocus={() => setMobileNavIsOpen(true)}
               />
             </span>
           </div>
         </div>
         <Show when={mobileNavIsOpen()}>
           <ul class="mt-2">
-            {props.filteredWords().map((word) => {
-              return (
-                <li class=" ">
-                  <a
-                    class="ml-2 inline-block px-1 py-2 text-accent underline"
-                    onClick={(e) => {
-                      props.fetchSectionAndNav(e, word.section, word.slug)
-                      setMobileNavIsOpen(false)
-                    }}
-                    href={`?section=${word.section}#${word.slug}`}
-                    data-section={word.section}
-                    data-hash={word.slug}
-                  >
-                    {word.label}
-                  </a>
-                </li>
-              )
-            })}
+            <For each={props.filteredWords()}>
+              {(word) => {
+                return (
+                  <li class=" ">
+                    <a
+                      class="ml-2 inline-block px-1 py-2 text-accent underline"
+                      onClick={(e) => {
+                        props.fetchSectionAndNav(e, word.section, word.slug)
+                        setMobileNavIsOpen(false)
+                      }}
+                      href={`?section=${word.section}#${word.slug}`}
+                      data-section={word.section}
+                      data-hash={word.slug}
+                    >
+                      {word.label}
+                    </a>
+                  </li>
+                )
+              }}
+            </For>
           </ul>
         </Show>
       </div>
@@ -105,28 +108,30 @@ export function BeyondSmallNav(props: mobileTwNavProps) {
           type="text"
           class="mt-2 ml-1 inline-block w-11/12 rounded-full  border p-2 py-4  text-darkAccent sm:mt-4"
           placeholder="Search words.."
-          onInput={props.searchWords}
+          onInput={(ev) => props.searchWords(ev)}
         />
       </div>
 
       <ul class="mt-2">
-        {props.filteredWords().map((word) => {
-          return (
-            <li class=" ">
-              <a
-                class="ml-2 inline-block px-1 py-2 text-accent underline"
-                onClick={(e) =>
-                  props.fetchSectionAndNav(e, word.section, word.slug)
-                }
-                href={`?section=${word.section}#${word.slug}`}
-                data-section={word.section}
-                data-hash={word.slug}
-              >
-                {word.label}
-              </a>
-            </li>
-          )
-        })}
+        <For each={props.filteredWords()}>
+          {(word) => {
+            return (
+              <li class=" ">
+                <a
+                  class="ml-2 inline-block px-1 py-2 text-accent underline"
+                  onClick={(e) =>
+                    props.fetchSectionAndNav(e, word.section, word.slug)
+                  }
+                  href={`?section=${word.section}#${word.slug}`}
+                  data-section={word.section}
+                  data-hash={word.slug}
+                >
+                  {word.label}
+                </a>
+              </li>
+            )
+          }}
+        </For>
       </ul>
     </>
   )

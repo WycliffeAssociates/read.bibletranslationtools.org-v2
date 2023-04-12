@@ -12,13 +12,14 @@ import solidJs from "@astrojs/solid-js"
 import AstroPWA from "@vite-pwa/astro"
 import { manifest } from "./manifest"
 import { visualizer } from "rollup-plugin-visualizer"
-
-// TODO: SET SITE:
-// site: 'https://www.my-site.dev'
-// https://docs.astro.build/en/reference/configuration-reference/#site
-
+const siteUrl = import.meta.env.PROD
+  ? "https://read.bibleineverylanguage.org"
+  : import.meta.env.DEV
+  ? "https://read-dev.bibleineverylanguage.org"
+  : ""
 // https://astro.build/config
 export default defineConfig({
+  site: siteUrl,
   output: "server",
   adapter: cloudflare({
     mode: "directory"
@@ -29,7 +30,7 @@ export default defineConfig({
     AstroPWA({
       /* your pwa options */
       srcDir: "src",
-      filename: "sw.js",
+      filename: "sw.ts",
       strategies: "injectManifest",
       registerType: "autoUpdate",
       manifest: manifest,

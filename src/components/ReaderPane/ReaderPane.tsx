@@ -1,5 +1,4 @@
 import {
-  createSignal,
   onMount,
   Show,
   createEffect,
@@ -10,7 +9,6 @@ import {
 } from "solid-js"
 import { SvgArrow } from "@components"
 import NavButtonLinks from "./NavButtons"
-import { set } from "idb-keyval"
 import type { storeType } from "../ReaderWrapper/ReaderWrapper"
 import {
   PreviewPane,
@@ -29,11 +27,6 @@ interface ReaderPaneProps {
 }
 
 export default function ReaderPane(props: ReaderPaneProps) {
-  // todo: will use if implmeenting a fetch on demand or fetch later optoins
-  const [newerData, setNewerData] = createSignal({
-    hasNewerData: false,
-    response: null
-  })
   let textRef: HTMLDivElement | undefined
   // for footnote
 
@@ -44,14 +37,15 @@ export default function ReaderPane(props: ReaderPaneProps) {
         url: location.href
       }
     })
-    const menu = document.querySelector("#commonWrapper")
-    menu && menu.dispatchEvent(setLastEvent)
+    const commonWrapper = document.querySelector("#commonWrapper")
+    commonWrapper && commonWrapper.dispatchEvent(setLastEvent)
   }
 
   createEffect(
     on(
       () => props.storeInterface.getStoreVal("currentChapter"),
       () => {
+        if (!props.storeInterface.HTML()) return
         preFetchAdjacent()
         hoverOnFootnotes()
         hoverOnCrossReferences()
@@ -64,10 +58,11 @@ export default function ReaderPane(props: ReaderPaneProps) {
     )
   )
   onMount(() => {
-    window.addEventListener("popstate", (e) => {
-      // todo: add popstate logic  to other templates or at layout level?
-      let params = new URLSearchParams(location.search)
-      let chapter = params.get("chapter")
+    // popstate is history push.  since most navs are ajax, we want to manually make sure that we are trigger a "nav" or sorts on popstates
+    window.addEventListener("popstate", () => {
+      // maybe: add popstate logic  to other templates or at layout level?
+      const params = new URLSearchParams(location.search)
+      const chapter = params.get("chapter")
       if (chapter) {
         fetchReaderHtml({
           navigate: true,
@@ -76,9 +71,6 @@ export default function ReaderPane(props: ReaderPaneProps) {
       }
     })
   })
-  // onCleanup(() => {
-
-  // })
 
   async function preFetchAdjacent() {
     const currentChap =
@@ -92,12 +84,11 @@ export default function ReaderPane(props: ReaderPaneProps) {
 
   function pushHistory(currentBook: string, currentChap: string) {
     if ("URLSearchParams" in window) {
-      let searchParams = new URLSearchParams(window.location.search)
+      const searchParams = new URLSearchParams(window.location.search)
       searchParams.set("book", currentBook)
       searchParams.set("chapter", currentChap)
       const hash = window.location.hash || ""
-      // debugger
-      let newRelativePathQuery =
+      const newRelativePathQuery =
         window.location.pathname + "?" + searchParams.toString() + hash
       document.title = `${props.repositoryName}-${currentBook}-${currentChap}`
       history.pushState(
@@ -107,18 +98,9 @@ export default function ReaderPane(props: ReaderPaneProps) {
         "",
         newRelativePathQuery
       )
-      // Add html url to cache:
-      const commonWrapper = document.querySelector("#commonWrapper")
-      const updateSwCache = new CustomEvent("addCurrentPageToSw", {
-        detail: {
-          url: location.href,
-          cacheName: "lr-pages"
-        }
-      })
-      commonWrapper && commonWrapper.dispatchEvent(updateSwCache)
 
       if (hash) {
-        let el = document.querySelector(hash)
+        const el = document.querySelector(hash)
         el?.scrollIntoView({
           block: "center",
           inline: "start"
@@ -135,7 +117,7 @@ export default function ReaderPane(props: ReaderPaneProps) {
     chapNum?: number | string
   }
   function scrollToTop() {
-    let scrollPane = document.querySelector('[data-js="scrollToTop"]')
+    const scrollPane = document.querySelector('[data-js="scrollToTop"]')
     if (scrollPane) {
       scrollPane.scrollTop = 0
     }
@@ -165,15 +147,16 @@ export default function ReaderPane(props: ReaderPaneProps) {
     }
     // Check for existing in memory;
     nextCh = String(nextCh) //all store keys are strings; Nums only for math
-    let currentBookObj = props.storeInterface.currentBookObj()
+    const currentBookObj = props.storeInterface.currentBookObj()
     // handles index offset:
-    let existingChap = currentBookObj
+    const existingChap = currentBookObj
       ? props.storeInterface.getChapObjFromGivenBook(
           currentBookObj.slug,
           nextCh
         )
       : null
-    let existingText = existingChap?.text //html if put there;
+
+    const existingText = existingChap?.content //html if put there;
     if (!existingChap) return
     if (existingText && navigate) {
       scrollToTop()
@@ -188,7 +171,7 @@ export default function ReaderPane(props: ReaderPaneProps) {
       chapter: nextCh
     }
 
-    let text = await props.storeInterface.fetchHtml(params)
+    const text = await props.storeInterface.fetchHtml(params)
     if (!text) return
 
     // Batch some state updates to notified memos at end of stateful updates
@@ -223,18 +206,19 @@ export default function ReaderPane(props: ReaderPaneProps) {
                 user={props.user}
                 repo={props.repositoryName}
                 book={props.firstBookKey}
-                // chapter={ Number(props.firstChapterToShow) - 1}
                 chapter={props.storeInterface.navLinks()?.prev}
+                // eslint-disable-next-line solid/reactivity
                 onClick={(event: Event) => {
                   fetchReaderHtml({ event, navigate: true, dir: "BACK" })
                 }}
                 icon={
-                  <SvgArrow className="color-inherit mx-auto fill-current stroke-current ltr:rotate-0 rtl:rotate-180" />
+                  <SvgArrow classNames="color-inherit mx-auto fill-current stroke-current ltr:rotate-0 rtl:rotate-180" />
                 }
               />
             </Show>
             {/* top buttons */}
             <div
+              id="theText"
               ref={textRef}
               class="theText mx-auto mb-24 h-full  max-w-[85ch] overflow-y-auto bg-inherit pr-1 pt-2 text-lg leading-relaxed print:h-min print:overflow-y-visible  print:pb-4  sm:px-2 md:mr-auto md:ml-0 md:w-4/5 md:max-w-[75ch] md:text-2xl xl:mx-auto"
               innerHTML={props.storeInterface.HTML()}
@@ -251,11 +235,12 @@ export default function ReaderPane(props: ReaderPaneProps) {
                 repo={props.repositoryName}
                 book={props.firstBookKey}
                 chapter={props.storeInterface.navLinks()?.next}
+                // eslint-disable-next-line solid/reactivity
                 onClick={(event: Event) => {
                   fetchReaderHtml({ event, navigate: true, dir: "FORWARD" })
                 }}
                 icon={
-                  <SvgArrow className="color-inherit mx-auto fill-current stroke-current ltr:rotate-180 rtl:rotate-0" />
+                  <SvgArrow classNames="color-inherit mx-auto fill-current stroke-current ltr:rotate-180 rtl:rotate-0" />
                 }
               />
             </Show>

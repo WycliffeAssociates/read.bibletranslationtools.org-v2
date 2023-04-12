@@ -10,8 +10,8 @@ import {
   getChapterHtml,
   getTwSchemaHtml,
   getRepoIndex,
-  isValidRepo,
-  getTmSchemaHtml
+  getTmSchemaHtml,
+  checkForOrDownloadWholeRepo
 } from "@lib/api"
 import {
   getBookAndChapterFromUrl,
@@ -21,9 +21,17 @@ import {
   getTmQueryParamOrDefault
 } from "@lib/utils"
 import { setOriginUrl } from "@lib/routes"
-import type { tmProps, twProps, bibleSchemaProps } from "@src/customTypes/types"
-let { repo, user } = Astro.params
+import type {
+  tmProps,
+  twProps,
+  bibleSchemaProps,
+  repoIndexObj
+} from "@src/customTypes/types"
+import { gunzipSync, strFromU8 } from "fflate"
+
 setOriginUrl(Astro.url.origin)
+let { repo, user } = Astro.params
+
 const res404 = new Response(null, {
   status: 404
 })
@@ -34,15 +42,42 @@ if (!repo || !user) {
 
 repo = String(repo)
 user = String(user)
-// is current wacs repo check
-// todo: maybe put this back if needed? The url is is sort of buried.
-// const isValid = isValidRepo({ user, repo })
-// if (!isValid) {
-//   return res404
-// }
 
-// get of text and metadata
-const repoIndex = await getRepoIndex({ user, repo })
+// let searchParamRepo = Astro.url.searchParams.get("repoindex")
+let repoIndex: repoIndexObj | null = null
+let hasDownloadIndex = false
+let wasPostRequest = false
+// POST REQUESTS COME FROM SETTINGS ACTION WHEN SAVING ENTIRE BOOK OFFLINE..POST BODY IS AN ALREADY DOWNLOADED INDEX AND CONTENT FOR THIS RESOURCE.
+if (Astro.request.method === "POST") {
+  try {
+    const body = Astro.request.body
+    if (!body) return
+
+    const arrBuff = await Astro.request.arrayBuffer()
+    const u8Array = new Uint8Array(arrBuff)
+    const decodedU8 = gunzipSync(u8Array)
+    const decodedRepoIndex = JSON.parse(strFromU8(decodedU8)) as repoIndexObj
+    if (!decodedRepoIndex) return
+    repoIndex = decodedRepoIndex
+    wasPostRequest = true
+    hasDownloadIndex = true
+  } catch (error) {
+    console.error(error)
+    return new Response(null, {
+      status: 500
+    })
+  }
+}
+
+// NORMAL GET SCENARIO
+if (!repoIndex) {
+  repoIndex = await getRepoIndex({ user, repo })
+  hasDownloadIndex = !!(await checkForOrDownloadWholeRepo({
+    user,
+    repo,
+    method: "HEAD"
+  }))
+}
 
 if (!repoIndex) return res404
 
@@ -55,7 +90,7 @@ const isTw = repoIndex.resourceType === "tw"
 let repoProps: tmProps | twProps | bibleSchemaProps = {
   repoIndex: repoIndex,
   templateType: isBibleSchema ? "BIBLE" : isTw ? "TW" : "TM"
-} as any
+} as tmProps | twProps | bibleSchemaProps
 
 if (repoProps.templateType === "TW") {
   // initial NAV
@@ -81,24 +116,29 @@ if (repoProps.templateType === "TW") {
 }
 //# BIBLE SCHEMA PAGE PROPS
 else if (repoProps.templateType === "BIBLE") {
-  const { book, chapter } = getBookAndChapterFromUrl({
+  let { book, chapter } = getBookAndChapterFromUrl({
     book: Astro.url.searchParams.get("book"),
     chapter: Astro.url.searchParams.get("chapter"),
     repoIndex
   })
+
   if (!book && !chapter) return res404
 
   //  intial props/data for page;
-  const initialHtml = await getChapterHtml({ user, repo, book, chapter })
-  if (!initialHtml) return res404
+  let initialHtml = null
+  // post has a complete index
+  if (Astro.request.method !== "POST") {
+    if (!repoIndex.bible?.length) return res404
+    initialHtml = await getChapterHtml({ user, repo, book, chapter })
+    if (!initialHtml) return res404
+    seedAndMutateInitialDataRepoIndex({
+      repoIndex,
+      book, //slug, not native label;
+      chapter,
+      initialHtml
+    })
+  }
 
-  seedAndMutateInitialDataRepoIndex({
-    repoIndex,
-    book, //slug, not native label;
-    chapter,
-    initialHtml: initialHtml
-  })
-  repoProps.initialHtml = initialHtml
   repoProps.pageTitle = `${user}-${repo}-${book}-${chapter}`
   repoProps.book = book
   repoProps.chapter = chapter
@@ -127,8 +167,9 @@ else if (repoProps.templateType === "BIBLE") {
 // Set props common to all pages:
 const preferredLocale = getPreferredLangFromHeader(Astro.request)
 const initialDictModule = await import(
-  `../../translations/${preferredLocale}.json`
+  `../../translations/${preferredLocale}.js`
 )
+
 const initialDict = {
   [preferredLocale]: initialDictModule.default
 }
@@ -138,6 +179,7 @@ const initialDict = {
   title={repoProps.pageTitle}
   use100vh={true}
   textDir={repoIndex.textDirection}
+  repoUrl={repoIndex.repoUrl}
 >
   <CommonWrapper resourceType={repoIndex.resourceType} client:load>
     <!-- #=============== BIBLE SCHEMA  ============= -->
@@ -152,6 +194,8 @@ const initialDict = {
           repositoryName={repo}
           preferredLocale={preferredLocale}
           initialDict={initialDict}
+          hasDownloadIndex={hasDownloadIndex}
+          wasPostRequest={wasPostRequest}
         />
       )
     }
@@ -164,7 +208,7 @@ const initialDict = {
     <!-- #=============== TM TEMPLATE  ============= -->
     {
       repoProps.templateType === "TM" && (
-        <div class="tm-wrapper px- mx-auto h-full  max-w-[1400px] ">
+        <div class="tm-wrapper  mx-auto h-full  max-w-[1400px] ">
           <TranslationManual
             client:load
             initialHtml={repoProps.initialHtml}
@@ -191,10 +235,4 @@ const initialDict = {
   window.addEventListener("load", secDocHeight)
   window.addEventListener("resize", secDocHeight)
   window.addEventListener("orientationchange", secDocHeight)
-  // window.addEventListener("popstate", (event) => {
-  //   console.log({ event })
-  // })
-  // function handleNav(details: any) {
-  //   console.log({ details })
-  // }
 </script>

@@ -7,19 +7,11 @@ interface CommonWrapperProps {
 }
 
 export default function CommonWrapper(props: CommonWrapperProps) {
-  // INSTEAD OF WORRYING ABOUT PASSING PROPS HOWEVER DEEP DOWN TO COMPONENTS IN THE TREE... FOR A FAIRLY SIMPLE BIT OF FUNCTIONALITY TO BE SHARED ACCROSS ANY/ALL COMPONENTS, TYPES.TS DEFINES THE INTERFACE FOR THESE CUSTOM EVENTS. THAT WAY ALL TEMPLATE TYPES CAN JUST CREATE AN EVENT AND FIRE IT OFF FOR THE HISTORY API SW CACHE.  THE SW API CALLS ARE CACHED (WHEN JS IS AVAILABLE), BUT ITS NICE TO HAVE THE CURRENT HTML PAGE ALSO CACHED SINCE THE API RESPONSE IS NOT ENOUGH BY ITSELF TO GENERATE A PAGE IF HAVING GONE OFFLINE.
+  /* 
+  instead of worrying about passing props however deep down to components in the tree... for a fairly simple bit of functionality to be shared accross any/all components, types.ts defines the interface for these custom events. that way all template types can just create an event and fire it off for the history api or sw cache.  the sw api calls are cached (when js is available), but its nice to have the current html page also cached since the api response is not enough by itself to generate a page if having gone offline.
+  */
   function setLastPageVisited(url: string) {
     return set("lastPageVisited", url)
-  }
-  function addNewPageToSWCache(cacheName: string = "lr-pages", url: string) {
-    if (!url) return
-    if (import.meta.env.PROD) {
-      setTimeout(() => {
-        if (typeof window != undefined) {
-          caches.open(cacheName).then((cache) => cache.add(url))
-        }
-      }, 100)
-    }
   }
 
   return (
@@ -34,14 +26,6 @@ export default function CommonWrapper(props: CommonWrapperProps) {
         }>
       ) => {
         setLastPageVisited(e.detail.url)
-      }}
-      on:addCurrentPageToSw={(
-        e: CustomEvent<{
-          cacheName: string | undefined
-          url: string
-        }>
-      ) => {
-        addNewPageToSWCache(e.detail.cacheName, e.detail.url)
       }}
     >
       {props.children}

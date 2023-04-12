@@ -1,35 +1,36 @@
+import type { IBibleMenuBooksByCategory } from "@customTypes/types"
 import { useI18n } from "@solid-primitives/i18n"
 import { For, Show } from "solid-js"
+
 interface propsInterface {
-  onClick: Function
-  isActiveBook: Function
-  bibleMenuBooksByCategory: () => {
-    OT: any[]
-    NT: any[]
-  }
-  isMobile: Boolean
+  onClick: (book: string) => void
+  isActiveBook: (book: string) => boolean
+  bibleMenuBooksByCategory: () => IBibleMenuBooksByCategory | undefined
+  isMobile: boolean
 }
 export function BookList(props: propsInterface) {
-  const [t, { add, locale }] = useI18n()
-  let outterClassNames = props.isMobile
-    ? "h-[95vh] overflow-y-auto pb-96"
-    : "max-h-[50vh] min-h-[100px] overflow-y-auto pb-32"
+  const [t] = useI18n()
+  const outterClassNames = () => {
+    return props.isMobile
+      ? "h-[95vh] overflow-y-auto pb-96"
+      : "max-h-[50vh] min-h-[100px] overflow-y-auto pb-32"
+  }
   return (
     <Show
       when={
-        props.bibleMenuBooksByCategory().OT.length ||
-        props.bibleMenuBooksByCategory().NT.length
+        props.bibleMenuBooksByCategory()?.OT.length ||
+        props.bibleMenuBooksByCategory()?.NT.length
       }
     >
-      <div class={outterClassNames}>
+      <div class={outterClassNames()}>
         {/* OT */}
-        <Show when={props.bibleMenuBooksByCategory().OT.length}>
+        <Show when={props.bibleMenuBooksByCategory()?.OT.length}>
           <span class="block px-4 pt-5 pb-1 text-xs uppercase italic text-gray-800">
             {t("oldTestament", undefined, "Old Testament")}
           </span>
           <ul class="" aria-label="">
-            <For each={props.bibleMenuBooksByCategory().OT}>
-              {(book, idx) => (
+            <For each={props.bibleMenuBooksByCategory()?.OT}>
+              {(book) => (
                 <li class="w-full">
                   <button
                     classList={{
@@ -37,7 +38,7 @@ export function BookList(props: propsInterface) {
                         true,
                       "font-bold text-accent": props.isActiveBook(book.slug)
                     }}
-                    onClick={(e) => props.onClick(book.slug)}
+                    onClick={() => props.onClick(book.slug)}
                   >
                     {book.label}
                   </button>
@@ -47,13 +48,13 @@ export function BookList(props: propsInterface) {
           </ul>
         </Show>
         {/* NT */}
-        <Show when={props.bibleMenuBooksByCategory().NT.length}>
+        <Show when={props.bibleMenuBooksByCategory()?.NT.length}>
           <span class="block px-4 pt-5 pb-1 text-xs uppercase italic text-gray-800">
             {t("newTestament", undefined, "New Testament")}
           </span>
           <ul>
-            <For each={props.bibleMenuBooksByCategory().NT}>
-              {(book, idx) => (
+            <For each={props.bibleMenuBooksByCategory()?.NT}>
+              {(book) => (
                 <li class="w-full">
                   <button
                     classList={{
@@ -61,7 +62,7 @@ export function BookList(props: propsInterface) {
                         true,
                       "font-bold text-accent": props.isActiveBook(book.slug)
                     }}
-                    onClick={(e) => props.onClick(book.slug)}
+                    onClick={() => props.onClick(book.slug)}
                   >
                     {book.label}
                   </button>
