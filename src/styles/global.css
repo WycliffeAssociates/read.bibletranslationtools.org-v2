@@ -9,6 +9,10 @@
   --screenHeight: 100vh;
   --marginIncrement: 0.25rem;
 }
+.usingCustomFont .font-sans {
+  font-family: inherit;
+}
+
 /* Fluid font size variables, for browsers that support clamp */
 /* link */ /* https://www.fluid-type-scale.com/calculate?minFontSize=18&minWidth=300&minRatio=1.067&maxFontSize=18&maxWidth=1200&maxRatio=1.2&steps=sm%2Cbase%2Cmd%2Clg%2Cxl%2Cxxl%2Cxxxl&baseStep=base&prefix=font-size&decimals=2&includeFallbacks=on&useRems=on&remValue=16&previewFont=Inter */
 @supports (font-size: clamp(1rem, 1vw, 1rem)) {
@@ -79,31 +83,8 @@
     url("/fonts/atkinson/atkinson-hyperlegible-v10-latin-ext_latin-700.woff")
       format("woff");
 }
+
 /* #===============  FONT FACE   =============   */
-
-/* @=============== scrollbar   ============= */
-
-/* .theText::-webkit-scrollbar,
-.customScrollBar::-webkit-scrollbar {
-  width: 12px;
-}
-.theText,
-.customScrollBar {
-  scrollbar-width: thin;
-  scrollbar-color: var(--thumbBG) var(--scrollbarBG);
-  overflow-wrap: anywhere;
-}
-.theText::-webkit-scrollbar-track,
-.customScrollBar::-webkit-scrollbar-track {
-  background: var(--scrollbarBG);
-}
-.theText::-webkit-scrollbar-thumb,
-.customScrollBar::-webkit-scrollbar-thumb {
-  background-color: var(--thumbBG);
-  border-radius: 6px;
-  border: 3px solid var(--scrollbarBG);
-} */
-/*# =============== scrollbar   ============= */
 
 /* @ =============== addl utils   ============= */
 .sentenceCase {

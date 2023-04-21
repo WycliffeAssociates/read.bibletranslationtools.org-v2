@@ -4,6 +4,8 @@ export interface Props {
   use100vh?: boolean
   textDir: string
   repoUrl: string
+  customFont?: string | null
+  customFontFamily?: string | null
 }
 // imports
 import { pwaInfo } from "virtual:pwa-info"
@@ -12,7 +14,8 @@ import { Nav } from "@components"
 import { getPreferredLangFromHeader } from "@lib/utils"
 
 // data
-const { title, use100vh, textDir, repoUrl } = Astro.props
+const { title, use100vh, textDir, repoUrl, customFont, customFontFamily } =
+  Astro.props
 
 const preferredLocale = getPreferredLangFromHeader(Astro.request)
 let initialDictModule = await import(`../translations/${preferredLocale}.js`)
@@ -41,6 +44,17 @@ const initialDict = {
       href="/fonts/atkinson/atkinson-hyperlegible-v10-latin-ext_latin-700.woff2"
       crossorigin
     />
+    {
+      customFont && customFontFamily && (
+        <link
+          rel="preload"
+          as="font"
+          type="font/woff2"
+          href={customFont}
+          crossorigin
+        />
+      )
+    }
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     <meta name="description" content="A site to read rendered USFM" />
@@ -55,7 +69,12 @@ const initialDict = {
     }
     {pwaInfo && <Fragment set:html={pwaInfo.webManifest.linkTag} />}
   </head>
-  <body>
+  <body
+    style={customFont && customFontFamily
+      ? { "font-family": customFontFamily }
+      : null}
+    class={customFont && customFontFamily && "usingCustomFont"}
+  >
     <div class={use100vh ? "print:block print:pb-20" : ""} id="pageWrapper">
       <Nav
         preferredLocale={preferredLocale}

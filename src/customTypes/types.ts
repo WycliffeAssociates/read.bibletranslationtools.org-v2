@@ -89,6 +89,9 @@ export interface repoIndexObj {
       }[]
     | []
   wholeResourceByteCount: number
+  appMeta: {
+    [key: string]: JSONValue
+  }
 }
 
 export interface bibleSchemaPropsType {
@@ -143,3 +146,9 @@ export interface ISavedInServiceWorkerStatus {
   currentBookIsOutOfDate: null | boolean
 }
 export type ILoadingTextEnums = "IDLE" | "FINISHED" | "STARTED" | "ERROR"
+type JSONValue =
+  | string
+  | number
+  | boolean
+  | { [x: string]: JSONValue }
+  | Array<JSONValue>
