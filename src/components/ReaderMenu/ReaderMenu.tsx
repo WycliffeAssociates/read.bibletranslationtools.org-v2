@@ -290,7 +290,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
   }
 
   return (
-    <div class="mx-auto max-w-[1400px]">
+    <div class="mx-auto max-w-[105ch] bg-white">
       <div
         use:clickOutside={() => setMenuIsOpen(false)}
         class="mx-auto w-full"
@@ -315,8 +315,8 @@ const ReaderMenu: Component<MenuProps> = (props) => {
           use:escapeOut={() => setMenuIsOpen(false)}
           class=" mx-auto flex w-full flex-wrap items-center px-4 py-2 "
         >
-          <div class="relative flex w-full items-center justify-between gap-3  print:hidden sm:w-5/6 ltr:sm:ml-auto rtl:sm:mr-auto">
-            <div class="my-2 flex w-4/5 justify-between overflow-hidden  rounded-lg bg-neutral-200 outline outline-1 outline-gray-300 hover:outline-accent">
+          <div class="relative mx-auto flex w-full max-w-[75ch] items-center  justify-between gap-3  text-varBase print:hidden">
+            <div class="my-2 flex w-full justify-between overflow-hidden  rounded-lg bg-neutral-200 outline outline-1 outline-gray-300 hover:outline-accent">
               <button
                 class="flex w-full flex-grow items-center justify-between rounded-md ltr:pl-4 rtl:pr-4"
                 onClick={() => togglePanel()}
@@ -355,7 +355,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                                 searchBooks()
                               }}
                               type="text"
-                              class="w-full rounded-full border border-neutral-300 py-2 px-4 capitalize"
+                              class="w-full rounded-full border border-neutral-300 px-4 py-2 capitalize"
                               placeholder={t("searchBooks")}
                               value={searchQuery()}
                             />
@@ -386,7 +386,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
             <div class="w-1/5 print:hidden">
               <div class=" relative w-max rounded-md ltr:ml-auto rtl:mr-auto ">
                 <button
-                  class="rounded   py-2  px-5 outline outline-1 outline-gray-300 hover:outline-accent"
+                  class="rounded   px-5  py-2 outline outline-1 outline-gray-300 hover:outline-accent"
                   aria-label={t("openSettings", {}, "open settings")}
                   onClick={manageOpenSettings}
                 >
@@ -430,7 +430,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
           <Show when={menuIsOpen()}>
             <div
               id="mobileMenu"
-              class="r-0  bottom-0 left-0 top-0 right-0   z-10 w-full overflow-y-scroll bg-white sm:hidden "
+              class="r-0  bottom-0 left-0 right-0 top-0   z-10 w-full overflow-y-scroll bg-white sm:hidden "
             >
               <ul class="flex justify-between ">
                 <li class="w-full text-center">
@@ -473,7 +473,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                         searchBooks()
                       }}
                       type="text"
-                      class="w-full rounded-full border border-neutral-300 py-2 px-4 capitalize "
+                      class="w-full rounded-full border border-neutral-300 px-4 py-2 capitalize "
                       placeholder={t("searchBooks")}
                       value={searchQuery()}
                     />

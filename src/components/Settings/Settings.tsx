@@ -51,8 +51,10 @@ export default function Settings(props: settingsProps) {
       props.setSavingOffline("STARTED")
       // IF SOMEONE HAS PREVIOUSLY SAVED THE WHOLE RESOURCE, WE want to update just that book in the whole offline ready response. IF not, we want to create a origin/pathname/complete resource (even if it is just one book, such as a btt writer project), which can be added to incrementally if desired.
       // open caches once and operate in loop.
+      // ROW WHOLE RESOURCE IS FOR JSON
       const rowWholeResourcesCache = await caches.open(CACHENAMES.complete)
       const lrApiCache = await caches.open(CACHENAMES.lrApi)
+      // LRPAGES IS FOR HTML ONLY
       const lrPagesCache = await caches.open(CACHENAMES.lrPagesCache)
       //
       const wholeResourceMatch = props
@@ -90,9 +92,17 @@ export default function Settings(props: settingsProps) {
         .map((book) => {
           return {
             slug: book.slug,
-            lastRendered: book.lastRendered
+            lastRendered: book.lastRendered,
+            size: book.chapters.reduce((acc, cur) => (acc += cur.byteCount), 0)
           }
         })
+      const bookWithAllContentSize =
+        (booksWithAllContent &&
+          booksWithAllContent.reduce((acc, current) => {
+            acc += current.size
+            return acc
+          }, 0)) ||
+        0
       const allContentIsPopulated =
         booksWithAllContent &&
         booksWithAllContent.length === indexToPostWith.bible?.length
@@ -113,7 +123,8 @@ export default function Settings(props: settingsProps) {
             "Content-Type": "text/html",
             "X-Last-Generated": props.repoIndex.lastRendered,
             "X-Is-Complete": allContentIsPopulated ? "1" : "0",
-            "X-Complete-Books": JSON.stringify(booksWithAllContent)
+            "X-Complete-Books": JSON.stringify(booksWithAllContent),
+            "Content-Length": String(bookWithAllContentSize)
           }
         })
       )
@@ -131,7 +142,6 @@ export default function Settings(props: settingsProps) {
           "Content-Type": "text/html"
         }
       })
-
       // will overwrite any existing /complete, but should be fine since it augments existing downloaded books or downloaded whole
       if (htmlSsrUrlRes.ok) {
         await lrPagesCache.put(
@@ -141,7 +151,8 @@ export default function Settings(props: settingsProps) {
             statusText: "OK",
             headers: {
               "Content-Type": "text/html",
-              "X-Last-Generated": props.repoIndex.lastRendered
+              "X-Last-Generated": props.repoIndex.lastRendered,
+              "Content-Length": String(bookWithAllContentSize)
             }
           })
         )
@@ -191,15 +202,8 @@ export default function Settings(props: settingsProps) {
   }
 
   async function getWholeBook() {
-    try {
-      const originalRepoIndex = await getRepoIndexFromSavedWhole()
-      const bookSlug = props.storeInterface.currentBookObj()?.slug
-      if (originalRepoIndex) {
-        const matchingBook = originalRepoIndex?.bible?.find(
-          (book) => book.slug == bookSlug
-        )
-        return matchingBook
-      } else {
+    async function fetchTheBook(bookSlug: string) {
+      try {
         if (!bookSlug) return
         const wholeBookUrl = FUNCTIONS_ROUTES.getWholeBookJson({
           user: props.user,
@@ -208,6 +212,30 @@ export default function Settings(props: settingsProps) {
         })
         const wholeBookRes = await fetch(wholeBookUrl)
         const data: bibleEntryObj = await wholeBookRes.json()
+        return data
+      } catch (error) {
+        console.error(error)
+      }
+    }
+    try {
+      const originalRepoIndex = await getRepoIndexFromSavedWhole()
+      const bookSlug = props.storeInterface.currentBookObj()?.slug
+      if (originalRepoIndex) {
+        const matchingBook = originalRepoIndex?.bible?.find(
+          (book) => book.slug == bookSlug
+        )
+        const matchingBookIsPopulated =
+          matchingBook && matchingBook.chapters.every((chap) => !!chap.content)
+        if (matchingBookIsPopulated) {
+          return matchingBook
+        } else {
+          if (!bookSlug) return
+          const data = await fetchTheBook(bookSlug)
+          return data
+        }
+      } else {
+        if (!bookSlug) return
+        const data = await fetchTheBook(bookSlug)
         return data
       }
     } catch (error) {
@@ -274,12 +302,11 @@ export default function Settings(props: settingsProps) {
       // response is same shape as working memory, so add to working memory and eliminate need for any other api calls
       props.storeInterface.mutateStore("text", downloadIndex.content)
 
-      // compress the current index. WE are going to pass it in body of post req so response doesn't have to fetch it.
+      //  clone the current index bc it has some metadata on it, and we are ultimately going to save a complete version of it once merging in the download index.
       const indexClone = structuredClone(props.repoIndex)
       indexClone.bible = downloadIndex.content
-      // const ssrPostPayload = compressDataAndGetEncodedIndex(indexClone)
-
       const ssrPostPayload = JSON.stringify(indexClone)
+
       // compress to minimize transfer to try to avoid CF timeouts
       const gzippedPayload = gzipSync(strToU8(ssrPostPayload))
       // eslint-disable-next-line solid/reactivity
@@ -325,8 +352,8 @@ export default function Settings(props: settingsProps) {
         }
         // eslint-disable-next-line solid/reactivity
       }).then(async (htmlSsrUrlRes) => {
-        const num = 3
-        if (htmlSsrUrlRes.ok && num > 4) {
+        debugger
+        if (htmlSsrUrlRes.ok) {
           const blob = await htmlSsrUrlRes.blob()
           const size = blob.size
 
@@ -343,6 +370,7 @@ export default function Settings(props: settingsProps) {
             })
           )
         } else {
+          // Some really large resources timeout of free CF functions, so we serialize the bare index, and put some logic in the onMount of the page to check the SW cache to fill it out.
           const smallIndex = JSON.stringify(props.repoIndex)
           // compress to minimize transfer to try to avoid CF timeouts
           const gzippedPayload = gzipSync(strToU8(smallIndex))

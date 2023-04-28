@@ -8,6 +8,8 @@
   --thumbBG: var(--color-accent);
   --screenHeight: 100vh;
   --marginIncrement: 0.25rem;
+  --clrBackground: #f2f3f5;
+  --color-text: #33445c;
 }
 .usingCustomFont .font-sans {
   font-family: inherit;
@@ -138,6 +140,13 @@ body.noscroll {
 .theText h4 {
   font-size: var(--font-size-base);
 }
+.theText :is(h1, h2, h3, h4, h5, h6, .chapterMarker, .verseMarker) {
+  color: var(--color-darkAccent);
+}
+.theText .theText p {
+  color: var(--color-text);
+}
+
 .theText p,
 .theText li {
   font-size: var(--font-size-base);
@@ -332,7 +341,7 @@ a[href*="footnote-target"] {
 }
 
 .versemarker {
-  font-size: 0.5rem;
+  font-size: 0.7rem;
 }
 
 [class^="poetry-"] .versemarker {

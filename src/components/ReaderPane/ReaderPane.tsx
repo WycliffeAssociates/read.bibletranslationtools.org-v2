@@ -195,7 +195,7 @@ export default function ReaderPane(props: ReaderPaneProps) {
       {/* HTML CONTENT */}
       <Show when={!props.printWholeBook()}>
         <PreviewPane />
-        <div class="mx-auto  w-full max-w-[1400px] px-4">
+        <div class="mx-auto  w-full max-w-[105ch] bg-white px-4">
           <div class="relative flex  h-full content-center  justify-center gap-2">
             <Show
               when={props.storeInterface.navLinks()?.prev}
@@ -212,7 +212,9 @@ export default function ReaderPane(props: ReaderPaneProps) {
                   fetchReaderHtml({ event, navigate: true, dir: "BACK" })
                 }}
                 icon={
-                  <SvgArrow classNames="color-inherit mx-auto fill-current stroke-current ltr:rotate-0 rtl:rotate-180" />
+                  <span class="w-4">
+                    <SvgArrow classNames="color-inherit mx-auto fill-current stroke-current ltr:rotate-0 rtl:rotate-180 w-full block" />
+                  </span>
                 }
               />
             </Show>
@@ -220,7 +222,7 @@ export default function ReaderPane(props: ReaderPaneProps) {
             <div
               id="theText"
               ref={textRef}
-              class="theText mx-auto mb-24 h-full  max-w-[85ch] overflow-y-auto bg-inherit pr-1 pt-2 text-lg leading-relaxed print:h-min print:overflow-y-visible  print:pb-4  sm:px-2 md:mr-auto md:ml-0 md:w-4/5 md:max-w-[75ch] md:text-2xl xl:mx-auto"
+              class="theText mx-auto mb-24 h-full   max-w-[75ch] overflow-y-auto bg-inherit pr-1 pt-2 text-lg leading-relaxed text-[--color-text]  print:h-min  print:overflow-y-visible  print:pb-4 sm:px-2  md:w-full"
               innerHTML={props.storeInterface.HTML()}
             />
 
@@ -240,7 +242,9 @@ export default function ReaderPane(props: ReaderPaneProps) {
                   fetchReaderHtml({ event, navigate: true, dir: "FORWARD" })
                 }}
                 icon={
-                  <SvgArrow classNames="color-inherit mx-auto fill-current stroke-current ltr:rotate-180 rtl:rotate-0" />
+                  <span class="w-4">
+                    <SvgArrow classNames="color-inherit mx-auto fill-current stroke-current ltr:rotate-180 rtl:rotate-0" />
+                  </span>
                 }
               />
             </Show>
@@ -254,7 +258,7 @@ export default function ReaderPane(props: ReaderPaneProps) {
         <div
           id="wholeBook"
           innerHTML={props.storeInterface.wholeBookHtml()}
-          class=" theText  mx-auto  max-w-[85ch] !overflow-y-visible bg-inherit text-lg leading-relaxed print:pb-4 sm:px-8 md:max-w-[75ch] md:text-2xl"
+          class=" theText mx-auto  max-w-[75ch]  !overflow-y-visible bg-inherit bg-white text-lg leading-relaxed print:pb-4 sm:px-8 md:max-w-[75ch] "
         />
       </Show>
     </>

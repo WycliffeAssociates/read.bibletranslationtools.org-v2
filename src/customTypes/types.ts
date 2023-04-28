@@ -38,6 +38,7 @@ export interface bibleChapObj {
   number: string
   label: string
   content: null | string
+  byteCount: number
 }
 export interface bibleEntryObj {
   // [index: string]: any

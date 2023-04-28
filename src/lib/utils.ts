@@ -135,3 +135,12 @@ export function seedAndMutateInitialDataRepoIndex({
     })
   })
 }
+
+export function intlDate(
+  timestring: string,
+  locale: string | string[],
+  options: Intl.DateTimeFormatOptions
+) {
+  const date = new Date(timestring)
+  return new Intl.DateTimeFormat(locale, options).format(date)
+}
