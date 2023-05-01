@@ -352,7 +352,6 @@ export default function Settings(props: settingsProps) {
         }
         // eslint-disable-next-line solid/reactivity
       }).then(async (htmlSsrUrlRes) => {
-        debugger
         if (htmlSsrUrlRes.ok) {
           const blob = await htmlSsrUrlRes.blob()
           const size = blob.size

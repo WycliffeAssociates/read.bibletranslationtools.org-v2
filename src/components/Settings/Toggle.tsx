@@ -2,10 +2,19 @@ import { IconX, IconCheck } from "@components/Icons/Icons"
 import { ToggleButton } from "@kobalte/core"
 import { JSX, Show } from "solid-js"
 
-interface IDetailItem {}
+interface IDetailItem {
+  pressed?: boolean
+  // defaultPressed?:boolean
+  onChangeFxn: (isPressed: boolean) => void
+}
 export default function DetailItem(props: IDetailItem) {
   return (
-    <ToggleButton.Root class="toggle-button" aria-label="Toggle offline">
+    <ToggleButton.Root
+      onChange={props.onChangeFxn}
+      class="toggle-button"
+      aria-label="Toggle offline"
+      pressed={props.pressed}
+    >
       {(state) => (
         <span
           data-name="toggleTrack"

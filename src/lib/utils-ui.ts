@@ -1,4 +1,7 @@
 import { onCleanup, Setter } from "solid-js"
+import { CACHENAMES } from "@lib/contants"
+import { gunzipSync, gzipSync, strFromU8, strToU8 } from "fflate"
+import type { repoIndexObj } from "@customTypes/types"
 
 /* @===============  UI UTILS   =============   */
 
@@ -88,4 +91,146 @@ export function debounce(
       callback(...args)
     }, wait)
   }
+}
+interface IdeleteSingleBookFromSw {
+  bookSlug: string
+  user: string
+  repo: string
+  bookChapters: string[]
+}
+export async function deleteAllResourceFromSw({
+  user,
+  repo,
+  repoIndex,
+  bookSlug
+}: {
+  user: string
+  repo: string
+  repoIndex: repoIndexObj
+  bookSlug: string
+}) {
+  debugger
+  const rowWholeResourcesCache = await caches.open(CACHENAMES.complete)
+  const pagesCaches = await caches.open(CACHENAMES.lrPagesCache)
+  const apiCache = await caches.open(CACHENAMES.lrApi)
+
+  const didDeleteRowWhole = await rowWholeResourcesCache.delete(
+    `${window.location.origin}/${user}/${repo}`
+  )
+
+  const didDeletePagesWhole = await pagesCaches.delete(
+    `${window.location.origin}/${user}/${repo}/complete`
+  )
+
+  const allDeleteableApiRoutes =
+    repoIndex.bible
+      ?.map((book) => {
+        return book.chapters.map((chap) => {
+          return `/api/getHtmlForChap?user=${user}&repo=${repo}&book=${book.slug}&chapter=${chap.label}`
+        })
+      })
+      .flat() || []
+
+  for await (const route of allDeleteableApiRoutes) {
+    const didDeleteRoute = await apiCache.delete(route)
+    console.log({ didDeleteRoute })
+  }
+  return true
+}
+export async function deleteSingleBookFromSw({
+  bookSlug,
+  user,
+  repo,
+  bookChapters
+}: IdeleteSingleBookFromSw) {
+  const rowWholeResourcesCache = await caches.open(CACHENAMES.complete)
+  const apiCache = await caches.open(CACHENAMES.lrApi)
+  const wholeResource = await rowWholeResourcesCache.match(
+    `${window.location.origin}/${user}/${repo}`
+  )
+  if (!wholeResource) return false
+  const arrBuff = await wholeResource.arrayBuffer()
+  const u8Array = new Uint8Array(arrBuff)
+  const decodedU8 = gunzipSync(u8Array)
+  const decodedRepoIndex = JSON.parse(strFromU8(decodedU8)) as repoIndexObj
+  decodedRepoIndex.bible
+  let specificedBook = decodedRepoIndex.bible?.find((storeBib) => {
+    return storeBib.slug.toLowerCase() == String(bookSlug).toLowerCase()
+  })
+  if (!specificedBook) return
+  const thatBookDeleted = specificedBook.chapters.forEach((chap) => {
+    chap.content = ""
+  })
+  await writeRepoIndexToSw(decodedRepoIndex, user, repo)
+
+  for await (const chap of bookChapters) {
+    const url = `/api/getHtmlForChap?user=${user}&repo=${repo}&book=${bookSlug}&chapter=${chap}`
+    const match = await apiCache.match(url)
+    if (match) {
+      await apiCache.delete(url)
+    }
+  }
+  return true
+}
+
+export async function writeRepoIndexToSw(
+  repoIndex: repoIndexObj,
+  user: string,
+  repo: string
+) {
+  const rowWholeResourcesCache = await caches.open(CACHENAMES.complete)
+  const gzippedPayload = gzipSync(strToU8(JSON.stringify(repoIndex)))
+
+  const booksWithAllContent = repoIndex.bible
+    ?.filter((book) => {
+      return book.chapters.every((chap) => !!chap.content)
+    })
+    .map((book) => {
+      return {
+        slug: book.slug,
+        lastRendered: book.lastRendered,
+        size: book.chapters.reduce((acc, cur) => (acc += cur.byteCount), 0)
+      }
+    })
+  const bookWithAllContentSize =
+    (booksWithAllContent &&
+      booksWithAllContent.reduce((acc, current) => {
+        acc += current.size
+        return acc
+      }, 0)) ||
+    0
+  const allContentIsPopulated =
+    booksWithAllContent &&
+    booksWithAllContent.length === repoIndex.bible?.length
+
+  const wholeResUrl = new URL(`${window.location.origin}/${user}/${repo}`)
+
+  await rowWholeResourcesCache.put(
+    wholeResUrl,
+    new Response(gzippedPayload, {
+      status: 200,
+      statusText: "OK",
+      headers: {
+        "Content-Type": "text/html",
+        "X-Last-Generated": repoIndex.lastRendered,
+        "X-Is-Complete": allContentIsPopulated ? "1" : "0",
+        "X-Complete-Books": JSON.stringify(booksWithAllContent),
+        "Content-Length": String(bookWithAllContentSize)
+      }
+    })
+  )
+}
+
+export async function extractRepoIndexFromSavedWhole(
+  savedResponse: Response | undefined
+) {
+  if (!savedResponse) return
+  // clone the response bc in the case that someone clicks save whole and then save book and the print book, or whatever, they may want to access the response multiple times, and you can only read the body once.
+  const wholeResourceMatch = savedResponse.clone()
+  if (!wholeResourceMatch) return
+  const arrBuff = await wholeResourceMatch.arrayBuffer()
+  const u8Array = new Uint8Array(arrBuff)
+  const decodedU8 = gunzipSync(u8Array)
+  const originalRepoIndex = JSON.parse(strFromU8(decodedU8)) as repoIndexObj
+  return originalRepoIndex
 }

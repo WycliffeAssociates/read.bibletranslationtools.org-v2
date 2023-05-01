@@ -286,34 +286,35 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
       const queryParams = new URLSearchParams(window.location.search)
       const book = queryParams.get("book")
       const chapter = queryParams.get("chapter")
-      const isCompleteText = readerStore.text?.every((book) => {
-        return book.chapters.every((chap) => {
-          return !!chap.content
-        })
-      })
-      let completeText = readerStore.text
+      // const isCompleteText = readerStore.text?.every((book) => {
+      //   return book.chapters.every((chap) => {
+      //     return !!chap.content
+      //   })
+      // })
+      // //
 
-      if (!isCompleteText) {
-        const rowWholeResourcesCache = await caches.open(CACHENAMES.complete)
-        const wholeResource = await rowWholeResourcesCache.match(
-          `${window.location.origin}/${props.user}/${props.repositoryName}`
-        )
-        if (!wholeResource) return
-        const arrBuff = await wholeResource.arrayBuffer()
-        const u8Array = new Uint8Array(arrBuff)
-        const decodedU8 = gunzipSync(u8Array)
-        const decodedRepoIndex = JSON.parse(
-          strFromU8(decodedU8)
-        ) as repoIndexObj
-        completeText = decodedRepoIndex.bible
-      }
+      // todo: remove this note:
+      // Make the response saved in service worker always be primary. That way it's the only source of truth, and nothing from the SSR response for saved items.
+      // if (!isCompleteText) {
+      const rowWholeResourcesCache = await caches.open(CACHENAMES.complete)
+      const wholeResource = await rowWholeResourcesCache.match(
+        `${window.location.origin}/${props.user}/${props.repositoryName}`
+      )
+      if (!wholeResource) return
+      const arrBuff = await wholeResource.arrayBuffer()
+      const u8Array = new Uint8Array(arrBuff)
+      const decodedU8 = gunzipSync(u8Array)
+      const decodedRepoIndex = JSON.parse(strFromU8(decodedU8)) as repoIndexObj
+      let completeText = decodedRepoIndex.bible
+      // }
       let storeQueryParamBook = completeText?.find((storeBib) => {
         return storeBib.slug.toLowerCase() == String(book).toLowerCase()
       })
+      if (!storeQueryParamBook || !chapter || !book) return setDoRender(true)
       let storeQueryParamChapter =
         storeQueryParamBook &&
         storeQueryParamBook.chapters.find((chap) => chap.label == chapter)
-      if (!storeQueryParamBook || !chapter || !book) return setDoRender(true)
+
       if (!storeQueryParamChapter?.content) {
         // fallback to first available contents
         storeQueryParamBook = completeText?.find((storeBib) => {

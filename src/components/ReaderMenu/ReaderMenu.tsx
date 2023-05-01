@@ -37,6 +37,7 @@ import { BibleBookCategories } from "@lib/contants"
 import { CACHENAMES } from "../../lib/contants"
 import { getRepoIndex } from "@lib/api"
 import { IconMagnifyingGlass } from "@components/Icons/Icons"
+import Settings2 from "../Settings/Settings2"
 
 interface MenuProps {
   storeInterface: storeType
@@ -52,10 +53,11 @@ const ReaderMenu: Component<MenuProps> = (props) => {
   const [menuIsOpen, setMenuIsOpen] = createSignal(false)
   const [temporarilyHideMenu, setTemporarilyHideMenu] = createSignal(false)
   // eslint-disable-next-line solid/reactivity
-  const [savedInServiceWorker] = createResource(
+  const [savedInServiceWorker, { mutate, refetch }] = createResource(
     () => props.storeInterface.currentBookObj(),
     checkIfCurrentBookOrResIsSaved
   )
+  // type x = typeof refetch;
   const [savingOffline, setSavingOffline] = createSignal<
     "IDLE" | "FINISHED" | "STARTED" | "ERROR"
   >("IDLE")
@@ -103,6 +105,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
     // const bookMatch = await completeResourceCache.match(
     //   `${window.location.origin}/${props.user}/${props.repositoryName}/${currentBook.slug}`
     // )
+
     const wholeMatch = await completeResourceCache.match(
       `${window.location.origin}/${props.user}/${props.repositoryName}`
     )
@@ -159,6 +162,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
 
       wholeIsComplete = wholeMatch.headers?.get("X-Is-Complete") == "1"
     }
+
     return {
       wholeResponse: wholeMatch,
       wholeIsComplete,
@@ -333,7 +337,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
           class="mx-auto flex w-full flex-wrap items-center px-4 py-2 "
         >
           <div class="relative mx-auto flex w-full max-w-[75ch] items-center  justify-between gap-3  text-varBase print:hidden">
-            <div class="my-2 flex w-full justify-between overflow-hidden  rounded-lg bg-neutral-200 outline outline-1 outline-gray-300 hover:outline-accent">
+            <div class="my-2 flex w-full justify-between overflow-hidden  rounded-lg bg-white outline outline-1 outline-gray-300 hover:outline-accent">
               <button
                 class="flex w-full flex-grow items-center justify-between rounded-md ltr:pl-4 rtl:pr-4"
                 onClick={() => togglePanel()}
@@ -345,7 +349,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                   </span>
                 </span>
                 <span
-                  class="menuNumberInput w-[5ch] bg-gray-50 py-2 text-center"
+                  class="menuNumberInput w-[5ch] border-l border-gray-200 py-2 text-center"
                   data-testid="chapterNavigation"
                 >
                   {props.storeInterface.getStoreVal("currentChapter")}
@@ -358,8 +362,6 @@ const ReaderMenu: Component<MenuProps> = (props) => {
               open={menuIsOpen()}
               // open={true}
               onOpenChange={(val) => {
-                // debugger
-                // console.log({ val })
                 setMenuIsOpen(val)
               }}
             >
@@ -369,7 +371,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                   data-title="dialog__overlay"
                 />
                 <div
-                  id="fineme"
+                  id="readerMenuPositioner"
                   style={{
                     top: topAmount()
                   }}
@@ -533,19 +535,20 @@ const ReaderMenu: Component<MenuProps> = (props) => {
             <div class="w-1/5 print:hidden">
               <div class=" relative w-max rounded-md ltr:ml-auto rtl:mr-auto ">
                 <button
-                  class="rounded   px-5  py-2 outline outline-1 outline-gray-300 hover:outline-accent"
+                  class="rounded   px-5  py-2 text-slate-700  hover:outline-accent"
                   aria-label={t("openSettings", {}, "open settings")}
                   onClick={manageOpenSettings}
                 >
                   <SvgSettings classNames="" />
                 </button>
-                <Show when={settingsAreOpen()}>
-                  <div
+                {/* todo: re-enable */}
+                {/* <Show when={settingsAreOpen()}> */}
+                {/* <div
                     class={`shadow-dark-700  z-20 w-72 bg-neutral-100 p-4 text-right shadow-xl ltr:right-0 rtl:left-0 md:w-96 ${
                       temporarilyHideMenu() && "hidden"
                     }`}
-                  >
-                    <Suspense
+                  > */}
+                {/* <Suspense
                       fallback={
                         <LoadingSpinner classNames="w-12 mx-auto text-accent" />
                       }
@@ -566,9 +569,22 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                         savingWholeOffline={savingWholeOffline}
                         setSavingWholeOffline={setSavingWholeOffline}
                       />
-                    </Suspense>
-                  </div>
+                    </Suspense> */}
+                <Show when={savedInServiceWorker()}>
+                  <Settings2
+                    settingsAreOpen={settingsAreOpen}
+                    setSettingsOpen={setSettingsAreOpen}
+                    topAmount={topAmount}
+                    repoIndex={props.repoIndex}
+                    storeInterface={props.storeInterface}
+                    savedInServiceWorker={savedInServiceWorker}
+                    user={props.user}
+                    repo={props.repositoryName}
+                    refetchSwResponses={refetch}
+                  />
                 </Show>
+                {/* </div> */}
+                {/* </Show> */}
               </div>
             </div>
           </div>
