@@ -13,7 +13,7 @@ export function BookList(props: propsInterface) {
   const outterClassNames = () => {
     return props.isMobile
       ? "h-[95vh] overflow-y-auto pb-96"
-      : "max-h-[50vh] min-h-[100px] overflow-y-auto pb-32"
+      : "max-h-[70vh] min-h-[100px] overflow-y-auto pb-32"
   }
   return (
     <Show
@@ -25,7 +25,7 @@ export function BookList(props: propsInterface) {
       <div class={outterClassNames()}>
         {/* OT */}
         <Show when={props.bibleMenuBooksByCategory()?.OT.length}>
-          <span class="block px-4 pt-5 pb-1 text-xs uppercase italic text-gray-800">
+          <span class="block px-4 pb-1 pt-5 text-xs uppercase italic text-gray-800">
             {t("oldTestament", undefined, "Old Testament")}
           </span>
           <ul class="" aria-label="">
@@ -49,7 +49,7 @@ export function BookList(props: propsInterface) {
         </Show>
         {/* NT */}
         <Show when={props.bibleMenuBooksByCategory()?.NT.length}>
-          <span class="block px-4 pt-5 pb-1 text-xs uppercase italic text-gray-800">
+          <span class="block px-4 pb-1 pt-5 text-xs uppercase italic text-gray-800">
             {t("newTestament", undefined, "New Testament")}
           </span>
           <ul>

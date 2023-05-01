@@ -7,10 +7,11 @@ import {
   Suspense,
   createResource
 } from "solid-js"
-import { SvgSettings, SvgBook, LoadingSpinner } from "@components"
+import { SvgSettings, SvgBook, LoadingSpinner, SvgArrow } from "@components"
 import { BookList } from "./BookList"
 import { ChapterList } from "./ChapterList"
 import { clickOutside, escapeOut, debounce } from "@lib/utils-ui"
+import { Dialog } from "@kobalte/core"
 
 // https://github.com/solidjs/solid/discussions/845
 // these are hacks (name doesn't matter) to keep typescript from stripping away "unused imports", but these are used as custom solid directives below:
@@ -35,6 +36,7 @@ import type { storeType } from "@components/ReaderWrapper/ReaderWrapper"
 import { BibleBookCategories } from "@lib/contants"
 import { CACHENAMES } from "../../lib/contants"
 import { getRepoIndex } from "@lib/api"
+import { IconMagnifyingGlass } from "@components/Icons/Icons"
 
 interface MenuProps {
   storeInterface: storeType
@@ -288,11 +290,26 @@ const ReaderMenu: Component<MenuProps> = (props) => {
     }
     locale(langCode)
   }
+  function getPortalSpot() {
+    return document.getElementById("menuPortalMount") as HTMLDivElement
+  }
+  function topAmount() {
+    if (import.meta.env.SSR) {
+      console.log("HEIGHT SSR")
+      return "5rem"
+    } else {
+      let nav = document.querySelector("nav") as HTMLElement
+      const compstyle = window.getComputedStyle(nav)
+      const height = compstyle.getPropertyValue("height")
+      console.log({ height })
+      return height
+    }
+  }
 
   return (
-    <div class="mx-auto max-w-[105ch] bg-white">
+    <div class="mx-auto  bg-white">
       <div
-        use:clickOutside={() => setMenuIsOpen(false)}
+        // use:clickOutside={() => setMenuIsOpen(false)}
         class="mx-auto w-full"
         on:changelanguage={(
           e: CustomEvent<{
@@ -313,7 +330,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
       >
         <div
           use:escapeOut={() => setMenuIsOpen(false)}
-          class=" mx-auto flex w-full flex-wrap items-center px-4 py-2 "
+          class="mx-auto flex w-full flex-wrap items-center px-4 py-2 "
         >
           <div class="relative mx-auto flex w-full max-w-[75ch] items-center  justify-between gap-3  text-varBase print:hidden">
             <div class="my-2 flex w-full justify-between overflow-hidden  rounded-lg bg-neutral-200 outline outline-1 outline-gray-300 hover:outline-accent">
@@ -335,54 +352,184 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                 </span>
               </button>
             </div>
-            <Show when={menuIsOpen()}>
-              {/*//! TABLET AND UP */}
-              <div class="sm:shadow-dark-300 z-20 hidden max-h-[71vh]  w-4/5  overflow-y-hidden   bg-white sm:absolute sm:top-full sm:block sm:rounded-xl sm:border sm:shadow-xl">
-                <div class="hidden sm:flex">
-                  {/* Books */}
-                  <div class="border-netural-200 w-2/5 border-r">
-                    <div class="w-full">
-                      <h2 class="mt-2 text-2xl capitalize ltr:ml-4 rtl:mr-4">
-                        {t("books")}
-                      </h2>
-                      <div class="mt-2 border-t border-neutral-200 pt-2">
-                        <div class="">
-                          <label for="" class="block p-4">
-                            <input
-                              onInput={(e: InputEvent) => {
-                                const target = e.target as HTMLInputElement
-                                setSearchQuery(target.value)
-                                searchBooks()
-                              }}
-                              type="text"
-                              class="w-full rounded-full border border-neutral-300 px-4 py-2 capitalize"
-                              placeholder={t("searchBooks")}
-                              value={searchQuery()}
-                            />
-                          </label>
-                          <BookList
-                            // eslint-disable-next-line solid/reactivity
-                            onClick={(book: string) => switchBooks(book)}
-                            isActiveBook={isActiveBook}
-                            bibleMenuBooksByCategory={
-                              filteredMenuBookByCategory
-                            }
+            {/* <Show when={menuIsOpen()}> */}
+            {/*//! TABLET AND UP */}
+            <Dialog.Root
+              open={menuIsOpen()}
+              // open={true}
+              onOpenChange={(val) => {
+                // debugger
+                // console.log({ val })
+                setMenuIsOpen(val)
+              }}
+            >
+              <Dialog.Portal mount={getPortalSpot()}>
+                <Dialog.Overlay
+                  class="fixed inset-0 z-40 hidden bg-black/[.1] data-[expanded]:block"
+                  data-title="dialog__overlay"
+                />
+                <div
+                  id="fineme"
+                  style={{
+                    top: topAmount()
+                  }}
+                  class="fixed left-1/2  z-50 w-full max-w-[calc(75ch+2rem)] -translate-x-1/2 transform text-varBase"
+                  data-title="dialog__positioner"
+                >
+                  <Dialog.Content class="" data-title="dialog__content">
+                    {/* ===============  shared   =============   */}
+                    <div class="bg-white ">
+                      <div class="border-netural-200 flex border-b py-4 ltr:pl-8 rtl:pr-8">
+                        <Dialog.CloseButton
+                          class=""
+                          data-title="dialog__close-button"
+                        >
+                          <p class="flex gap-4">
+                            <span class="w-5">
+                              <SvgArrow />
+                            </span>
+                            <span class="text-lg">English ULB</span>
+                          </p>
+                        </Dialog.CloseButton>
+                      </div>
+                      {/* ===============  tablet up menu   =============   */}
+                      <div
+                        data-title="tabletAndLarger"
+                        class="sm:shadow-dark-300 z-20 hidden h-full w-full overflow-y-hidden sm:block"
+                      >
+                        <div class="hidden sm:flex">
+                          {/* Books */}
+                          <div class="border-netural-200 w-2/5 border-r">
+                            <div class="w-full">
+                              {/* todo: fully remove if looks right */}
+                              {/* <h2 class="mt-2 text-2xl capitalize ltr:ml-4 rtl:mr-4">
+                                {t("books")}
+                              </h2> */}
+                              <div class="mt-2  pt-2">
+                                <div class="">
+                                  <label for="" class="relative block p-4">
+                                    <input
+                                      onInput={(e: InputEvent) => {
+                                        const target =
+                                          e.target as HTMLInputElement
+                                        setSearchQuery(target.value)
+                                        searchBooks()
+                                      }}
+                                      type="text"
+                                      class="w-full rounded-full border border-neutral-300 px-8 py-2 capitalize"
+                                      placeholder={t("searchBooks")}
+                                      value={searchQuery()}
+                                    />
+                                    <span class="absolute top-1/2 inline-block w-4 transform ltr:left-8 ltr:-translate-y-1/2 rtl:right-8  rtl:translate-y-1/2">
+                                      <IconMagnifyingGlass />
+                                    </span>
+                                  </label>
+                                  <BookList
+                                    // eslint-disable-next-line solid/reactivity
+                                    onClick={(book: string) =>
+                                      switchBooks(book)
+                                    }
+                                    isActiveBook={isActiveBook}
+                                    bibleMenuBooksByCategory={
+                                      filteredMenuBookByCategory
+                                    }
+                                    isMobile={false}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <ChapterList
+                            storeInterface={props.storeInterface}
+                            isActiveBookAndChap={isActiveBookAndChap}
+                            jumpToNewChapIdx={jumpToNewChapIdx}
                             isMobile={false}
                           />
                         </div>
                       </div>
+                      {/* ===============  mobile menu   =============   */}
+                      <div
+                        id="mobileMenu"
+                        class=" z-10 h-full   w-full  overflow-y-scroll bg-white sm:hidden "
+                      >
+                        <ul class="flex justify-between ">
+                          <li class="w-full text-center">
+                            <button
+                              class={`${
+                                mobileTabOpen() == "book"
+                                  ? "w-full border-b-2 border-b-accent font-bold text-accent"
+                                  : "underline"
+                              }  py-3 text-xl capitalize`}
+                              onClick={() => {
+                                setMobileTabOpen("book")
+                              }}
+                            >
+                              {t("books")}
+                            </button>
+                          </li>
+                          <li class="w-full text-center">
+                            <button
+                              class={`${
+                                mobileTabOpen() == "chapter"
+                                  ? "w-full border-b-2 border-b-accent font-bold text-accent"
+                                  : "underline"
+                              } py-3 text-xl capitalize`}
+                              onClick={() => {
+                                setMobileTabOpen("chapter")
+                              }}
+                            >
+                              {t("chapters")}
+                            </button>
+                          </li>
+                        </ul>
+                        {/* MOBILE BOOKS */}
+                        <Show when={mobileTabOpen() == "book"}>
+                          <div data-name="searchInput">
+                            <label for="" class="block p-4">
+                              <input
+                                onInput={(e: InputEvent) => {
+                                  const target = e.target as HTMLInputElement
+                                  setSearchQuery(target.value)
+                                  searchBooks()
+                                }}
+                                type="text"
+                                class="w-full rounded-full border border-neutral-300 px-4 py-2 capitalize "
+                                placeholder={t("searchBooks")}
+                                value={searchQuery()}
+                              />
+                            </label>
+                            <BookList
+                              // eslint-disable-next-line solid/reactivity
+                              onClick={(bookSlug: string) => {
+                                switchBooks(bookSlug)
+                                setMobileTabOpen("chapter")
+                              }}
+                              isActiveBook={isActiveBook}
+                              bibleMenuBooksByCategory={
+                                filteredMenuBookByCategory
+                              }
+                              isMobile={true}
+                            />
+                          </div>
+                        </Show>
+                        {/* MOBILE CHAPTERS */}
+                        <Show when={mobileTabOpen() == "chapter"}>
+                          <ChapterList
+                            isActiveBookAndChap={isActiveBookAndChap}
+                            isMobile={true}
+                            jumpToNewChapIdx={jumpToNewChapIdx}
+                            storeInterface={props.storeInterface}
+                          />
+                        </Show>
+                      </div>
                     </div>
-                  </div>
-                  <ChapterList
-                    storeInterface={props.storeInterface}
-                    isActiveBookAndChap={isActiveBookAndChap}
-                    jumpToNewChapIdx={jumpToNewChapIdx}
-                    isMobile={false}
-                  />
+                  </Dialog.Content>
                 </div>
-              </div>
-              {/* //!END table and up menu */}
-            </Show>
+              </Dialog.Portal>
+            </Dialog.Root>
+
+            {/* //!END table and up menu */}
+            {/* </Show> */}
             <div class="w-1/5 print:hidden">
               <div class=" relative w-max rounded-md ltr:ml-auto rtl:mr-auto ">
                 <button
@@ -394,7 +541,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                 </button>
                 <Show when={settingsAreOpen()}>
                   <div
-                    class={`shadow-dark-700 absolute z-20 w-72 bg-neutral-100 p-4 text-right shadow-xl ltr:right-0 rtl:left-0 md:w-96 ${
+                    class={`shadow-dark-700  z-20 w-72 bg-neutral-100 p-4 text-right shadow-xl ltr:right-0 rtl:left-0 md:w-96 ${
                       temporarilyHideMenu() && "hidden"
                     }`}
                   >
@@ -425,82 +572,6 @@ const ReaderMenu: Component<MenuProps> = (props) => {
               </div>
             </div>
           </div>
-        </div>
-        <div class="relative z-40">
-          <Show when={menuIsOpen()}>
-            <div
-              id="mobileMenu"
-              class="r-0  bottom-0 left-0 right-0 top-0   z-10 w-full overflow-y-scroll bg-white sm:hidden "
-            >
-              <ul class="flex justify-between ">
-                <li class="w-full text-center">
-                  <button
-                    class={`${
-                      mobileTabOpen() == "book"
-                        ? "w-full border-b-2 border-b-accent font-bold text-accent"
-                        : "underline"
-                    }  py-3 text-xl capitalize`}
-                    onClick={() => {
-                      setMobileTabOpen("book")
-                    }}
-                  >
-                    {t("books")}
-                  </button>
-                </li>
-                <li class="w-full text-center">
-                  <button
-                    class={`${
-                      mobileTabOpen() == "chapter"
-                        ? "w-full border-b-2 border-b-accent font-bold text-accent"
-                        : "underline"
-                    } py-3 text-xl capitalize`}
-                    onClick={() => {
-                      setMobileTabOpen("chapter")
-                    }}
-                  >
-                    {t("chapters")}
-                  </button>
-                </li>
-              </ul>
-              {/* MOBILE BOOKS */}
-              <Show when={mobileTabOpen() == "book"}>
-                <div data-name="searchInput">
-                  <label for="" class="block p-4">
-                    <input
-                      onInput={(e: InputEvent) => {
-                        const target = e.target as HTMLInputElement
-                        setSearchQuery(target.value)
-                        searchBooks()
-                      }}
-                      type="text"
-                      class="w-full rounded-full border border-neutral-300 px-4 py-2 capitalize "
-                      placeholder={t("searchBooks")}
-                      value={searchQuery()}
-                    />
-                  </label>
-                  <BookList
-                    // eslint-disable-next-line solid/reactivity
-                    onClick={(bookSlug: string) => {
-                      switchBooks(bookSlug)
-                      setMobileTabOpen("chapter")
-                    }}
-                    isActiveBook={isActiveBook}
-                    bibleMenuBooksByCategory={filteredMenuBookByCategory}
-                    isMobile={true}
-                  />
-                </div>
-              </Show>
-              {/* MOBILE CHAPTERS */}
-              <Show when={mobileTabOpen() == "chapter"}>
-                <ChapterList
-                  isActiveBookAndChap={isActiveBookAndChap}
-                  isMobile={true}
-                  jumpToNewChapIdx={jumpToNewChapIdx}
-                  storeInterface={props.storeInterface}
-                />
-              </Show>
-            </div>
-          </Show>
         </div>
       </div>
     </div>

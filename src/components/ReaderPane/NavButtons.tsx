@@ -30,11 +30,6 @@ export default function NavButtonLinks(props: navProps) {
 
   return (
     <>
-      <Show when={props.fallback}>
-        <div class="hidden h-full  w-16 flex-shrink-0 print:hidden sm:block">
-          {" "}
-        </div>
-      </Show>
       <Show when={!props.fallback}>
         <div
           class={`${

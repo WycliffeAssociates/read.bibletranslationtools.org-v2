@@ -354,24 +354,26 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
           data-js="scrollToTop"
           class=" mx-auto grid max-h-full w-full overflow-hidden bg-[--clrBackground] print:block  print:overflow-visible md:justify-center"
         >
-          <div class=" sticky top-0 z-40 w-full">
-            <ReaderMenu
-              repoIndex={props.repoData}
+          <div class="relative mx-auto  max-w-[105ch]" id="menuPortalMount">
+            <div class=" sticky top-0 z-40 w-full">
+              <ReaderMenu
+                repoIndex={props.repoData}
+                storeInterface={storeInterface}
+                setPrintWholeBook={setPrintWholeBook}
+                user={props.user}
+                repositoryName={props.repositoryName}
+                hasDownloadIndex={props.hasDownloadIndex}
+              />
+            </div>
+            <ReaderPane
               storeInterface={storeInterface}
-              setPrintWholeBook={setPrintWholeBook}
               user={props.user}
               repositoryName={props.repositoryName}
-              hasDownloadIndex={props.hasDownloadIndex}
+              firstBookKey={props.firstBookKey}
+              firstChapterToShow={props.firstChapterToShow}
+              printWholeBook={printWholeBook}
             />
           </div>
-          <ReaderPane
-            storeInterface={storeInterface}
-            user={props.user}
-            repositoryName={props.repositoryName}
-            firstBookKey={props.firstBookKey}
-            firstChapterToShow={props.firstChapterToShow}
-            printWholeBook={printWholeBook}
-          />
         </div>
       </I18nProvider>
     </Show>

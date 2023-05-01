@@ -195,7 +195,7 @@ export default function ReaderPane(props: ReaderPaneProps) {
       {/* HTML CONTENT */}
       <Show when={!props.printWholeBook()}>
         <PreviewPane />
-        <div class="mx-auto  w-full max-w-[105ch] bg-white px-4">
+        <div class="mx-auto  w-full  bg-white px-4">
           <div class="relative flex  h-full content-center  justify-center gap-2">
             <Show
               when={props.storeInterface.navLinks()?.prev}
