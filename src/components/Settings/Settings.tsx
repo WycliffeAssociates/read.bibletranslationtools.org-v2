@@ -17,6 +17,7 @@ import { DetailItem, SectionHeader } from "./index"
 import { intlDate } from "@lib/utils"
 import { OfflineSection } from "./OfflineSection"
 import { DownloadSection } from "./DownloadSection"
+import { getPortalSpot } from "@lib/utils-ui"
 
 interface settingsProps {
   settingsAreOpen: Accessor<boolean>
@@ -45,11 +46,6 @@ export default function Settings(props: settingsProps) {
       props.repoIndex.resourceType?.charAt(0).toLocaleUpperCase() +
       props.repoIndex.resourceType?.slice(1)
     )
-  }
-
-  // todo: get as prop from parent, or ui utils
-  function getPortalSpot() {
-    return document.getElementById("menuPortalMount") as HTMLDivElement
   }
 
   return (

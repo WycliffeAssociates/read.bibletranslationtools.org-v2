@@ -305,10 +305,10 @@ const ReaderMenu: Component<MenuProps> = (props) => {
       >
         <div
           use:escapeOut={() => setMenuIsOpen(false)}
-          class="mx-auto flex w-full flex-wrap items-center px-4 py-2 "
+          class="mx-auto flex w-full flex-wrap items-center bg-[--clrBackground]"
         >
-          <div class="relative mx-auto flex w-full max-w-[75ch] items-center  justify-between gap-3  text-varBase print:hidden">
-            <div class="my-2 flex w-full justify-between overflow-hidden  rounded-lg bg-white outline outline-1 outline-gray-300 hover:outline-accent">
+          <div class="relative mx-auto flex w-full max-w-[75ch] items-center  justify-between gap-3  bg-white p-2 text-varBase print:hidden sm:px-8 sm:pt-2">
+            <div class="flex w-full justify-between overflow-hidden  rounded-lg bg-white outline outline-1 outline-gray-300 hover:outline-accent">
               <button
                 class="flex w-full flex-grow items-center justify-between rounded-md ltr:pl-4 rtl:pr-4"
                 onClick={() => togglePanel()}

@@ -365,7 +365,7 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
           onScroll={notifyPreviewPaneOfScroll}
           id="readerWrapper"
           data-js="scrollToTop"
-          class=" mx-auto grid max-h-full w-full overflow-hidden bg-[--clrBackground] print:!block  print:overflow-visible md:justify-center"
+          class=" mx-auto grid max-h-full w-full overflow-hidden bg-[--clrBackground] bg-gray-100  print:!block print:overflow-visible md:justify-center"
         >
           <div class="sticky top-0 z-40 w-full">
             <ReaderMenu
