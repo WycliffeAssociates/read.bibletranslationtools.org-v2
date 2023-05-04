@@ -173,6 +173,16 @@ const initialDictModule = await import(
 const initialDict = {
   [preferredLocale]: initialDictModule.default
 }
+
+const customFont =
+  repoIndex.appMeta?.fontUrl && typeof repoIndex.appMeta?.fontUrl == "string"
+    ? repoIndex.appMeta?.fontUrl
+    : null
+const customFontFamily =
+  repoIndex.appMeta?.fontFamily &&
+  typeof repoIndex.appMeta?.fontFamily == "string"
+    ? repoIndex.appMeta?.fontFamily
+    : null
 ---
 
 <Layout
@@ -180,6 +190,8 @@ const initialDict = {
   use100vh={true}
   textDir={repoIndex.textDirection}
   repoUrl={repoIndex.repoUrl}
+  customFont={customFont}
+  customFontFamily={customFontFamily}
 >
   <CommonWrapper resourceType={repoIndex.resourceType} client:load>
     <!-- #=============== BIBLE SCHEMA  ============= -->
