@@ -1,29 +1,16 @@
-import {
-  createSignal,
-  Show,
-  batch,
-  Setter,
-  lazy,
-  Suspense,
-  createResource
-} from "solid-js"
-import { SvgSettings, SvgBook, LoadingSpinner, SvgArrow } from "@components"
+import { createSignal, Show, batch, Setter, createResource } from "solid-js"
+import { SvgSettings, SvgBook, SvgArrow } from "@components"
 import { BookList } from "./BookList"
 import { ChapterList } from "./ChapterList"
-import { clickOutside, escapeOut, debounce } from "@lib/utils-ui"
+import { clickOutside, escapeOut, debounce, getPortalSpot } from "@lib/utils-ui"
 import { Dialog } from "@kobalte/core"
 
 // https://github.com/solidjs/solid/discussions/845
 // these are hacks (name doesn't matter) to keep typescript from stripping away "unused imports", but these are used as custom solid directives below:
-
 // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 const clickout = clickOutside
 // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 const escape = escapeOut
-
-const Settings = lazy(async () => {
-  return import("../Settings/Settings")
-})
 
 import { useI18n } from "@solid-primitives/i18n"
 import type { Component } from "solid-js"
@@ -37,7 +24,7 @@ import { BibleBookCategories } from "@lib/contants"
 import { CACHENAMES } from "../../lib/contants"
 import { getRepoIndex } from "@lib/api"
 import { IconMagnifyingGlass } from "@components/Icons/Icons"
-import Settings2 from "../Settings/Settings2"
+import Settings from "../Settings/Settings"
 
 interface MenuProps {
   storeInterface: storeType
@@ -51,19 +38,13 @@ const ReaderMenu: Component<MenuProps> = (props) => {
   // ====MENU STATE
   const [t, { add, locale }] = useI18n()
   const [menuIsOpen, setMenuIsOpen] = createSignal(false)
-  const [temporarilyHideMenu, setTemporarilyHideMenu] = createSignal(false)
+  const [hasFetchedRepoIndexAfresh, setHasFetchedRepoIndexAfresh] =
+    createSignal(false)
   // eslint-disable-next-line solid/reactivity
-  const [savedInServiceWorker, { mutate, refetch }] = createResource(
+  const [savedInServiceWorker, { refetch }] = createResource(
     () => props.storeInterface.currentBookObj(),
     checkIfCurrentBookOrResIsSaved
   )
-  // type x = typeof refetch;
-  const [savingOffline, setSavingOffline] = createSignal<
-    "IDLE" | "FINISHED" | "STARTED" | "ERROR"
-  >("IDLE")
-  const [savingWholeOffline, setSavingWholeOffline] = createSignal<
-    "IDLE" | "FINISHED" | "STARTED" | "ERROR"
-  >("IDLE")
 
   // While maybe the most solid-like, creating state from new props is still an acceptable pattern in solid.
   const [mobileTabOpen, setMobileTabOpen] = createSignal(
@@ -105,7 +86,6 @@ const ReaderMenu: Component<MenuProps> = (props) => {
     // const bookMatch = await completeResourceCache.match(
     //   `${window.location.origin}/${props.user}/${props.repositoryName}/${currentBook.slug}`
     // )
-
     const wholeMatch = await completeResourceCache.match(
       `${window.location.origin}/${props.user}/${props.repositoryName}`
     )
@@ -115,12 +95,14 @@ const ReaderMenu: Component<MenuProps> = (props) => {
     let currentBookIsOutOfDate = null
     let repoIndex: repoIndexObj | null = null
     if (wholeMatch) {
-      const lastGenHeader = wholeMatch.headers?.get("X-Last-Generated")
+      const lastGenHeader =
+        wholeMatch.headers?.get("X-Last-Generated") ||
+        props.repoIndex.lastRendered
       wholeIsOutOfDate = lastGenHeader
         ? lastGenHeader < props.repoIndex.lastRendered
         : null
 
-      if (navigator.onLine) {
+      if (navigator.onLine && !hasFetchedRepoIndexAfresh()) {
         // when we have internet, see if there is a newer version of the whole or the book by getting the latest repoIndex from blob storage and checking its timestamps against the saved service worker timestamp.
         try {
           repoIndex = await getRepoIndex({
@@ -129,8 +111,9 @@ const ReaderMenu: Component<MenuProps> = (props) => {
           })
           // frepoIndex?.lastRendered higher (e.g. "2023-04-06T16:47:31.7484775Z" > "2023-04-05T20:44:06.3942103Z") than currentBook from sw response.
           wholeIsOutOfDate = repoIndex?.lastRendered
-            ? repoIndex?.lastRendered > props.repoIndex.lastRendered
+            ? repoIndex?.lastRendered > lastGenHeader
             : null
+          setHasFetchedRepoIndexAfresh(true)
         } catch (error) {
           console.error(error)
         }
@@ -246,16 +229,8 @@ const ReaderMenu: Component<MenuProps> = (props) => {
     })
   }
   function manageOpenSettings() {
-    if (savingOffline() == "STARTED" || savingWholeOffline() == "STARTED") {
-      return setTemporarilyHideMenu(!temporarilyHideMenu())
-    }
     const newState = !settingsAreOpen()
     setSettingsAreOpen(newState)
-    if (menuIsOpen() && newState == true && window.innerWidth < 640) {
-      setMenuIsOpen(false)
-    }
-    setTemporarilyHideMenu(false)
-    props.setPrintWholeBook(false)
   }
   function switchBooks(book: string) {
     props.storeInterface.mutateStore("menuBook", book)
@@ -294,18 +269,14 @@ const ReaderMenu: Component<MenuProps> = (props) => {
     }
     locale(langCode)
   }
-  function getPortalSpot() {
-    return document.getElementById("menuPortalMount") as HTMLDivElement
-  }
+
   function topAmount() {
     if (import.meta.env.SSR) {
-      console.log("HEIGHT SSR")
       return "5rem"
     } else {
-      let nav = document.querySelector("nav") as HTMLElement
+      const nav = document.querySelector("nav") as HTMLElement
       const compstyle = window.getComputedStyle(nav)
       const height = compstyle.getPropertyValue("height")
-      console.log({ height })
       return height
     }
   }
@@ -541,37 +512,8 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                 >
                   <SvgSettings classNames="" />
                 </button>
-                {/* todo: re-enable */}
-                {/* <Show when={settingsAreOpen()}> */}
-                {/* <div
-                    class={`shadow-dark-700  z-20 w-72 bg-neutral-100 p-4 text-right shadow-xl ltr:right-0 rtl:left-0 md:w-96 ${
-                      temporarilyHideMenu() && "hidden"
-                    }`}
-                  > */}
-                {/* <Suspense
-                      fallback={
-                        <LoadingSpinner classNames="w-12 mx-auto text-accent" />
-                      }
-                    >
-                      <Settings
-                        repoIndex={props.repoIndex}
-                        savedInServiceWorker={savedInServiceWorker}
-                        storeInterface={props.storeInterface}
-                        setPrintWholeBook={props.setPrintWholeBook}
-                        user={props.user}
-                        repo={props.repositoryName}
-                        hasDownloadIndex={props.hasDownloadIndex}
-                        downloadSourceUsfmArr={props.storeInterface.getStoreVal(
-                          "downloadLinks"
-                        )}
-                        savingOffline={savingOffline}
-                        setSavingOffline={setSavingOffline}
-                        savingWholeOffline={savingWholeOffline}
-                        setSavingWholeOffline={setSavingWholeOffline}
-                      />
-                    </Suspense> */}
-                <Show when={savedInServiceWorker()}>
-                  <Settings2
+                <Show when={savedInServiceWorker() && settingsAreOpen()}>
+                  <Settings
                     settingsAreOpen={settingsAreOpen}
                     setSettingsOpen={setSettingsAreOpen}
                     topAmount={topAmount}
@@ -581,6 +523,10 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                     user={props.user}
                     repo={props.repositoryName}
                     refetchSwResponses={refetch}
+                    setPrintWholeBook={props.setPrintWholeBook}
+                    downloadSourceUsfmArr={props.storeInterface.getStoreVal(
+                      "downloadLinks"
+                    )}
                   />
                 </Show>
                 {/* </div> */}

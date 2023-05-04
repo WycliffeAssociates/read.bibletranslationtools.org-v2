@@ -103,6 +103,10 @@ const FUNCTIONS_ROUTES = {
   isValidRepo: ({ user, repo }: repo) => {
     base = base || supplyBaseLocation()
     return `${base}/isValidRepo?user=${user}&repo=${repo}`
+  },
+  printPdfRoute: () => {
+    base = base || supplyBaseLocation()
+    return `${base}/getPdf`
   }
 }
 

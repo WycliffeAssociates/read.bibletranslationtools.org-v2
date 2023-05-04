@@ -45,7 +45,8 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
       resourceType: props.repoData.resourceType,
       textDirection: props.repoData.textDirection,
       repoUrl: props.repoData.repoUrl,
-      downloadLinks: props.repoData.downloadLinks
+      downloadLinks: props.repoData.downloadLinks,
+      printHtml: ""
     }
   }
   // eslint-disable-next-line solid/reactivity
@@ -175,6 +176,14 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
     const html = currentBook?.chapters.map((chap) => chap.content).join("")
     return html || undefined
   })
+  const wholeResourceHtml = createMemo(() => {
+    const html = readerStore.text
+      ?.map((book) => book.chapters.map((chap) => chap.content))
+      .flat()
+      .filter((content) => !!content)
+      .join("")
+    return html
+  })
   const HTML = createMemo(() => {
     const currentChap = currentChapObj()
 
@@ -259,7 +268,8 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
     possibleChapters,
     fetchHtml,
     getMenuBook,
-    navLinks
+    navLinks,
+    wholeResourceHtml
   }
 
   // These functions sends a custom event of wrapper scroll position so that hover panes/tooltips disappear if you start scrolling away from them
@@ -305,7 +315,9 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
       const u8Array = new Uint8Array(arrBuff)
       const decodedU8 = gunzipSync(u8Array)
       const decodedRepoIndex = JSON.parse(strFromU8(decodedU8)) as repoIndexObj
-      let completeText = decodedRepoIndex.bible
+
+      const completeText = decodedRepoIndex.bible
+
       // }
       let storeQueryParamBook = completeText?.find((storeBib) => {
         return storeBib.slug.toLowerCase() == String(book).toLowerCase()
@@ -353,29 +365,28 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
           onScroll={notifyPreviewPaneOfScroll}
           id="readerWrapper"
           data-js="scrollToTop"
-          class=" mx-auto grid max-h-full w-full overflow-hidden bg-[--clrBackground] print:block  print:overflow-visible md:justify-center"
+          class=" mx-auto grid max-h-full w-full overflow-hidden bg-[--clrBackground] print:!block  print:overflow-visible md:justify-center"
         >
-          <div class="relative mx-auto  max-w-[105ch]" id="menuPortalMount">
-            <div class=" sticky top-0 z-40 w-full">
-              <ReaderMenu
-                repoIndex={props.repoData}
-                storeInterface={storeInterface}
-                setPrintWholeBook={setPrintWholeBook}
-                user={props.user}
-                repositoryName={props.repositoryName}
-                hasDownloadIndex={props.hasDownloadIndex}
-              />
-            </div>
-            <ReaderPane
+          <div class="sticky top-0 z-40 w-full">
+            <ReaderMenu
+              repoIndex={props.repoData}
               storeInterface={storeInterface}
+              setPrintWholeBook={setPrintWholeBook}
               user={props.user}
               repositoryName={props.repositoryName}
-              firstBookKey={props.firstBookKey}
-              firstChapterToShow={props.firstChapterToShow}
-              printWholeBook={printWholeBook}
+              hasDownloadIndex={props.hasDownloadIndex}
             />
           </div>
+          <ReaderPane
+            storeInterface={storeInterface}
+            user={props.user}
+            repositoryName={props.repositoryName}
+            firstBookKey={props.firstBookKey}
+            firstChapterToShow={props.firstChapterToShow}
+            printWholeBook={printWholeBook}
+          />
         </div>
+        <div class="relative mx-auto  max-w-[105ch]" id="menuPortalMount" />
       </I18nProvider>
     </Show>
   )
@@ -438,6 +449,7 @@ export interface storeType {
       | "resourceType"
       | "textDirection"
       | "repoUrl"
+      | "printHtml"
   >(
     key: T,
     val: {
@@ -456,6 +468,7 @@ export interface storeType {
       resourceType: "bible" | "tn" | "tq" | "commentary" | "tw" | "tm"
       textDirection: string
       repoUrl: string
+      printHtml: string
       downloadLinks:
         | []
         | {
@@ -479,6 +492,7 @@ export interface storeType {
       | "textDirection"
       | "repoUrl"
       | "downloadLinks"
+      | "printHtml"
   ) => T
 
   allBibArr: () => bibleEntryObj[] | null
@@ -512,4 +526,5 @@ export interface storeType {
       }
     | undefined
   >
+  wholeResourceHtml: Accessor<string | undefined>
 }

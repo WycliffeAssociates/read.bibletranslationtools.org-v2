@@ -29,10 +29,12 @@ const language = {
   loading: "Descargando",
   loadingBehavior: "Comportamiento de descargar",
   newTestament: "Nuevo Testamento",
+  notYetSupported: "Esa combinación aún no es compatible",
   oldTestament: "El Antiguo Testamento",
   openSettings: "abre las configuraciones",
   print: "Imprimir",
   processes: "Procesos",
+  removingPercent: "Eliminando {{ percent }}%",
   resource: "Recurso",
   resources: "Recursos",
   resourceType: "Tipo de Recurso",
@@ -45,13 +47,16 @@ const language = {
   success: "Éxito",
   successSaving:
     "{{ bookname }} ya está disponible para leer sin Internet.  Marque esta página para poder consultarla más adelante.",
+  successRemoving:
+    "{{ bookname }} ha sido retirado con éxito de la disponibilidad offline.",
   spanish: "Español",
   support: "Apoyo",
   thisLanguage: "Español",
   tools: "Herramientas",
+  updateAvailable: "Actualización Disponible",
+  updateResource: "Actualizar recursos",
   translations: "Traducciones",
   wholeAlreadySaved: "Este recurso ya está guardado sin conexión.",
-  wholeSavedAndOutOfDate:
-    "Hay una actualización disponible para este recurso guardado"
+  wholeSavedAndOutOfDate: "Existe una nueva versión de este recurso"
 }
 export default language

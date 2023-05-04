@@ -1,7 +1,10 @@
 import { onCleanup, Setter } from "solid-js"
 import { CACHENAMES } from "@lib/contants"
 import { gunzipSync, gzipSync, strFromU8, strToU8 } from "fflate"
-import type { repoIndexObj } from "@customTypes/types"
+import type { bibleEntryObj, repoIndexObj } from "@customTypes/types"
+import type { LimitFunction } from "p-limit"
+import { FUNCTIONS_ROUTES } from "@lib/routes"
+import { checkForOrDownloadWholeRepo } from "@lib/api"
 
 /* @===============  UI UTILS   =============   */
 
@@ -102,24 +105,29 @@ export async function deleteAllResourceFromSw({
   user,
   repo,
   repoIndex,
-  bookSlug
+  promiseLimit
 }: {
   user: string
   repo: string
   repoIndex: repoIndexObj
   bookSlug: string
+  promiseLimit: LimitFunction
 }) {
-  debugger
+  const promises: Promise<unknown>[] = []
+
   const rowWholeResourcesCache = await caches.open(CACHENAMES.complete)
   const pagesCaches = await caches.open(CACHENAMES.lrPagesCache)
   const apiCache = await caches.open(CACHENAMES.lrApi)
 
-  const didDeleteRowWhole = await rowWholeResourcesCache.delete(
-    `${window.location.origin}/${user}/${repo}`
+  promises.push(
+    promiseLimit(() =>
+      rowWholeResourcesCache.delete(`${window.location.origin}/${user}/${repo}`)
+    )
   )
-
-  const didDeletePagesWhole = await pagesCaches.delete(
-    `${window.location.origin}/${user}/${repo}/complete`
+  promises.push(
+    promiseLimit(() =>
+      pagesCaches.delete(`${window.location.origin}/${user}/${repo}/complete`)
+    )
   )
 
   const allDeleteableApiRoutes =
@@ -131,46 +139,61 @@ export async function deleteAllResourceFromSw({
       })
       .flat() || []
 
-  for await (const route of allDeleteableApiRoutes) {
-    const didDeleteRoute = await apiCache.delete(route)
-    console.log({ didDeleteRoute })
+  for (const route of allDeleteableApiRoutes) {
+    promises.push(
+      promiseLimit(() => {
+        return apiCache.delete(route)
+      })
+    )
   }
-  return true
+  return promises
 }
 export async function deleteSingleBookFromSw({
   bookSlug,
   user,
   repo,
-  bookChapters
-}: IdeleteSingleBookFromSw) {
+  bookChapters,
+  promiseLimit
+}: IdeleteSingleBookFromSw & {
+  promiseLimit: LimitFunction
+}) {
+  const promises: Promise<unknown>[] = []
+
   const rowWholeResourcesCache = await caches.open(CACHENAMES.complete)
   const apiCache = await caches.open(CACHENAMES.lrApi)
   const wholeResource = await rowWholeResourcesCache.match(
     `${window.location.origin}/${user}/${repo}`
   )
-  if (!wholeResource) return false
+  if (!wholeResource) return undefined
   const arrBuff = await wholeResource.arrayBuffer()
   const u8Array = new Uint8Array(arrBuff)
   const decodedU8 = gunzipSync(u8Array)
   const decodedRepoIndex = JSON.parse(strFromU8(decodedU8)) as repoIndexObj
   decodedRepoIndex.bible
-  let specificedBook = decodedRepoIndex.bible?.find((storeBib) => {
+  const specificedBook = decodedRepoIndex.bible?.find((storeBib) => {
     return storeBib.slug.toLowerCase() == String(bookSlug).toLowerCase()
   })
-  if (!specificedBook) return
-  const thatBookDeleted = specificedBook.chapters.forEach((chap) => {
+  if (!specificedBook) return undefined
+  specificedBook.chapters.forEach((chap) => {
     chap.content = ""
   })
-  await writeRepoIndexToSw(decodedRepoIndex, user, repo)
+  const addlPromise = await writeRepoIndexToSw(decodedRepoIndex, user, repo)
+  promises.push(promiseLimit(addlPromise))
 
   for await (const chap of bookChapters) {
-    const url = `/api/getHtmlForChap?user=${user}&repo=${repo}&book=${bookSlug}&chapter=${chap}`
-    const match = await apiCache.match(url)
-    if (match) {
-      await apiCache.delete(url)
-    }
+    // const url = `/api/getHtmlForChap?user=${user}&repo=${repo}&book=${bookSlug}&chapter=${chap}`
+    // const match = await apiCache.match(url)
+    // if (match) {
+    promises.push(
+      promiseLimit(() => {
+        return apiCache.delete(
+          `/api/getHtmlForChap?user=${user}&repo=${repo}&book=${bookSlug}&chapter=${chap}`
+        )
+      })
+    )
+    // }
   }
-  return true
+  return promises
 }
 
 export async function writeRepoIndexToSw(
@@ -204,21 +227,22 @@ export async function writeRepoIndexToSw(
     booksWithAllContent.length === repoIndex.bible?.length
 
   const wholeResUrl = new URL(`${window.location.origin}/${user}/${repo}`)
-
-  await rowWholeResourcesCache.put(
-    wholeResUrl,
-    new Response(gzippedPayload, {
-      status: 200,
-      statusText: "OK",
-      headers: {
-        "Content-Type": "text/html",
-        "X-Last-Generated": repoIndex.lastRendered,
-        "X-Is-Complete": allContentIsPopulated ? "1" : "0",
-        "X-Complete-Books": JSON.stringify(booksWithAllContent),
-        "Content-Length": String(bookWithAllContentSize)
-      }
-    })
-  )
+  const returnedPromise = () =>
+    rowWholeResourcesCache.put(
+      wholeResUrl,
+      new Response(gzippedPayload, {
+        status: 200,
+        statusText: "OK",
+        headers: {
+          "Content-Type": "text/html",
+          "X-Last-Generated": repoIndex.lastRendered,
+          "X-Is-Complete": allContentIsPopulated ? "1" : "0",
+          "X-Complete-Books": JSON.stringify(booksWithAllContent),
+          "Content-Length": String(bookWithAllContentSize)
+        }
+      })
+    )
+  return returnedPromise
 }
 
 export async function extractRepoIndexFromSavedWhole(
@@ -233,4 +257,112 @@ export async function extractRepoIndexFromSavedWhole(
   const decodedU8 = gunzipSync(u8Array)
   const originalRepoIndex = JSON.parse(strFromU8(decodedU8)) as repoIndexObj
   return originalRepoIndex
+}
+interface IgetWholeBook {
+  user: string
+  repo: string
+  savedResponse: Response | undefined | null
+  bookSlug: string
+  storeBook: bibleEntryObj | undefined
+}
+export async function getWholeBook({
+  user,
+  repo,
+  savedResponse,
+  bookSlug,
+  storeBook
+}: IgetWholeBook) {
+  async function fetchTheBook(bookSlug: string) {
+    try {
+      const wholeBookUrl = FUNCTIONS_ROUTES.getWholeBookJson({
+        user: user,
+        repo: repo,
+        book: bookSlug
+      })
+      const wholeBookRes = await fetch(wholeBookUrl)
+      const data: bibleEntryObj = await wholeBookRes.json()
+      return data
+    } catch (error) {
+      console.error(error)
+    }
+  }
+  try {
+    // Check Memory
+    if (storeBook) {
+      const chapsArr = storeBook.chapters
+        .filter((chap) => !!chap.content)
+        .map((chap) => chap.content)
+      const isComplete = storeBook.chapters.length == chapsArr.length
+      if (isComplete) {
+        return storeBook
+      }
+    }
+    // Check SW
+    let originalRepoIndex
+    if (savedResponse) {
+      originalRepoIndex = await extractRepoIndexFromSavedWhole(savedResponse)
+    }
+    if (originalRepoIndex) {
+      const matchingBook = originalRepoIndex?.bible?.find(
+        (book) => book.slug == bookSlug
+      )
+      const matchingBookIsPopulated =
+        matchingBook && matchingBook.chapters.every((chap) => !!chap.content)
+      if (matchingBookIsPopulated) {
+        return matchingBook
+      } else {
+        if (!bookSlug) return
+        const data = await fetchTheBook(bookSlug)
+        return data
+      }
+    } else {
+      if (!bookSlug) return
+      const data = await fetchTheBook(bookSlug)
+      return data
+    }
+  } catch (error) {
+    console.error(error)
+  }
+}
+interface IgetWholeResource {
+  user: string
+  repo: string
+  bibArr: bibleEntryObj[]
+}
+export async function getWholeResource({
+  user,
+  repo,
+  bibArr
+}: IgetWholeResource) {
+  try {
+    // Check Memory
+    if (bibArr) {
+      const isComplete = bibArr.every((book) =>
+        book.chapters.every((chap) => !!chap.content)
+      )
+      if (isComplete) {
+        return bibArr
+      } else {
+        // Fetch it;
+        const downloadIndex = await checkForOrDownloadWholeRepo({
+          user: user,
+          repo: repo,
+          method: "GET"
+        })
+        if (
+          !downloadIndex ||
+          typeof downloadIndex != "object" ||
+          !downloadIndex.content.length
+        ) {
+          return
+        }
+        return downloadIndex.content
+      }
+    }
+  } catch (error) {
+    console.error(error)
+  }
+}
+export function getPortalSpot() {
+  return document.getElementById("menuPortalMount") as HTMLDivElement
 }

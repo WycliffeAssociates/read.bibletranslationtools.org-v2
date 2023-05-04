@@ -29,10 +29,12 @@ const language = {
   loadingBehavior: "Loading behavior",
   menu: "Menu",
   newTestament: "New Testament",
+  notYetSupported: "That combination is not yet supported",
   oldTestament: "Old Testament",
   openSettings: "open settings",
   print: "Print",
   processes: "Processes",
+  removingPercent: "Removing {{ percent }}%",
   resource: "Resource",
   resources: "Resources",
   resourceType: "Resource Type",
@@ -45,12 +47,16 @@ const language = {
   success: "Success",
   successSaving:
     "{{ bookname }} is now available to read without internet.  Bookmark this page so you can easily reference it later.",
+  successRemoving:
+    "{{ bookname }} has been successfully removed from offline availability.",
   spanish: "Spanish",
   support: "Support",
   thisLanguage: "English",
   tools: "tools",
+  updateAvailable: "Update Available",
+  updateResource: "Update Resource",
   translations: "translations",
   wholeAlreadySaved: "This resource is already saved offline",
-  wholeSavedAndOutOfDate: "There is an update available for this saved resource"
+  wholeSavedAndOutOfDate: "A new version of this resource is available."
 }
 export default language

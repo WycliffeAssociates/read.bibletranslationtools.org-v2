@@ -1,6 +1,3 @@
-import { IconX, IconCheck } from "@components/Icons/Icons"
-import { ToggleButton } from "@kobalte/core"
-import type { JSX } from "solid-js"
 import { Dynamic } from "solid-js/web"
 
 interface ISectionHeader {
@@ -10,9 +7,11 @@ interface ISectionHeader {
 }
 export default function SectionHeader(props: ISectionHeader) {
   const defaultClass = "mb-1 text-lg font-bold"
-  const className = `${defaultClass} ${props.className || ""}`
   return (
-    <Dynamic class={className} component={props.component}>
+    <Dynamic
+      class={`${defaultClass} ${props.className || ""}`}
+      component={props.component}
+    >
       {props.text}
     </Dynamic>
   )

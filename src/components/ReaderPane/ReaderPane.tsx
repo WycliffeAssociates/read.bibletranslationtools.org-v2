@@ -131,7 +131,7 @@ export default function ReaderPane(props: ReaderPaneProps) {
     event && event.preventDefault()
     const currentBook = props.storeInterface.getStoreVal<string>("currentBook")
 
-    if (chapNum && chapNum <= 0 && !dir) return
+    if (chapNum && Number(chapNum) <= 0 && !dir) return
     let nextCh: number | string | undefined
     // Decide next chapter, whether given or sequential;
     if (chapNum) {
@@ -257,8 +257,9 @@ export default function ReaderPane(props: ReaderPaneProps) {
       <Show when={props.printWholeBook()}>
         <div
           id="wholeBook"
-          innerHTML={props.storeInterface.wholeBookHtml()}
-          class=" theText mx-auto  max-w-[75ch]  !overflow-y-visible bg-inherit bg-white text-lg leading-relaxed print:pb-4 sm:px-8 md:max-w-[75ch] "
+          innerHTML={props.storeInterface.getStoreVal("printHtml")}
+          class=" theText mx-auto  h-max  max-w-[75ch] !overflow-y-visible bg-inherit bg-white text-lg leading-relaxed text-[--color-text] text-black print:pb-4  
+        "
         />
       </Show>
     </>

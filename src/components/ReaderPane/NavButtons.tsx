@@ -16,8 +16,8 @@ interface navProps {
 
 const mobileGradient =
   "z-10 bg-gradient-to-b from-[rgba(0,0,0,0)] to-[rgba(255,255,255,.8)]"
-const backwardClassNamesDiv = `${mobileGradient} w-full p-4  bottom-0 ltr:left-[max(0vw,_((100vw-105ch)/2))] rtl:right-0  print:hidden   fixed `
-const forwardClassNamesDiv = `${mobileGradient} p-4  ltr:right-[max(0vw,_((100vw-105ch)/2))] rtl:left-0 bottom-0  print:hidden    fixed`
+const backwardClassNamesDiv = `${mobileGradient} w-full p-4  bottom-0 ltr:left-[max(0vw,_((100vw-85ch)/2))] rtl:right-0  print:hidden   fixed `
+const forwardClassNamesDiv = `${mobileGradient} p-4  ltr:right-[max(0vw,_((100vw-85ch)/2))] rtl:left-0 bottom-0  print:hidden    fixed`
 
 const backwardClassA =
   "rounded-xl bg-neutral-50 border-zinc-300 h-14 shadow-[0_1px_3px_rgba(0,21,51,.12),_0px_1px_2px_rgba(0,21,51,.24)] text-center grid shadow-dark-800 w-14 place-content-center  hover:text-accent focus:text-accent  cursor-pointer  "

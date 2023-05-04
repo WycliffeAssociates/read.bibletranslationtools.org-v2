@@ -9,11 +9,11 @@ import type {
 } from "@customTypes/types"
 import { checkForOrDownloadWholeRepo } from "@lib/api"
 import { CACHENAMES } from "@lib/contants"
-import { FUNCTIONS_ROUTES } from "@lib/routes"
 import {
   deleteAllResourceFromSw,
   deleteSingleBookFromSw,
-  extractRepoIndexFromSavedWhole
+  extractRepoIndexFromSavedWhole,
+  getWholeBook
 } from "@lib/utils-ui"
 import { gzipSync, strToU8 } from "fflate"
 import pLimit, { LimitFunction } from "p-limit"
@@ -21,7 +21,8 @@ import { Resource, Show, createSignal } from "solid-js"
 import Toggle from "./Toggle"
 import SectionHeader from "./SectionHeader"
 import { useI18n } from "@solid-primitives/i18n"
-import { Progress } from "@kobalte/core"
+import { Button, Progress } from "@kobalte/core"
+import { IconX, SvgDownload } from "@components/Icons/Icons"
 
 interface IOfflineSection {
   savedInServiceWorker: Resource<ISavedInServiceWorkerStatus>
@@ -42,8 +43,62 @@ export function OfflineSection(props: IOfflineSection) {
   const [saveProgress, setSaveProgress] = createSignal({
     isSaving: false,
     amountStr: "0",
-    amountNum: 0
+    amountNum: 0,
+    isFinished: false,
+    didAddResources: false
   })
+  const [successText, setSuccessText] = createSignal("")
+
+  function handleProgress(
+    limit: LimitFunction,
+    promises: Promise<unknown>[],
+    scope: "WHOLE" | "BOOK",
+    didAddResources: boolean
+  ) {
+    let start: DOMHighResTimeStamp
+
+    function doRafProgress(timestamp: DOMHighResTimeStamp) {
+      if (start === undefined) {
+        start = timestamp
+      }
+      const elapsed = timestamp - start
+
+      const allPromiseLength = promises.length
+      const formatter = new Intl.NumberFormat(navigator.language)
+
+      const numPercent = Math.ceil(
+        ((allPromiseLength - limit.pendingCount) / allPromiseLength) * 100
+      )
+      const stringPercent = formatter.format(numPercent)
+      // technically we are saving here, but we want to set the isSaving bool a touch later.  Small projects on good internet save instanteously, so it's a little weird to show the bar.
+      setSaveProgress({
+        isSaving: elapsed > 200 ? true : false,
+        amountStr: stringPercent,
+        amountNum: numPercent,
+        isFinished: false,
+        didAddResources
+      })
+      if (numPercent < Number(formatter.format(100))) {
+        window.requestAnimationFrame(doRafProgress)
+      } else {
+        setTimeout(() => {
+          setSaveProgress({
+            isSaving: false,
+            amountStr: "0",
+            amountNum: 0,
+            isFinished: true,
+            didAddResources
+          })
+        }, 2000)
+      }
+    }
+    const label = props.storeInterface.currentBookObj()?.label || ""
+    scope === "BOOK"
+      ? setSuccessText(label)
+      : setSuccessText(`${props.user}/${props.repo}`)
+    window.requestAnimationFrame(doRafProgress)
+  }
+
   async function toggleSingleBook(isToggledOn: boolean) {
     const currentBook = props.storeInterface.currentBookObj()
     const currentChapter = props.storeInterface.getStoreVal(
@@ -51,38 +106,42 @@ export function OfflineSection(props: IOfflineSection) {
     ) as string
     const bookSlug = currentBook?.slug || ""
     const bookChapters = currentBook?.chapters.map((chap) => chap.label) || []
+    let promises: Promise<unknown>[] | undefined
+    const limit = pLimit(20)
     if (isToggledOn) {
-      await saveSingleBookToSwCache({
+      promises = await saveSingleBookToSwCache({
         currentBook,
         user: props.user,
         repo: props.repo,
         savedInServiceWorker: props.savedInServiceWorker,
         repoIndex: props.repoIndex,
         currentChapter,
-        mutateStoreText: props.storeInterface.mutateStoreText
+        mutateStoreText: props.storeInterface.mutateStoreText,
+        promiseLimit: limit
       })
     } else {
-      await deleteSingleBookFromSw({
+      promises = await deleteSingleBookFromSw({
         bookSlug: bookSlug,
         bookChapters,
         repo: props.repo,
-        user: props.user
+        user: props.user,
+        promiseLimit: limit
       })
     }
-
+    if (promises) {
+      await Promise.allSettled(promises)
+    }
     props.refetchSwResponses()
   }
   async function toggleWholeResource(isToggledOn: boolean) {
-    debugger
     const currentBook = props.storeInterface.currentBookObj()
     const currentChapter = props.storeInterface.getStoreVal(
       "currentChapter"
     ) as string
     const bookSlug = currentBook?.slug || ""
     let promises: Promise<unknown>[] | undefined
+    const limit = pLimit(20)
     if (isToggledOn) {
-      const limit = pLimit(20)
-
       promises = await saveEntireResourceOffline({
         currentBook,
         user: props.user,
@@ -93,36 +152,20 @@ export function OfflineSection(props: IOfflineSection) {
         mutateStoreText: props.storeInterface.mutateStore,
         promiseLimit: limit
       })
-      if (promises) {
-        debugger
-        const allPromiseLength = promises.length
-        const formatter = new Intl.NumberFormat(navigator.language)
-        function stepLimit() {
-          const numPercent = Math.ceil(
-            ((allPromiseLength - limit.pendingCount) / allPromiseLength) * 100
-          )
-          const stringPercent = formatter.format(numPercent)
-          setSaveProgress({
-            isSaving: true,
-            amountStr: stringPercent,
-            amountNum: numPercent
-          })
-          if (numPercent < Number(formatter.format(100))) {
-            window.requestAnimationFrame(stepLimit)
-          }
-        }
-        window.requestAnimationFrame(stepLimit)
-        await Promise.allSettled(promises)
-      }
     } else {
-      await deleteAllResourceFromSw({
+      promises = await deleteAllResourceFromSw({
         bookSlug: bookSlug,
         repo: props.repo,
         user: props.user,
-        repoIndex: props.repoIndex
+        repoIndex: props.repoIndex,
+        promiseLimit: limit
       })
     }
-    debugger
+    if (promises) {
+      handleProgress(limit, promises, "WHOLE", isToggledOn)
+      await Promise.allSettled(promises)
+    }
+
     props.refetchSwResponses()
   }
   return (
@@ -143,18 +186,18 @@ export function OfflineSection(props: IOfflineSection) {
           pressed={!!props.savedInServiceWorker()?.currentBooksIsDownloaded}
         />
       </div>
-      <Show when={props.repoIndex.bible && props.repoIndex.bible?.length > 1}>
-        <div class="flex items-center justify-between">
-          <div class="w-4/5">
-            <p class="text-slate-500">
-              {t("saveWhole", {}, "Save whole resource for reading offline")}
-            </p>
-          </div>
-          <Toggle
-            onChangeFxn={toggleWholeResource}
-            pressed={!!props.savedInServiceWorker()?.wholeIsComplete}
-          />
+      <div class="flex items-center justify-between">
+        <div class="w-4/5">
+          <p class="text-slate-500">
+            {t("saveWhole", {}, "Save whole resource for reading offline")}
+          </p>
         </div>
+        <Toggle
+          onChangeFxn={toggleWholeResource}
+          pressed={!!props.savedInServiceWorker()?.wholeIsComplete}
+        />
+      </div>
+      <Show when={saveProgress().isSaving}>
         <Progress.Root
           value={saveProgress().amountNum}
           class="flex w-full flex-col gap-2 "
@@ -165,7 +208,12 @@ export function OfflineSection(props: IOfflineSection) {
             data-title="progress__label-container"
           >
             <Progress.Label class="" data-title="progress__label">
-              {t("savingPercent", { percent: saveProgress().amountStr })}
+              {t(
+                saveProgress().didAddResources
+                  ? "savingPercent"
+                  : "removingPercent",
+                { percent: saveProgress().amountStr }
+              )}
             </Progress.Label>
           </div>
           <Progress.Track
@@ -178,6 +226,72 @@ export function OfflineSection(props: IOfflineSection) {
             />
           </Progress.Track>
         </Progress.Root>
+      </Show>
+      <Show when={saveProgress().isFinished}>
+        <div
+          data-title="successMessage"
+          class="mt-5 flex items-center justify-between bg-accent/10 px-4 py-3"
+        >
+          <div class="w-10/12">
+            <p class="font-bold text-accent">
+              {t("success", {}, "Loading...")}
+            </p>
+
+            <p class="">
+              {t(
+                saveProgress().didAddResources
+                  ? "successSaving"
+                  : "successRemoving",
+                {
+                  bookname: successText()
+                },
+                "{{ bookname }} is now available to read without internet.  Bookmark this page so you can easily reference it later."
+              )}
+            </p>
+          </div>
+          <Button.Root
+            class="w-6"
+            onClick={() => {
+              setSaveProgress({
+                isSaving: false,
+                amountStr: "0",
+                amountNum: 0,
+                isFinished: false,
+                didAddResources: false
+              })
+            }}
+          >
+            <IconX />
+          </Button.Root>
+        </div>
+      </Show>
+      <Show when={props.savedInServiceWorker()?.wholeIsOutOfDate}>
+        <div data-title="successMessage" class="mt-5 bg-accent/10 px-4 py-3">
+          <div class="w-10/12">
+            <p class="font-bold text-accent">
+              {t("updateAvailable", {}, "Update Available")}
+            </p>
+
+            <p class="">
+              {t(
+                "wholeSavedAndOutOfDate",
+                {},
+                "A new version of this resource is available."
+              )}
+            </p>
+          </div>
+          <Button.Root
+            class="mt-3 flex w-auto items-center gap-3 rounded-lg border-gray-200 bg-white px-4 py-3"
+            onClick={() => {
+              toggleWholeResource(true)
+            }}
+          >
+            <span>{t("updateResource", {}, "Update Resource")}</span>
+            <span>
+              <SvgDownload />
+            </span>
+          </Button.Root>
+        </div>
       </Show>
     </div>
   )
@@ -193,6 +307,7 @@ interface ISaveOfflineCommon {
 }
 interface IsaveSingleBookToSwCache extends ISaveOfflineCommon {
   mutateStoreText({ book, chapter, val }: updateStoreTextParams): void
+  promiseLimit: LimitFunction
 }
 async function saveSingleBookToSwCache({
   currentBook,
@@ -201,31 +316,31 @@ async function saveSingleBookToSwCache({
   user,
   repo,
   repoIndex,
-  mutateStoreText
+  mutateStoreText,
+  promiseLimit
 }: IsaveSingleBookToSwCache) {
   const bookSlug = currentBook && currentBook.slug
+  const promises: Array<Promise<unknown>> = []
+
   if (!bookSlug) return
   try {
     const data = await getWholeBook({
       user,
       repo,
       bookSlug,
-      savedResponse: savedInServiceWorker()?.wholeResponse
+      savedResponse: savedInServiceWorker()?.wholeResponse,
+      storeBook: currentBook
     })
     if (!data)
       throw new Error("There was a problem saving this resource offline")
-
-    // todo: reInit the saving offline stuff
-    // props.setSavingOffline("STARTED")
 
     // IF SOMEONE HAS PREVIOUSLY SAVED THE WHOLE RESOURCE, WE want to update just that book in the whole offline ready response. IF not, we want to create a origin/pathname/complete resource (even if it is just one book, such as a btt writer project), which can be added to incrementally if desired.
     // open caches once and operate in loop.
     // ROW WHOLE RESOURCE IS FOR JSON
     const rowWholeResourcesCache = await caches.open(CACHENAMES.complete)
-    const lrApiCache = await caches.open(CACHENAMES.lrApi)
     // LRPAGES IS FOR HTML ONLY
+    const lrApiCache = await caches.open(CACHENAMES.lrApi)
     const lrPagesCache = await caches.open(CACHENAMES.lrPagesCache)
-    //
     const wholeResourceMatch = savedInServiceWorker()?.wholeResponse?.clone()
     let indexToPostWith
     if (wholeResourceMatch) {
@@ -273,23 +388,26 @@ async function saveSingleBookToSwCache({
       booksWithAllContent.length === indexToPostWith.bible?.length
     const wholeResUrl = new URL(`${window.location.origin}/${user}/${repo}`)
 
-    // todo: I actually want to just send a minimum to avoid cf timeouts / keep source of truth for downloaded data solely in the browser cache
     const ssrPostPayload = JSON.stringify(indexToPostWith)
     // compress to minimize transfer to try to avoid CF timeouts
     const gzippedPayload = gzipSync(strToU8(ssrPostPayload))
 
-    await rowWholeResourcesCache.put(
-      wholeResUrl,
-      new Response(gzippedPayload, {
-        status: 200,
-        statusText: "OK",
-        headers: {
-          "Content-Type": "text/html",
-          "X-Last-Generated": repoIndex.lastRendered,
-          "X-Is-Complete": allContentIsPopulated ? "1" : "0",
-          "X-Complete-Books": JSON.stringify(booksWithAllContent),
-          "Content-Length": String(bookWithAllContentSize)
-        }
+    promises.push(
+      promiseLimit(() => {
+        return rowWholeResourcesCache.put(
+          wholeResUrl,
+          new Response(gzippedPayload, {
+            status: 200,
+            statusText: "OK",
+            headers: {
+              "Content-Type": "text/html",
+              "X-Last-Generated": new Date().toISOString(),
+              "X-Is-Complete": allContentIsPopulated ? "1" : "0",
+              "X-Complete-Books": JSON.stringify(booksWithAllContent),
+              "Content-Length": String(bookWithAllContentSize)
+            }
+          })
+        )
       })
     )
 
@@ -310,16 +428,20 @@ async function saveSingleBookToSwCache({
     })
     // will overwrite any existing /complete, but should be fine since it augments existing downloaded books or downloaded whole
     if (htmlSsrUrlRes.ok) {
-      await lrPagesCache.put(
-        `${window.location.origin}/${user}/${repo}/complete`,
-        new Response(htmlSsrUrlRes.body, {
-          status: 200,
-          statusText: "OK",
-          headers: {
-            "Content-Type": "text/html",
-            "X-Last-Generated": repoIndex.lastRendered,
-            "Content-Length": String(bookWithAllContentSize)
-          }
+      promises.push(
+        promiseLimit(() => {
+          lrPagesCache.put(
+            `${window.location.origin}/${user}/${repo}/complete`,
+            new Response(htmlSsrUrlRes.body, {
+              status: 200,
+              statusText: "OK",
+              headers: {
+                "Content-Type": "text/html",
+                "X-Last-Generated": repoIndex.lastRendered,
+                "Content-Length": String(bookWithAllContentSize)
+              }
+            })
+          )
         })
       )
     }
@@ -344,69 +466,13 @@ async function saveSingleBookToSwCache({
         repo,
         user
       })
-      lrApiCache.put(apiReq, apiRes)
-    })
-    // props.setSavingOffline("FINISHED")
-  } catch (error) {
-    console.error(error)
-    // props.setSavingOffline("ERROR")
-  } finally {
-    // setTimeout(() => {
-    //   props.setSavingOffline("IDLE")
-    // }, 6000)
-  }
-}
-
-interface IgetWholeBook {
-  user: string
-  repo: string
-  savedResponse: Response | undefined | null
-  bookSlug: string
-}
-async function getWholeBook({
-  user,
-  repo,
-  savedResponse,
-  bookSlug
-}: IgetWholeBook) {
-  if (!savedResponse) return
-  async function fetchTheBook(bookSlug: string) {
-    try {
-      if (!bookSlug) return
-      const wholeBookUrl = FUNCTIONS_ROUTES.getWholeBookJson({
-        user: user,
-        repo: repo,
-        book: bookSlug
-      })
-      const wholeBookRes = await fetch(wholeBookUrl)
-      const data: bibleEntryObj = await wholeBookRes.json()
-      return data
-    } catch (error) {
-      console.error(error)
-    }
-  }
-  try {
-    const originalRepoIndex = await extractRepoIndexFromSavedWhole(
-      savedResponse
-    )
-    if (originalRepoIndex) {
-      const matchingBook = originalRepoIndex?.bible?.find(
-        (book) => book.slug == bookSlug
+      promises.push(
+        promiseLimit(() => {
+          return lrApiCache.put(apiReq, apiRes)
+        })
       )
-      const matchingBookIsPopulated =
-        matchingBook && matchingBook.chapters.every((chap) => !!chap.content)
-      if (matchingBookIsPopulated) {
-        return matchingBook
-      } else {
-        if (!bookSlug) return
-        const data = await fetchTheBook(bookSlug)
-        return data
-      }
-    } else {
-      if (!bookSlug) return
-      const data = await fetchTheBook(bookSlug)
-      return data
-    }
+    })
+    return promises
   } catch (error) {
     console.error(error)
   }
@@ -471,9 +537,7 @@ async function saveEntireResourceOffline({
   mutateStoreText,
   promiseLimit
 }: ISaveEntireResourceOffline) {
-  // todo: renable this setter of progress
-  // props.setSavingWholeOffline("STARTED")
-
+  const promises: Array<Promise<unknown>> = []
   try {
     const downloadIndex = await checkForOrDownloadWholeRepo({
       user: user,
@@ -497,7 +561,6 @@ async function saveEntireResourceOffline({
 
     // compress to minimize transfer to try to avoid CF timeouts
     const gzippedPayload = gzipSync(strToU8(ssrPostPayload))
-    // eslint-disable-next-line solid/reactivity
     const rowWholeResourcesCache = await caches.open(CACHENAMES.complete)
     const lrApiCache = await caches.open(CACHENAMES.lrApi)
     const lrPagesCache = await caches.open(CACHENAMES.lrPagesCache)
@@ -510,30 +573,37 @@ async function saveEntireResourceOffline({
         lastRendered: book.lastRendered
       }
     })
-    await rowWholeResourcesCache.put(
-      swUrl,
-      new Response(gzippedPayload, {
-        status: 200,
-        statusText: "OK",
-        headers: {
-          "Content-Type": "text/html",
-          "Content-Length": String(repoIndex.wholeResourceByteCount),
-          "X-Last-Generated": repoIndex.lastRendered,
-          "X-Is-Complete": "1",
-          "X-Complete-Books": JSON.stringify(allBookSlugAndRendered)
-        }
-      })
+
+    promises.push(
+      promiseLimit(() =>
+        rowWholeResourcesCache.put(
+          swUrl,
+          new Response(gzippedPayload, {
+            status: 200,
+            statusText: "OK",
+            headers: {
+              "Content-Type": "text/html",
+              "Content-Length": String(repoIndex.wholeResourceByteCount),
+              "X-Last-Generated": new Date().toISOString(),
+              "X-Is-Complete": "1",
+              "X-Complete-Books": JSON.stringify(allBookSlugAndRendered)
+            }
+          })
+        )
+      )
     )
+
     // GET A SSR'D REQ/RESPONSE THAT WILL SERVE FOR ALL HTML PAGES OF THIS RESOURCE
+    const slug = currentBook?.slug ?? ""
     const htmlSsrUrl = getHtmlSsrUrl({
-      bookSlug: currentBook?.slug!,
+      bookSlug: slug,
       chapter: currentChapter,
       repo,
       user
     })
 
     const smallIndex = JSON.stringify(repoIndex)
-    // compress to minimize transfer to try to avoid CF timeouts. Also, we want the cache itself, not the response to be the source of truth for what's offline.  We can modify an object in the cache, but can't modify the response
+    // we are using the small index bc in prod I hit the CF limit for execution time several times with big resources (e.g. compressing 20mb json payload).  Since we already are saving the html as a json structure in the cache, we will just load in when the app mounts from the browser.  The other reason is that we incrementally delete / update the object in the cache, but not a returned response.
     const smallPayload = gzipSync(strToU8(smallIndex))
 
     const smallerHtmlSsrUrlRes = await fetch(htmlSsrUrl, {
@@ -546,23 +616,26 @@ async function saveEntireResourceOffline({
     })
     const blob = await smallerHtmlSsrUrlRes.blob()
     const size = blob.size
-    await lrPagesCache.put(
-      `${window.location.origin}/${user}/${repo}/complete`,
-      new Response(blob, {
-        status: 200,
-        statusText: "OK",
-        headers: {
-          "Content-Type": "text/html",
-          "X-Last-Generated": repoIndex.lastRendered,
-          "Content-Length": String(size)
-        }
-      })
+
+    promises.push(
+      promiseLimit(() =>
+        lrPagesCache.put(
+          `${window.location.origin}/${user}/${repo}/complete`,
+          new Response(blob, {
+            status: 200,
+            statusText: "OK",
+            headers: {
+              "Content-Type": "text/html",
+              "X-Last-Generated": repoIndex.lastRendered,
+              "Content-Length": String(size)
+            }
+          })
+        )
+      )
     )
 
-    // We will save each html page below, but we are saving one SSR reponse under a URL that the user shouldn't naturally arrive at (e.g. /complete). When processing a document request, it will check to see if there is a match for /origin/user/repo/complete, and serve this (offline ready) response here.
+    // We will save each html page below, but we are saving one SSR reponse under a URL that the user shouldn't naturally arrive at (e.g. /complete). When processing a document request in the SW, it will check to see if there is a match for /origin/user/repo/complete, and serve this (offline ready) response here.
 
-    const promises: Array<Promise<unknown>> = []
-    // on large enough resources, occasionally ran into memory error when saving 1000+ calls, so this is to throttle the writing to sw a bit to avoid memory overflows.
     downloadIndex.content.forEach((book) => {
       // eslint-disable-next-line solid/reactivity
       book.chapters.forEach(async (chapter) => {
@@ -571,47 +644,23 @@ async function saveEntireResourceOffline({
         if (!content) return
 
         const { apiReq, apiRes } = getApiUrlAndResponse({
-          bookSlug: currentBook?.slug!,
-          chapter: currentChapter,
+          bookSlug: book.slug,
+          chapter: chapter.label,
           content,
           lastRendered: repoIndex.lastRendered,
           repo,
           user
         })
-        promises.push(promiseLimit(() => lrApiCache.put(apiReq, apiRes)))
+        promises.push(
+          promiseLimit(() => {
+            return lrApiCache.put(apiReq, apiRes)
+          })
+        )
       })
     })
 
-    /* todo ===============  connect to progress bar   =============   */
-    const allPromiseLength = promises.length
-    const formatter = new Intl.NumberFormat(navigator.language)
-    // eslint-disable-next-line solid/reactivity
-
-    // const saveInterval = window.setInterval(() => {
-    //   const numPercent = Math.ceil(
-    //     ((allPromiseLength - limit.pendingCount) / allPromiseLength) * 100
-    //   )
-    //   const stringPercent = formatter.format(numPercent)
-
-    //   setWholeAmountToSave({
-    //     str: stringPercent,
-    //     num: numPercent
-    //   })
-    //   props.setSavingWholeOffline("STARTED")
-    //   if (numPercent >= Number(formatter.format(100)))
-    //     clearInterval(saveInterval)
-    // }, 1000)
-
-    /* todo ===============  connect to progress bar   =============   */
     return promises
-    await Promise.all(promises)
-    // props.setSavingWholeOffline("FINISHED")
   } catch (error) {
     console.error(error)
-    // props.setSavingWholeOffline("ERROR")
-  } finally {
-    // setTimeout(() => {
-    //   props.setSavingWholeOffline("IDLE")
-    // }, 6000)
   }
 }

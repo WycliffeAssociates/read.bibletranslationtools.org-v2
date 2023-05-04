@@ -37,6 +37,7 @@ function focusWithinClose(ev: FocusEvent) {
   }
 }
 function reactToScrollingWhenNoteIsOpen(amount: number) {
+  console.log("reactToScrollingWhenNoteIsOpen")
   if (!showFootnote()) {
     return
   }
@@ -76,7 +77,7 @@ export function PreviewPane() {
           <button
             data-testid="closePreviewPane"
             ref={previewCloseButton}
-            class="absolute top-0 right-0 text-red-300 hover:text-red-700"
+            class="absolute right-0 top-0 text-red-300 hover:text-red-700"
             onClick={() => setShowFootnote(false)}
           >
             <svg
@@ -109,6 +110,8 @@ export function hoverOnCrossReferences() {
     setTimeout(() => {
       const scrollPane = document.querySelector('[data-js="scrollToTop"]')
       if (scrollPane) {
+        console.log({ scrollPane })
+        console.log(scrollPane.scrollTop)
         setCurrentScrollTop(scrollPane.scrollTop)
       }
       populatePreviewPane()
@@ -167,6 +170,7 @@ export function hoverOnCrossReferences() {
   crossReferences.forEach((ref) => {
     ref.addEventListener("mouseover", managePreviewPane)
     ref.addEventListener("mouseout", () => {
+      console.log("moused out")
       setMousedIn(false)
     })
   })
