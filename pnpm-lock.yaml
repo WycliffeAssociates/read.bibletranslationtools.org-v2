@@ -1,8 +1,8 @@
 lockfileVersion: 5.4
 
 specifiers:
-  '@astrojs/cloudflare': 6.2.4
-  '@astrojs/solid-js': ^2.1.1
+  '@astrojs/cloudflare': 6.2.2
+  '@astrojs/solid-js': 2.1.0
   '@astrojs/tailwind': ^3.1.2
   '@cloudflare/workers-types': ^4.20230404.0
   '@kobalte/core': ^0.9.4
@@ -42,8 +42,8 @@ specifiers:
   wrangler: ^2.18.0
 
 dependencies:
-  '@astrojs/cloudflare': 6.2.4_astro@2.3.4
-  '@astrojs/solid-js': 2.1.1_rlmejeh26ns4pc2lyi2v3h5qtq
+  '@astrojs/cloudflare': 6.2.2_astro@2.3.4
+  '@astrojs/solid-js': 2.1.0_rlmejeh26ns4pc2lyi2v3h5qtq
   '@astrojs/tailwind': 3.1.2_s6yiphfdqqvkcvtcfokesalite
   '@kobalte/core': 0.9.4_solid-js@1.7.4
   '@solid-primitives/i18n': 1.2.4_solid-js@1.7.4
@@ -110,10 +110,10 @@ packages:
       leven: 3.1.0
     dev: true
 
-  /@astrojs/cloudflare/6.2.4_astro@2.3.4:
-    resolution: {integrity: sha512-hA8ede9+TQdeg3x8XaPyciYq6yfHAUKqgqjYIvd6vJUMFis97mOCFE5A/J+DGsXs7i7qK2VjZmq05ZBwVdnILw==}
+  /@astrojs/cloudflare/6.2.2_astro@2.3.4:
+    resolution: {integrity: sha512-Z/twtIM68TwazHGLax05WcADsR6oDVFiq21TMTfEsWOmhoVzTTPwxiU8kw8gukGrwug8JwLiiAeK7qFDZNmFcw==}
     peerDependencies:
-      astro: ^2.3.3
+      astro: ^2.1.4
     dependencies:
       astro: 2.3.4
       esbuild: 0.17.18
@@ -169,8 +169,8 @@ packages:
     dependencies:
       prismjs: 1.29.0
 
-  /@astrojs/solid-js/2.1.1_rlmejeh26ns4pc2lyi2v3h5qtq:
-    resolution: {integrity: sha512-gRz9+d+c18HTRd5yf8TNjel/3kY9cdCPKjKucK3XLscniAjnWBd3/AIx4Rc9S/02Ici3kYhKH9se/D1Ry6nXIg==}
+  /@astrojs/solid-js/2.1.0_rlmejeh26ns4pc2lyi2v3h5qtq:
+    resolution: {integrity: sha512-p07DP9NRWJPjtF+CzPZ9lzOMkoyw6wSs3S6g3OZUxR+DVQy3VIXXDqCcnZZVJI34VakkHuViZaoNNkBW/9I54w==}
     engines: {node: '>=16.12.0'}
     peerDependencies:
       solid-js: ^1.4.3
