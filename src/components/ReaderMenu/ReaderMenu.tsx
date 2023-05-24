@@ -25,6 +25,7 @@ import { CACHENAMES } from "../../lib/contants"
 import { getRepoIndex } from "@lib/api"
 import { IconMagnifyingGlass } from "@components/Icons/Icons"
 import Settings from "../Settings/Settings"
+import SectionHeader from "../Settings/SectionHeader"
 
 interface MenuProps {
   storeInterface: storeType
@@ -307,10 +308,10 @@ const ReaderMenu: Component<MenuProps> = (props) => {
           use:escapeOut={() => setMenuIsOpen(false)}
           class="mx-auto flex w-full flex-wrap items-center bg-[--clrBackground]"
         >
-          <div class="relative mx-auto flex w-full max-w-[75ch] items-center  justify-between gap-3  bg-white p-2 text-varBase print:hidden sm:px-8 sm:pt-2">
-            <div class="flex w-full justify-between overflow-hidden  rounded-lg bg-white outline outline-1 outline-gray-300 hover:outline-accent">
+          <div class="relative mx-auto flex w-full max-w-[75ch] items-center  justify-between gap-3  bg-white p-3 text-varBase print:hidden sm:px-8 ">
+            <div class="flex w-full justify-between overflow-hidden  rounded-lg bg-white outline outline-1 outline-gray-300 focus-within:outline-2 focus-within:outline-accent">
               <button
-                class="flex w-full flex-grow items-center justify-between rounded-md ltr:pl-4 rtl:pr-4"
+                class="flex h-12 w-full flex-grow items-center justify-between rounded-md  hover:bg-gray-100 ltr:pl-4 rtl:pr-4"
                 onClick={() => togglePanel()}
               >
                 <span class="flex items-center">
@@ -319,8 +320,9 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                     {props.storeInterface.currentBookObj()?.label}
                   </span>
                 </span>
+
                 <span
-                  class="menuNumberInput w-[5ch] border-l border-gray-200 py-2 text-center"
+                  class="menuNumberInput w-[5ch] border-l border-gray-200 bg-white py-2 text-center"
                   data-testid="chapterNavigation"
                 >
                   {props.storeInterface.getStoreVal("currentChapter")}
@@ -506,7 +508,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
             <div class="w-1/5 print:hidden">
               <div class=" relative w-max rounded-md ltr:ml-auto rtl:mr-auto ">
                 <button
-                  class="rounded   px-5  py-2 text-slate-700  hover:outline-accent"
+                  class="rounded   px-5  py-2 text-slate-700  hover:bg-gray-100 focus:outline-2 focus:outline-accent"
                   aria-label={t("openSettings", {}, "open settings")}
                   onClick={manageOpenSettings}
                 >

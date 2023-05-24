@@ -32,7 +32,8 @@ export function ChapterList(props: ChapterProps) {
                         <button
                           data-testid="pickChapter"
                           classList={{
-                            "w-full p-3 hover:bg-accent/10": true,
+                            "w-full p-3 hover:bg-gray-100 focus:outline-2 focus:outline-accent":
+                              true,
                             "text-blue-400": props.isActiveBookAndChap(
                               book.label
                             )
@@ -74,7 +75,8 @@ export function ChapterList(props: ChapterProps) {
                 <li class="w-full text-center text-xl">
                   <button
                     classList={{
-                      "w-full p-3 hover:bg-accent/10": true,
+                      "w-full p-3 hover:bg-gray-100 focus:outline-2 focus:outline-accent":
+                        true,
                       "text-blue-400": props.isActiveBookAndChap(book.label)
                     }}
                     onClick={(e) => {

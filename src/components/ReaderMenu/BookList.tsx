@@ -34,7 +34,7 @@ export function BookList(props: propsInterface) {
                 <li class="w-full">
                   <button
                     classList={{
-                      " w-full text-xl py-2 ltr:text-left rtl:text-right border-y border-gray-100 ltr:pl-4 rtl:pr-4 hover:bg-accent/10 focus:bg-accent/10 focus:font-bold":
+                      " w-full text-xl py-2 ltr:text-left rtl:text-right border-y border-gray-100 ltr:pl-4 rtl:pr-4 hover:bg-gray-100 focus:outline-2 focus:outline-accent focus:font-bold":
                         true,
                       "font-bold text-accent": props.isActiveBook(book.slug)
                     }}
@@ -58,7 +58,7 @@ export function BookList(props: propsInterface) {
                 <li class="w-full">
                   <button
                     classList={{
-                      " w-full text-xl py-2 ltr:text-left rtl:text-right border-y border-gray-100 ltr:pl-4 rtl:pr-4 hover:bg-accent/10 focus:bg-accent/10 focus:font-bold":
+                      " w-full text-xl py-2 ltr:text-left rtl:text-right border-y border-gray-100 ltr:pl-4 rtl:pr-4 hover:bg-gray-100 focus:outline-2 focus:outline-accent focus:font-bold":
                         true,
                       "font-bold text-accent": props.isActiveBook(book.slug)
                     }}

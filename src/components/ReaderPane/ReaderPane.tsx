@@ -222,7 +222,7 @@ export default function ReaderPane(props: ReaderPaneProps) {
             <div
               id="theText"
               ref={textRef}
-              class="theText mx-auto mb-24 h-full max-w-[75ch] overflow-y-auto   bg-inherit bg-white p-2  text-lg text-varBase leading-relaxed  text-[--color-text]  print:h-min  print:overflow-y-visible print:pb-4 sm:px-8 sm:pt-2  md:w-full"
+              class="theText mx-auto mb-24 h-full max-w-[75ch] overflow-y-auto   bg-inherit bg-white p-2  text-lg text-varBase leading-[185%]  text-[--color-text]  print:h-min  print:overflow-y-visible print:pb-4 sm:px-8 sm:pt-2  md:w-full"
               innerHTML={props.storeInterface.HTML()}
             />
 
@@ -258,7 +258,7 @@ export default function ReaderPane(props: ReaderPaneProps) {
         <div
           id="wholeBook"
           innerHTML={props.storeInterface.getStoreVal("printHtml")}
-          class=" theText mx-auto  h-max  max-w-[75ch] !overflow-y-visible bg-inherit bg-white text-lg leading-relaxed text-[--color-text] text-black print:pb-4  
+          class=" theText mx-auto  h-max  max-w-[75ch] !overflow-y-visible bg-inherit bg-white text-lg leading-[185%] text-[--color-text] text-black print:pb-4  
         "
         />
       </Show>

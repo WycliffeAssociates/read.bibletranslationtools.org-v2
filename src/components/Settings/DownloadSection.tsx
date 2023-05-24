@@ -21,8 +21,8 @@ interface IDownloadSection {
 }
 export function DownloadSection(props: IDownloadSection) {
   const [t] = useI18n()
-  const [bookOrResource, setBookOrResource] = createSignal()
-  const [fileType, setFileType] = createSignal()
+  const [bookOrResource, setBookOrResource] = createSignal("BOOK")
+  const [fileType, setFileType] = createSignal(".PDF")
   let printWholeUsfmRef: HTMLAnchorElement | undefined
   let bttWriterSinglUsfmForm: HTMLFormElement | undefined
 
@@ -106,6 +106,7 @@ export function DownloadSection(props: IDownloadSection) {
     <div data-title="downloadSection" class="">
       <SectionHeader component="h2" text={t("download", {}, "Download")} />
       <RadioGroup.Root
+        defaultValue="Book"
         data-title="bookOrResourceRadio"
         onChange={(val) => setBookOrResource(val.toUpperCase())}
       >
@@ -114,14 +115,16 @@ export function DownloadSection(props: IDownloadSection) {
         </RadioGroup.Label>
         <div
           data-title="radio-group__items"
-          class="flex divide-x divide-accent rounded-lg border border-accent"
+          class="flex divide-x divide-accent overflow-hidden rounded-lg border border-accent"
         >
           <For each={[t("book", {}, "Book"), t("resource", {}, "Resource")]}>
             {(choice) => (
               <RadioGroup.Item
                 value={choice}
                 data-title="radio"
-                class="flex-grow py-2 text-center data-[checked]:bg-accent/10 data-[checked]:text-accent/90"
+                class={
+                  "flex-grow cursor-pointer   py-2 text-center hover:border-accent hover:bg-gray-100 focus:outline-2 focus:outline-accent data-[checked]:bg-accent/10 data-[checked]:text-accent/90"
+                }
               >
                 <RadioGroup.ItemInput data-title="radio__input" class="" />
                 <RadioGroup.ItemControl data-title="radio__control" class="">
@@ -140,6 +143,7 @@ export function DownloadSection(props: IDownloadSection) {
       </RadioGroup.Root>
 
       <RadioGroup.Root
+        defaultValue=".pdf"
         data-title="fileFormatRadio"
         class="mt-4"
         onChange={(val) => setFileType(val.toUpperCase())}
@@ -154,7 +158,7 @@ export function DownloadSection(props: IDownloadSection) {
                 <RadioGroup.Item
                   value={choice}
                   data-title="radio"
-                  class="flex items-center justify-between rounded-lg px-4 py-3 data-[checked]:bg-accent/10 data-[checked]:text-accent/90"
+                  class="flex cursor-pointer items-center justify-between rounded-lg px-4 py-3 hover:bg-gray-100 focus:outline-2 focus:outline-accent data-[checked]:bg-accent/10 data-[checked]:text-accent/90"
                 >
                   <RadioGroup.ItemLabel data-title="radio__label" class="">
                     {choice}
@@ -178,7 +182,7 @@ export function DownloadSection(props: IDownloadSection) {
       </RadioGroup.Root>
       <Button.Root
         onClick={handleDownloadSubmission}
-        class="mt-4  flex w-full items-center justify-center gap-4 rounded-2xl border border-gray-200 py-3 text-center disabled:border-red-200 disabled:opacity-70"
+        class="mt-4  flex w-full items-center justify-center gap-4 rounded-2xl border border-gray-200 py-3 text-center hover:bg-gray-100 focus:outline-2 focus:outline-accent disabled:border-red-200 disabled:opacity-70"
         disabled={buttonIsDisabled().enabled}
       >
         {buttonIsDisabled().text}
