@@ -101,14 +101,16 @@ export function UnwrappedHeader(props: HeaderProps) {
           data-js="mobileMenu"
           class={`${
             mobileMenuOpen() ? "block" : "hidden"
-          } absolute top-full  left-0 right-0  z-50 w-full flex-col bg-darkAccent pt-5 md:static md:flex md:w-auto md:flex-row`}
+          } absolute left-0  right-0 top-full  z-50 w-full flex-col bg-darkAccent pt-5 md:static md:flex md:w-auto md:flex-row`}
         >
           <ul class="flex flex-col ltr:pl-4 rtl:pr-4 md:flex-row">
             <Index each={props.menuItems}>
               {(menuItem) => {
                 return (
                   <li class="my-2 capitalize hover:text-secondary focus:text-secondary md:mx-4 md:my-0">
-                    {<a href={props.repoUrl}>{t(String(menuItem()))}</a>}
+                    <a href={`${props.linkBase}/${menuItem()}`}>
+                      {t(String(menuItem()))}
+                    </a>
                   </li>
                 )
               }}
