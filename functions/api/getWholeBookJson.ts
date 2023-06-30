@@ -24,7 +24,7 @@ export const onRequestGet: PagesFunction = async (context) => {
     if (response.ok) {
       return new Response(response.body, {
         headers: {
-          ...getHeaders(url),
+          ...getHeaders(),
           "Content-Type": "application/json"
         }
       })

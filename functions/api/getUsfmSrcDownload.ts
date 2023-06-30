@@ -39,7 +39,7 @@ export const onRequestPost: PagesFunction = async (context) => {
     }-${book?.toUpperCase()}`
     const newResp = new Response(response.body, {
       headers: {
-        ...getHeaders(url),
+        ...getHeaders(),
         "Content-Type": "application/octet-stream",
         "content-disposition": `attachment; filename=${fileName}.usfm`
       }

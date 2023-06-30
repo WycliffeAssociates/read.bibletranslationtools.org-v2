@@ -40,7 +40,7 @@ export const onRequestGet: PagesFunction = async (context) => {
     const response = await fetch(finalUrl)
     // E[foo*="bar"]
     const newResp = new Response(response.body, {
-      headers: getHeaders(url)
+      headers: getHeaders()
     })
     const aHandler = new aTagHandler(user, "TW")
     return new HTMLRewriter()

@@ -41,7 +41,7 @@ export const onRequestGet: PagesFunction = async (context) => {
     const finalUrl = `${baseUrl}/${user}/${repo}/${navSection}.html`
     const response = await fetch(finalUrl)
     const newResp = new Response(response.body, {
-      headers: getHeaders(url)
+      headers: getHeaders()
     })
     // return newResp
     const htmlRewriter = new HTMLRewriter()

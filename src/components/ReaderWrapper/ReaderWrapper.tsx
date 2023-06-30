@@ -303,9 +303,6 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
       // })
       // //
 
-      // todo: remove this note:
-      // Make the response saved in service worker always be primary. That way it's the only source of truth, and nothing from the SSR response for saved items.
-      // if (!isCompleteText) {
       const rowWholeResourcesCache = await caches.open(CACHENAMES.complete)
       const wholeResource = await rowWholeResourcesCache.match(
         `${window.location.origin}/${props.user}/${props.repositoryName}`

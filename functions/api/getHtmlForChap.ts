@@ -33,7 +33,7 @@ export const onRequestGet: PagesFunction = async (context) => {
     const response = await fetch(finalUrl)
 
     const newResp = new Response(response.body, {
-      headers: getHeaders(url)
+      headers: getHeaders()
     })
     // NOTE: TN AND BIBLE CHAP ARE BOTH CHAPTER/VERSE SCHEMAS, SO THE SAME API FETCHER FUNCTION IS HERE USED, BUT WE REWRITE ANY FOUND TN LINKS AS WELL HERE.
     const handler = new aTagHandler(user, "TN")

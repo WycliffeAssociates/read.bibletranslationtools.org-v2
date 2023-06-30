@@ -25,7 +25,6 @@ import { CACHENAMES } from "../../lib/contants"
 import { getRepoIndex } from "@lib/api"
 import { IconMagnifyingGlass } from "@components/Icons/Icons"
 import Settings from "../Settings/Settings"
-import SectionHeader from "../Settings/SectionHeader"
 
 interface MenuProps {
   storeInterface: storeType
@@ -364,7 +363,14 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                               <SvgArrow />
                             </span>
                             {/* todo: make dynamic to current resource */}
-                            <span class="text-lg">English ULB</span>
+                            <Show
+                              when={props.repositoryName}
+                              fallback="no title"
+                            >
+                              <span class="text-lg">
+                                {props.repositoryName}
+                              </span>
+                            </Show>
                           </p>
                         </Dialog.CloseButton>
                       </div>

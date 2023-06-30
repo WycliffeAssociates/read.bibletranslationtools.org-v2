@@ -39,7 +39,7 @@ export const onRequestGet: PagesFunction = async (context) => {
 
     returnValue = response.body
     return new Response(returnValue, {
-      headers: getHeaders(url)
+      headers: getHeaders()
     })
   } catch (error) {
     console.error(error)
