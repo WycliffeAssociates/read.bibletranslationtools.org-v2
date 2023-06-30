@@ -23,7 +23,7 @@ export function SvgDownload(props: iconProps) {
 export function SvgSettings(props: iconProps) {
   return (
     <svg
-      class={`${props.classNames} h-6 w-6 `}
+      class={`${props.classNames} h-8 w-8 `}
       width="20"
       height="20"
       viewBox="0 0 20 20"

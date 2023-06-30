@@ -322,7 +322,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                 </span>
 
                 <span
-                  class="menuNumberInput w-[5ch] border-l border-gray-200 bg-white py-2 text-center"
+                  class="menuNumberInput w-[5ch] border-l border-gray-200  py-2 text-center "
                   data-testid="chapterNavigation"
                 >
                   {props.storeInterface.getStoreVal("currentChapter")}
@@ -354,7 +354,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                   <Dialog.Content class="" data-title="dialog__content">
                     {/* ===============  shared   =============   */}
                     <div class="bg-white ">
-                      <div class="border-netural-200 flex border-b py-4 ltr:pl-8 rtl:pr-8">
+                      <div class="border-netural-200 flex content-center border-b p-4">
                         <Dialog.CloseButton
                           class=""
                           data-title="dialog__close-button"
@@ -363,6 +363,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                             <span class="w-5">
                               <SvgArrow />
                             </span>
+                            {/* todo: make dynamic to current resource */}
                             <span class="text-lg">English ULB</span>
                           </p>
                         </Dialog.CloseButton>
@@ -376,10 +377,6 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                           {/* Books */}
                           <div class="border-netural-200 w-2/5 border-r">
                             <div class="w-full">
-                              {/* todo: fully remove if looks right */}
-                              {/* <h2 class="mt-2 text-2xl capitalize ltr:ml-4 rtl:mr-4">
-                                {t("books")}
-                              </h2> */}
                               <div class="mt-2  pt-2">
                                 <div class="">
                                   <label for="" class="relative block p-4">
@@ -391,11 +388,11 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                                         searchBooks()
                                       }}
                                       type="text"
-                                      class="w-full rounded-full border border-neutral-300 px-8 py-2 capitalize"
+                                      class="w-full rounded-full border border-neutral-300 px-12 py-2 capitalize"
                                       placeholder={t("searchBooks")}
                                       value={searchQuery()}
                                     />
-                                    <span class="absolute top-1/2 inline-block w-4 transform ltr:left-8 ltr:-translate-y-1/2 rtl:right-8  rtl:translate-y-1/2">
+                                    <span class="absolute top-1/2 inline-block w-6 transform ltr:left-8 ltr:-translate-y-1/2 rtl:right-8  rtl:translate-y-1/2">
                                       <IconMagnifyingGlass />
                                     </span>
                                   </label>
@@ -460,7 +457,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                         {/* MOBILE BOOKS */}
                         <Show when={mobileTabOpen() == "book"}>
                           <div data-name="searchInput">
-                            <label for="" class="block p-4">
+                            <label for="" class="relative block p-4">
                               <input
                                 onInput={(e: InputEvent) => {
                                   const target = e.target as HTMLInputElement
@@ -468,10 +465,13 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                                   searchBooks()
                                 }}
                                 type="text"
-                                class="w-full rounded-full border border-neutral-300 px-4 py-2 capitalize "
+                                class="w-full rounded-full border border-neutral-300 px-12 py-2 capitalize"
                                 placeholder={t("searchBooks")}
                                 value={searchQuery()}
                               />
+                              <span class="absolute top-1/2 inline-block w-6 transform ltr:left-8 ltr:-translate-y-1/2 rtl:right-8  rtl:translate-y-1/2">
+                                <IconMagnifyingGlass />
+                              </span>
                             </label>
                             <BookList
                               // eslint-disable-next-line solid/reactivity

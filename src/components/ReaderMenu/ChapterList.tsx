@@ -34,9 +34,7 @@ export function ChapterList(props: ChapterProps) {
                           classList={{
                             "w-full p-3 hover:bg-gray-100 focus:outline-2 focus:outline-accent":
                               true,
-                            "text-blue-400": props.isActiveBookAndChap(
-                              book.label
-                            )
+                            "text-accent": props.isActiveBookAndChap(book.label)
                           }}
                           // onClick={(e) => {
                           //   jumpToNewChapIdx(e, idx() + 1)
@@ -58,17 +56,6 @@ export function ChapterList(props: ChapterProps) {
       </Show>
       <Show when={!props.isMobile}>
         <div class="flex-grow p-2">
-          {/* todo: click on the menu are closing it, and the fixed body seems to not be what I want eitehr.  Why are the clicks on menu items closing the thing?  If you scroll down as well, you can't see the dialog with pos a instead of fixed, so need fixed.  */}
-          {/* todo: fully remove */}
-          {/* https://stackoverflow.com/questions/70989904/fixed-element-positioning-relative-to-its-parent
-           */}
-          {/* Or just go back to how it was and change the design without making it a modal. Preferably a dropdown really */}
-          {/* Or try this actually instead maybe?
-          https://kobalte.dev/docs/core/components/dropdown-menu
-          */}
-          {/* <p class="py-2 pl-2 text-2xl ">
-            {props.storeInterface.getMenuBook()?.label}
-          </p> */}
           <ul class="grid  h-[80vh] grid-cols-6 place-content-start gap-2 overflow-y-scroll pb-36 ">
             <For each={props.storeInterface.possibleChapters()}>
               {(book) => (
@@ -77,7 +64,7 @@ export function ChapterList(props: ChapterProps) {
                     classList={{
                       "w-full p-3 hover:bg-gray-100 focus:outline-2 focus:outline-accent":
                         true,
-                      "text-blue-400": props.isActiveBookAndChap(book.label)
+                      "text-accent": props.isActiveBookAndChap(book.label)
                     }}
                     onClick={(e) => {
                       props.jumpToNewChapIdx(e, book.label)
