@@ -58,8 +58,6 @@ export default function Settings(props: settingsProps) {
           data-title="dialog__overlay"
           class="fixed inset-0 z-50 hidden bg-black/20 data-[expanded]:block print:hidden"
         />
-        {/* animate-[slideRight_.2s_ease-in-out_forwards] */}
-        {/* data-[expanded]:animate-[slideLeft_.2s_ease-in-out_forwards] */}
         <Dialog.Content
           style={{
             top: props.topAmount()

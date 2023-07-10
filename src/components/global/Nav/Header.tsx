@@ -42,7 +42,7 @@ export function UnwrappedHeader(props: HeaderProps) {
     locale(lang)
     setFlagShowing(lang)
 
-    // NOTE: in a different scenario, the reader pane and this menu would be wrapped in same context, but note that Astro's island architecture does not permit the use of traditional React/Solid context.  Each of these components is wrapped in their own context with the same dictonary, and this custom event call the corresponding locale function there.
+    // NOTE: in a different scenario, the reader pane and this menu would be wrapped in same context, but note that Astro's island architecture does not permit the use of traditional JS SPA types contexts.  Each of these components is wrapped in their own context with the same dictonary, and this custom event call the corresponding locale function there.
     // notify Reader Pane localization event listener
     const changeLanguageEvent = new CustomEvent("changelanguage", {
       detail: {
@@ -81,6 +81,8 @@ export function UnwrappedHeader(props: HeaderProps) {
             class="w-32"
             width="618"
             height="186"
+            elementtiming={""}
+            fetchpriority={"high"}
           />
         </picture>
 
@@ -134,6 +136,8 @@ export function UnwrappedHeader(props: HeaderProps) {
                 class="mr-2 w-4"
                 src={`/flags/${flagShowing()}.svg`}
                 alt=""
+                elementtiming={""}
+                fetchpriority={"auto"}
               />
               {t("thisLanguage", undefined, "English")}
             </button>

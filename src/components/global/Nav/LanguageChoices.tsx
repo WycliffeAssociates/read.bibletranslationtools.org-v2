@@ -28,6 +28,8 @@ export default function LanguageChoices(props: LanguageChoicesI) {
                     class="inline-block w-4 ltr:mr-2 rtl:ml-2 "
                     src={`/flags/${lang().code}.svg`}
                     alt=""
+                    elementtiming={""}
+                    fetchpriority={"auto"}
                   />
                   {lang().name}
                 </button>

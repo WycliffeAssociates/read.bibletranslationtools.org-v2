@@ -169,7 +169,7 @@ export async function deleteSingleBookFromSw({
   const u8Array = new Uint8Array(arrBuff)
   const decodedU8 = gunzipSync(u8Array)
   const decodedRepoIndex = JSON.parse(strFromU8(decodedU8)) as repoIndexObj
-  decodedRepoIndex.bible
+
   const specificedBook = decodedRepoIndex.bible?.find((storeBib) => {
     return storeBib.slug.toLowerCase() == String(bookSlug).toLowerCase()
   })
@@ -181,9 +181,6 @@ export async function deleteSingleBookFromSw({
   promises.push(promiseLimit(addlPromise))
 
   for await (const chap of bookChapters) {
-    // const url = `/api/getHtmlForChap?user=${user}&repo=${repo}&book=${bookSlug}&chapter=${chap}`
-    // const match = await apiCache.match(url)
-    // if (match) {
     promises.push(
       promiseLimit(() => {
         return apiCache.delete(
@@ -191,7 +188,6 @@ export async function deleteSingleBookFromSw({
         )
       })
     )
-    // }
   }
   return promises
 }

@@ -8,8 +8,8 @@ import {
   positionPreviewPane
 } from "@lib/utils-ui"
 import { BeyondSmallNav, MobileTwNav } from "./TwNav"
-// these are hacks to keep typescript from stripping away "unused imports" the actual names are unimportant; These are solid custom directives;
 
+// these are hacks to keep typescript from stripping away "unused imports" the actual names are unimportant; These are solid custom directives;
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const clickout = clickOutside
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -189,7 +189,6 @@ export default function TranslationWords(props: twProps) {
         >
           <div class="relative h-full w-full">
             <button
-              // ref={previewCloseButton}
               class="absolute right-0 top-0 text-red-300 hover:text-red-700"
               onClick={() => setShowPreviewPane(false)}
             >

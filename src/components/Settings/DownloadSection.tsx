@@ -60,9 +60,8 @@ export function DownloadSection(props: IDownloadSection) {
       props.storeInterface.mutateStore("printHtml", text)
 
       props.setPrintWholeBook(true)
-      window.print() //not a true pdf, but more helpful than any js lib will be since you can save to pdf
+      window.print() //not a true pdf, but more helpful than any js lib or trickery will be since you can save to pdf with options.
       props.setPrintWholeBook(false)
-      // await printPdf(text)
     }
     async function downloadWholePdf() {
       const bibArr = props.storeInterface.getStoreVal("text") as bibleEntryObj[]
@@ -103,7 +102,7 @@ export function DownloadSection(props: IDownloadSection) {
     }
   }
   return (
-    <div data-title="downloadSection" class="">
+    <div data-title="downloadSection">
       <SectionHeader component="h2" text={t("download", {}, "Download")} />
       <RadioGroup.Root
         defaultValue="Book"

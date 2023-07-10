@@ -1,12 +1,4 @@
-import {
-  onMount,
-  Show,
-  createEffect,
-  on,
-  batch,
-  Accessor
-  // onCleanup
-} from "solid-js"
+import { onMount, Show, createEffect, on, batch, Accessor } from "solid-js"
 import { SvgArrow } from "@components"
 import NavButtonLinks from "./NavButtons"
 import type { storeType } from "../ReaderWrapper/ReaderWrapper"
@@ -27,10 +19,10 @@ interface ReaderPaneProps {
 }
 
 export default function ReaderPane(props: ReaderPaneProps) {
-  let textRef: HTMLDivElement | undefined
   // for footnote
+  let textRef: HTMLDivElement | undefined
 
-  // todo: extract to shared ui Utils and run on the layout level:
+  // maybe: extract to shared ui Utils and run on the layout level:
   function setLastPageVisited() {
     const setLastEvent = new CustomEvent("setLastPageVisited", {
       detail: {
@@ -207,7 +199,6 @@ export default function ReaderPane(props: ReaderPaneProps) {
                 repo={props.repositoryName}
                 book={props.firstBookKey}
                 chapter={props.storeInterface.navLinks()?.prev}
-                // eslint-disable-next-line solid/reactivity
                 onClick={(event: Event) => {
                   fetchReaderHtml({ event, navigate: true, dir: "BACK" })
                 }}

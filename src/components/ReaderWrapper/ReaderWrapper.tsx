@@ -17,7 +17,7 @@ import type { Accessor } from "solid-js"
 import { debounce } from "@lib/utils-ui"
 import { CACHENAMES } from "@lib/contants"
 
-// types are a little verbose up here: See them at the bottom:
+// parameter types at bottom of file due to verbosity.
 
 export default function ReaderWrapper(props: ReaderWrapperProps) {
   //======= Reader App state =============
@@ -290,18 +290,12 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
   }
   const notifyPreviewPaneOfScroll = debounce(reportScrollPosition, 20)
 
-  // Most if this page was the result response of being saved offline, we'll need to adjust the navigation for the query parameters here.  There may be the conditional need to load data from the service worker too if the post request failed when passing a large body.
+  // If this page was the result response of being saved offline, we'll need to adjust the navigation for the query parameters here.  There may be the conditional need to load data from the service worker too if the post request failed when passing a large body.
   onMount(async () => {
     if (props.wasPostRequest) {
       const queryParams = new URLSearchParams(window.location.search)
       const book = queryParams.get("book")
       const chapter = queryParams.get("chapter")
-      // const isCompleteText = readerStore.text?.every((book) => {
-      //   return book.chapters.every((chap) => {
-      //     return !!chap.content
-      //   })
-      // })
-      // //
 
       const rowWholeResourcesCache = await caches.open(CACHENAMES.complete)
       const wholeResource = await rowWholeResourcesCache.match(
@@ -315,7 +309,6 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
 
       const completeText = decodedRepoIndex.bible
 
-      // }
       let storeQueryParamBook = completeText?.find((storeBib) => {
         return storeBib.slug.toLowerCase() == String(book).toLowerCase()
       })

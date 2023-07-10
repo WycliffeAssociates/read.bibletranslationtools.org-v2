@@ -70,7 +70,7 @@ export function OfflineSection(props: IOfflineSection) {
         ((allPromiseLength - limit.pendingCount) / allPromiseLength) * 100
       )
       const stringPercent = formatter.format(numPercent)
-      // technically we are saving here, but we want to set the isSaving bool a touch later.  Small projects on good internet save instanteously, so it's a little weird to show the bar.
+      // technically we are saving here, but we want to delay setting the isSaving bool some (200ms here).  Small projects on good internet save instanteously, so it's a little weird to flash the bar.
       setSaveProgress({
         isSaving: elapsed > 200 ? true : false,
         amountStr: stringPercent,
@@ -603,7 +603,7 @@ async function saveEntireResourceOffline({
     })
 
     const smallIndex = JSON.stringify(repoIndex)
-    // we are using the small index bc in prod I hit the CF limit for execution time several times with big resources (e.g. compressing 20mb json payload).  Since we already are saving the html as a json structure in the cache, we will just load in when the app mounts from the browser.  The other reason is that we incrementally delete / update the object in the cache, but not a returned response.
+    // using the small index here bc in prod I hit the CF limit for execution time several times with big resources (e.g. compressing 20mb json payload).  Since we already are saving the html as a json structure in the cache, we will just load in when the app mounts from the browser in an onMount.  The other reason is that we incrementally delete / update the object in the cache, but have to wholesale replace a cached html response, so, despite the extra bit of onMount loading, it lets the json in the cache be the updateable source of truth and not the html response from the site.
     const smallPayload = gzipSync(strToU8(smallIndex))
 
     const smallerHtmlSsrUrlRes = await fetch(htmlSsrUrl, {
@@ -634,8 +634,7 @@ async function saveEntireResourceOffline({
       )
     )
 
-    // We will save each html page below, but we are saving one SSR reponse under a URL that the user shouldn't naturally arrive at (e.g. /complete). When processing a document request in the SW, it will check to see if there is a match for /origin/user/repo/complete, and serve this (offline ready) response here.
-
+    // We will save each html page below, but we are saving one SSR reponse under a URL that the user shouldn't naturally arrive at (e.g. /complete). When processing a document request in the SW script, it will check to see if there is a match for /origin/user/repo/complete, and serve this (offline ready) response here.
     downloadIndex.content.forEach((book) => {
       // eslint-disable-next-line solid/reactivity
       book.chapters.forEach(async (chapter) => {

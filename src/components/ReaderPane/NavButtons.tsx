@@ -8,10 +8,11 @@ interface navProps {
   repo?: string
   book?: string
   chapter?: string
+  // Next line: any really is fine here.  User defines the click behavior.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onClick?: (...args: any) => unknown
   icon?: JSXElement
   dir?: "BACK" | "FORWARD"
-  // children: JSXElement
 }
 
 const mobileGradient =

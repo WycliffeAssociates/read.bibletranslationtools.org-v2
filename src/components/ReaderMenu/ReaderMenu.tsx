@@ -46,7 +46,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
     checkIfCurrentBookOrResIsSaved
   )
 
-  // While maybe the most solid-like, creating state from new props is still an acceptable pattern in solid.
+  // While maybe the not most solid-like pattern, creating state from new props is still an acceptable pattern in solid with ssr, hence the disable next line
   const [mobileTabOpen, setMobileTabOpen] = createSignal(
     // eslint-disable-next-line solid/reactivity
     props.storeInterface.isOneBook() ? "chapter" : "book"
@@ -83,9 +83,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
         currentBookIsOutOfDate: null
       }
     const completeResourceCache = await caches.open(CACHENAMES.complete)
-    // const bookMatch = await completeResourceCache.match(
-    //   `${window.location.origin}/${props.user}/${props.repositoryName}/${currentBook.slug}`
-    // )
+
     const wholeMatch = await completeResourceCache.match(
       `${window.location.origin}/${props.user}/${props.repositoryName}`
     )
@@ -156,7 +154,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
   }
 
   // ====MENU FXNS
-  // eslint disabled.  Not the most solid like maybe, but I didn't turn on this eslint rule until after deploy of this project, and was learning solid.  This is stable however.  The values of the reactive dependencies are being used in JSX. This is a derived function really, but the rules wants to be sure that we are aware that its deps aren't auto-tracked here.
+  // eslint disabled. This is a derived function really, but the rules wants to be sure that we are aware that its deps aren't auto-tracked here, but that's fine, because the only reactive dependency here is the storeInterface which isn't going to change identity from the ssr render.
   // eslint-disable-next-line solid/reactivity
   const jumpToNewChapIdx = debounce(async (evt: InputEvent, value: string) => {
     const storeInterface = props.storeInterface
@@ -164,8 +162,6 @@ const ReaderMenu: Component<MenuProps> = (props) => {
     const menuBook = storeInterface.getStoreVal("menuBook") as string
     const chapter: string = value ? value : target.value
     // validate
-    // let chapter: string | number = value ? Number(value) : Number(target?.value)
-
     if (
       !chapter ||
       (Number(chapter) &&
@@ -181,7 +177,6 @@ const ReaderMenu: Component<MenuProps> = (props) => {
 
     let text: string | false | void
     if (menuBookObj?.content) {
-      // return storeInterface.mutateStore("currentChapter", String(chapter))
       text = menuBookObj.content
     } else {
       text = await storeInterface.fetchHtml({
@@ -284,7 +279,6 @@ const ReaderMenu: Component<MenuProps> = (props) => {
   return (
     <div class="mx-auto  bg-white">
       <div
-        // use:clickOutside={() => setMenuIsOpen(false)}
         class="mx-auto w-full"
         on:changelanguage={(
           e: CustomEvent<{
@@ -328,7 +322,6 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                 </span>
               </button>
             </div>
-            {/* <Show when={menuIsOpen()}> */}
             {/*//! TABLET AND UP */}
             <Dialog.Root
               open={menuIsOpen()}
@@ -362,7 +355,6 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                             <span class="w-5">
                               <SvgArrow />
                             </span>
-                            {/* todo: make dynamic to current resource */}
                             <Show
                               when={props.repositoryName}
                               fallback="no title"
@@ -403,7 +395,6 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                                     </span>
                                   </label>
                                   <BookList
-                                    // eslint-disable-next-line solid/reactivity
                                     onClick={(book: string) =>
                                       switchBooks(book)
                                     }
@@ -480,7 +471,6 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                               </span>
                             </label>
                             <BookList
-                              // eslint-disable-next-line solid/reactivity
                               onClick={(bookSlug: string) => {
                                 switchBooks(bookSlug)
                                 setMobileTabOpen("chapter")
@@ -510,7 +500,6 @@ const ReaderMenu: Component<MenuProps> = (props) => {
             </Dialog.Root>
 
             {/* //!END table and up menu */}
-            {/* </Show> */}
             <div class="w-1/5 print:hidden">
               <div class=" relative w-max rounded-md ltr:ml-auto rtl:mr-auto ">
                 <button
@@ -537,8 +526,6 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                     )}
                   />
                 </Show>
-                {/* </div> */}
-                {/* </Show> */}
               </div>
             </div>
           </div>

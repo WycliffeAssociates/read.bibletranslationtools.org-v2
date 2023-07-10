@@ -4,7 +4,6 @@ import { Show } from "solid-js"
 
 interface IDetailItem {
   pressed?: boolean
-  // defaultPressed?:boolean
   onChangeFxn: (isPressed: boolean) => void
 }
 export default function DetailItem(props: IDetailItem) {
