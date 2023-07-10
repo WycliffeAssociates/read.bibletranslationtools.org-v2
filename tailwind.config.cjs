@@ -16,6 +16,27 @@ module.exports = {
       },
       fontFamily: {
         sans: ["'Atkinson Hyperlegible'", ...defaultTheme.fontFamily.sans]
+      },
+      fontSize: {
+        varBase: "var(--font-size-base)"
+      },
+      keyframes: {
+        slideLeft: {
+          "0%": { transform: "translateX(100%)" },
+          "100%": { transform: "translateX(0%)" }
+        },
+        slideRight: {
+          "0%": { transform: "translateX(0%)" },
+          "100%": { transform: "translateX(100%)" }
+        },
+        fadeIn: {
+          "0%": { transform: "opacity(0)" },
+          "100%": { transform: "opacity(1)" }
+        },
+        fadeOut: {
+          "0%": { transform: "opacity(1)" },
+          "100%": { transform: "opacity(0)" }
+        }
       }
     }
   },

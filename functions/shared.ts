@@ -18,7 +18,8 @@ export async function getRepoIndexLocal(
   }
 }
 
-export function getHeaders(url: URL) {
+export function getHeaders() {
+  // theoretically can accept a url arg here to decide whether thhis request should be authorized cross origin or not, but for nnow just allowing all cors requests to these functions.
   type headersType = {
     "Content-Type": string
     "Access-Control-Allow-Origin"?: string

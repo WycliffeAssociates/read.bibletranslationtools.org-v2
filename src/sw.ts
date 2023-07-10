@@ -2,11 +2,12 @@
 import { precacheAndRoute, cleanupOutdatedCaches } from "workbox-precaching"
 import { clientsClaim } from "workbox-core"
 import { registerRoute } from "workbox-routing"
-import { NetworkFirst, Strategy, CacheFirst } from "workbox-strategies"
+import { Strategy, CacheFirst } from "workbox-strategies"
 import { CacheableResponsePlugin } from "workbox-cacheable-response"
 import { ExpirationPlugin } from "workbox-expiration"
 import { get } from "idb-keyval"
 import type { StrategyHandler } from "workbox-strategies"
+import { CACHENAMES } from "@lib/contants"
 
 declare const self: ServiceWorkerGlobalScope
 
@@ -50,7 +51,7 @@ class CacheNetworkRace extends Strategy {
     handler: StrategyHandler
   ): Promise<Response | undefined> {
     const isPagesReq =
-      request.mode == "navigate" && this.cacheName == "lr-pages"
+      request.mode == "navigate" && this.cacheName == CACHENAMES.lrPagesCache
     function regularRace(
       resolve: (
         value: Response | PromiseLike<Response | undefined> | undefined
@@ -168,11 +169,11 @@ if (import.meta.env.DEV) {
     //   // plugins: [new CacheableResponsePlugin({statuses: [-1]})],
     // })
     // new CacheFirst({
-    //   cacheName: "lr-pages"
+    //   cacheName: CACHENAMES.lrPagesCache
     //   // plugins: [new CacheableResponsePlugin({statuses: [-1]})],
     // })
     new CacheNetworkRace({
-      cacheName: "lr-pages",
+      cacheName: CACHENAMES.lrPagesCache,
       plugins: [new CacheableResponsePlugin({ statuses: [-1] })]
     })
   )
@@ -189,7 +190,7 @@ if (import.meta.env.DEV) {
       return false
     },
     new variableCacheOrNetwork({
-      cacheName: "lr-pages",
+      cacheName: CACHENAMES.lrPagesCache,
       plugins: [
         new CacheableResponsePlugin({
           statuses: [200]
@@ -220,7 +221,7 @@ if (import.meta.env.PROD) {
       return false
     },
     new CacheNetworkRace({
-      cacheName: "lr-pages",
+      cacheName: CACHENAMES.lrPagesCache,
       plugins: [
         new CacheableResponsePlugin({
           statuses: [200]

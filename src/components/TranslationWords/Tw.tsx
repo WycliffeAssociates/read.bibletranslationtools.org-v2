@@ -8,8 +8,8 @@ import {
   positionPreviewPane
 } from "@lib/utils-ui"
 import { BeyondSmallNav, MobileTwNav } from "./TwNav"
-// these are hacks to keep typescript from stripping away "unused imports" the actual names are unimportant; These are solid custom directives;
 
+// these are hacks to keep typescript from stripping away "unused imports" the actual names are unimportant; These are solid custom directives;
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const clickout = clickOutside
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -189,8 +189,7 @@ export default function TranslationWords(props: twProps) {
         >
           <div class="relative h-full w-full">
             <button
-              // ref={previewCloseButton}
-              class="absolute top-0 right-0 text-red-300 hover:text-red-700"
+              class="absolute right-0 top-0 text-red-300 hover:text-red-700"
               onClick={() => setShowPreviewPane(false)}
             >
               <svg
@@ -212,10 +211,10 @@ export default function TranslationWords(props: twProps) {
           <div class="p-6" innerHTML={previewPaneHtml()} />
         </div>
       </Show>
-      <div class="theTextWrapper h-full px-2  print:h-min print:overflow-y-visible sm:pl-4 sm:pr-0">
-        <div class="relative h-full overflow-y-scroll   sm:flex ">
+      <div class="theTextWrapper mx-auto h-full  max-w-[105ch] bg-white px-2 print:h-min print:overflow-y-visible sm:pl-4 sm:pr-0">
+        <div class="relative h-full gap-8   overflow-y-scroll sm:flex">
           <div
-            class="theText tw-theText h-full w-full scroll-pt-16 overflow-y-scroll pt-16  sm:w-4/5 sm:scroll-pt-0  sm:pt-0"
+            class="theText tw-theText h-full w-full max-w-[75ch] scroll-pt-16 overflow-y-scroll pt-16  sm:w-4/5 sm:scroll-pt-0  sm:pt-0"
             innerHTML={sectionsHTML()[activeSection()]}
           />
           <div class=" sm:hidden">
@@ -225,7 +224,7 @@ export default function TranslationWords(props: twProps) {
               searchWords={searchWords}
             />
           </div>
-          <div class="customScrollBar sticky top-0 right-0 ml-auto  hidden h-full w-1/5 overflow-y-auto print:hidden sm:block">
+          <div class="customScrollBar sticky right-0 top-0 ml-auto  hidden h-full w-1/5 overflow-y-auto print:hidden sm:block">
             <BeyondSmallNav
               filteredWords={filteredWords}
               fetchSectionAndNav={fetchSectionAndNav}

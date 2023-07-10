@@ -14,15 +14,15 @@ export function MobileTwNav(props: mobileTwNavProps) {
   return (
     <>
       <div
-        class={` absolute top-0 right-0 z-10 ml-auto max-h-[50vh] w-full overflow-y-auto bg-white  sm:sticky sm:w-1/4 ${
+        class={` absolute right-0 top-0 z-10 ml-auto max-h-[50vh] w-full overflow-y-auto bg-white  sm:sticky sm:w-1/4 ${
           mobileNavIsOpen() && "shadow-dark-700 shadow"
         }`}
       >
-        <div class="sticky top-0 flex content-center items-center bg-neutral-50">
+        <div class="sticky top-0 flex content-center items-center ">
           <div class="relative  mb-2 w-full">
             <Show when={mobileNavIsOpen()}>
               <button
-                class="absolute top-2 right-12 rounded-lg border p-2  hover:text-red-600"
+                class="absolute right-12 top-2 rounded-lg border p-2  hover:text-red-600"
                 onClick={() => setMobileNavIsOpen(false)}
               >
                 <svg
@@ -52,7 +52,7 @@ export function MobileTwNav(props: mobileTwNavProps) {
                 viewBox="0 0 24 24"
                 stroke-width="1.5"
                 stroke="currentColor"
-                class="absolute top-1/2 left-4 h-6 w-6 -translate-y-1/2"
+                class="absolute left-4 top-1/2 h-6 w-6 -translate-y-1/2"
               >
                 <path
                   stroke-linecap="round"
@@ -103,10 +103,10 @@ export function MobileTwNav(props: mobileTwNavProps) {
 export function BeyondSmallNav(props: mobileTwNavProps) {
   return (
     <>
-      <div class="sticky top-0 flex content-center items-center bg-neutral-50">
+      <div class="sticky top-0 flex content-center items-center bg-white">
         <input
           type="text"
-          class="mt-2 ml-1 inline-block w-11/12 rounded-full  border p-2 py-4  text-darkAccent sm:mt-4"
+          class="ml-1 mt-2 inline-block w-11/12 rounded-full  border p-2 py-4  text-darkAccent sm:mt-4"
           placeholder="Search words.."
           onInput={(ev) => props.searchWords(ev)}
         />

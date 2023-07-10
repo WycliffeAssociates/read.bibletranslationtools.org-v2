@@ -17,7 +17,6 @@ export function getPreferredLangFromHeader(request: Request): i18nDictKeysType {
   })
   let preferredLocale = defaultLocale //default
   for (let i = 0; i < langsArr.length; i++) {
-    //   let val = item() as i18nDictSubKeysType
     const langKey = langsArr[i] as i18nDictKeysType
     const matchedLocale = i18nDictMeta.find((locale) => locale.code === langKey)
     if (matchedLocale) {
@@ -43,7 +42,7 @@ export function getBookAndChapterFromUrl({
   chapter: string
 } {
   if (!repoIndex.bible?.length) {
-    // return a falsy value of same ts shape
+    // return an object of same ts shape, but falsy vals
     return {
       book: "",
       chapter: ""
@@ -134,4 +133,13 @@ export function seedAndMutateInitialDataRepoIndex({
       }
     })
   })
+}
+
+export function intlDate(
+  timestring: string,
+  locale: string | string[],
+  options: Intl.DateTimeFormatOptions
+) {
+  const date = new Date(timestring)
+  return new Intl.DateTimeFormat(locale, options).format(date)
 }

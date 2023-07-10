@@ -7,7 +7,7 @@ export default function TranslationManual(props: tmProps) {
   const [navIsOpen, setNavIsOpen] = createSignal(false)
 
   return (
-    <div class="h-full px-4 md:px-4 md:py-4">
+    <div class="h-full border-x border-gray-200 bg-white px-4 md:px-4 md:py-4">
       <div class="sticky top-0 z-20 pt-4 md:hidden md:pt-0 ">
         <button
           class={`ml-auto flex items-center gap-2 rounded-md border border-solid  border-white bg-darkAccent px-4 py-2 capitalize text-white rtl:flex-row-reverse md:hidden ${
@@ -22,7 +22,7 @@ export default function TranslationManual(props: tmProps) {
         </button>
       </div>
       <div
-        class={`relative flex h-full justify-between ${
+        class={`relative flex h-full justify-between  ${
           navIsOpen() ? "overflow-hidden" : "overflow-y-scroll"
         }`}
       >
@@ -36,7 +36,7 @@ export default function TranslationManual(props: tmProps) {
           <div class="h-full w-0  md:sticky md:top-0 md:w-2/5 md:bg-transparent lg:w-1/5">
             <Show when={navIsOpen()}>
               <button
-                class="fixed top-8 right-8 z-20 flex items-center gap-2 rounded-md border border-solid border-white  bg-darkAccent px-4 py-2 capitalize text-white rtl:flex-row-reverse md:hidden "
+                class="fixed right-8 top-8 z-20 flex items-center gap-2 rounded-md border border-solid border-white  bg-darkAccent px-4 py-2 capitalize text-white rtl:flex-row-reverse md:hidden "
                 onClick={() => {
                   setNavIsOpen(!navIsOpen())
                   document.body.classList.toggle("noscroll")
@@ -47,7 +47,7 @@ export default function TranslationManual(props: tmProps) {
             </Show>
             <nav
               aria-label="Translation Manual Navigation"
-              class={`fixed inset-0 z-10 h-[var(--screenHeight)] w-full overflow-y-scroll bg-neutral-50 px-4  md:sticky md:top-0 md:block md:h-full md:bg-none md:pt-0 ${
+              class={`fixed inset-0 z-10 h-[var(--screenHeight)] w-full overflow-y-scroll px-4  md:sticky md:top-0 md:block md:h-full md:bg-none md:pt-0 ${
                 navIsOpen() ? "block pt-24" : "hidden"
               }`}
             >

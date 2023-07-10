@@ -9,7 +9,7 @@ interface LanguageChoicesI {
 export default function LanguageChoices(props: LanguageChoicesI) {
   return (
     <div
-      class="absolute left-0 top-full z-20  w-full bg-darkAccent py-2 pr-2 text-right  md:right-[-1rem] md:left-auto md:mt-5 md:w-52 rtl:md:-right-full"
+      class="absolute left-0 top-full z-20  w-full bg-darkAccent py-2 pr-2 text-right  lg:left-auto lg:right-[-1rem] lg:mt-5 lg:w-52 rtl:lg:-right-full"
       data-js="languagePickerPane"
     >
       <ul class="flex flex-col  text-left rtl:text-right">
@@ -28,6 +28,8 @@ export default function LanguageChoices(props: LanguageChoicesI) {
                     class="inline-block w-4 ltr:mr-2 rtl:ml-2 "
                     src={`/flags/${lang().code}.svg`}
                     alt=""
+                    elementtiming={""}
+                    fetchpriority={"auto"}
                   />
                   {lang().name}
                 </button>

@@ -43,7 +43,6 @@ if (!repo || !user) {
 repo = String(repo)
 user = String(user)
 
-// let searchParamRepo = Astro.url.searchParams.get("repoindex")
 let repoIndex: repoIndexObj | null = null
 let hasDownloadIndex = false
 let wasPostRequest = false
@@ -198,7 +197,7 @@ const customFontFamily =
     {
       repoProps.templateType === "BIBLE" && (
         <ReaderWrapper
-          client:load
+          client:idle
           firstBookKey={repoProps.book}
           firstChapterToShow={repoProps.chapter}
           repoData={repoIndex}
@@ -220,7 +219,7 @@ const customFontFamily =
     <!-- #=============== TM TEMPLATE  ============= -->
     {
       repoProps.templateType === "TM" && (
-        <div class="tm-wrapper  mx-auto h-full  max-w-[1400px] ">
+        <div class="tm-wrapper  mx-auto h-full  max-w-[105ch] ">
           <TranslationManual
             client:load
             initialHtml={repoProps.initialHtml}
