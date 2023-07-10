@@ -27,10 +27,7 @@ declare module "solid-js" {
   }
 }
 
-// declare modu;
-
 export type i18nDictWithLangCode = Record<string, i18nDict>
-
 export type i18nDict = Record<string, string>
 
 export interface bibleChapObj {
@@ -38,9 +35,9 @@ export interface bibleChapObj {
   number: string
   label: string
   content: null | string
+  byteCount: number
 }
 export interface bibleEntryObj {
-  // [index: string]: any
   slug: string
   label: string
   chapters: bibleChapObj[]

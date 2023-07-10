@@ -60,7 +60,7 @@ const initialDict = {
     <meta name="description" content="A site to read rendered USFM" />
     <script src="/src/pwa.ts"></script>
     {
-      // used to work with just teh virtual, but it says doesn't during an ssr build, so making sure to put manifest link here.  As long as the build process spits out manifest.webmanifest, this should be fine.
+      // Astor pwa used to work with just the virtual script, but it wasn't for me during some builds, so going ahead and  making sure to put manifest link here in prod.  As long as the build process spits out manifest.webmanifest, this should be fine.
       import.meta.env.PROD && (
         <Fragment
           set:html={'<link rel="manifest" href="/manifest.webmanifest">'}
@@ -82,7 +82,13 @@ const initialDict = {
         repoUrl={repoUrl}
       />
       <slot />
-      <!-- <ReloadPrompt /> -->
     </div>
+    <!-- Cloudflare Web Analytics -->
+    <script
+      defer
+      src="https://static.cloudflareinsights.com/beacon.min.js"
+      data-cf-beacon='{"token": "feb40c2dec594227888151cf163244d6"}'
+    ></script>
+    <!-- End Cloudflare Web Analytics -->
   </body>
 </html>

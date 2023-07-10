@@ -7,16 +7,6 @@ import {
 } from "functions/shared"
 
 export const onRequestGet: PagesFunction = async (context) => {
-  // Contents of context object
-  // const {
-  //   request, // same as existing Worker API
-  //   env, // same as existing Worker API
-  //   params, // if filename includes [id] or [[path]]
-  //   waitUntil, // same as ctx.waitUntil in existing Worker API
-  //   next, // used for middleware or to fetch assets
-  //   data // arbitrary space for passing data between middlewares
-  // } = context
-
   const request: Request = context.request
   const env = context.env as IcfEnv & typeof context.env
   const url = new URL(request.url)
@@ -41,9 +31,8 @@ export const onRequestGet: PagesFunction = async (context) => {
     const finalUrl = `${baseUrl}/${user}/${repo}/${navSection}.html`
     const response = await fetch(finalUrl)
     const newResp = new Response(response.body, {
-      headers: getHeaders(url)
+      headers: getHeaders()
     })
-    // return newResp
     const htmlRewriter = new HTMLRewriter()
     const handler = new aTagHandler(user, "TM")
     // This line is to transform Hrefs inside the manual from absolute whatever.html into query parameters on the same origin such as

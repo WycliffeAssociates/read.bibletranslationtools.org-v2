@@ -8,6 +8,14 @@
   --thumbBG: var(--color-accent);
   --screenHeight: 100vh;
   --marginIncrement: 0.25rem;
+  --clrBackground: #f2f3f5;
+  --color-text: #33445c;
+}
+.usingCustomFont .font-sans {
+  font-family: inherit;
+}
+html #commonWrapper * {
+  @apply print:!h-max print:!overflow-visible;
 }
 .usingCustomFont .font-sans {
   font-family: inherit;
@@ -15,37 +23,38 @@
 
 /* Fluid font size variables, for browsers that support clamp */
 /* link */ /* https://www.fluid-type-scale.com/calculate?minFontSize=18&minWidth=300&minRatio=1.067&maxFontSize=18&maxWidth=1200&maxRatio=1.2&steps=sm%2Cbase%2Cmd%2Clg%2Cxl%2Cxxl%2Cxxxl&baseStep=base&prefix=font-size&decimals=2&includeFallbacks=on&useRems=on&remValue=16&previewFont=Inter */
+/* Fluid font size variables, for browsers that support clamp */
 @supports (font-size: clamp(1rem, 1vw, 1rem)) {
   :root {
-    --font-size-sm: clamp(1.05rem, -0.21vw + 1.09rem, 0.94rem);
-    --font-size-base: clamp(1.13rem, 0vw + 1.13rem, 1.13rem);
-    --font-size-md: clamp(1.2rem, 0.27vw + 1.15rem, 1.35rem);
-    --font-size-lg: clamp(1.28rem, 0.6vw + 1.17rem, 1.62rem);
-    --font-size-xl: clamp(1.37rem, 1.03vw + 1.17rem, 1.94rem);
-    --font-size-xxl: clamp(1.46rem, 1.55vw + 1.17rem, 2.33rem);
-    --font-size-xxxl: clamp(1.56rem, 2.21vw + 1.14rem, 2.8rem);
+    --font-size-sm: clamp(1.17rem, 0.14vw + 1.15rem, 1.25rem);
+    --font-size-base: clamp(1.25rem, 0.44vw + 1.17rem, 1.5rem);
+    --font-size-md: clamp(1.33rem, 0.83vw + 1.18rem, 1.8rem);
+    --font-size-lg: clamp(1.42rem, 1.31vw + 1.18rem, 2.16rem);
+    --font-size-xl: clamp(1.52rem, 1.91vw + 1.16rem, 2.59rem);
+    --font-size-xxl: clamp(1.62rem, 2.65vw + 1.12rem, 3.11rem);
+    --font-size-xxxl: clamp(1.73rem, 3.56vw + 1.06rem, 3.73rem);
   }
 }
 /* Fallback variables for browsers that don't support clamp */
 @supports not (font-size: clamp(1rem, 1vw, 1rem)) {
   :root {
-    --font-size-sm: 1.05rem;
-    --font-size-base: 1.13rem;
-    --font-size-md: 1.2rem;
-    --font-size-lg: 1.28rem;
-    --font-size-xl: 1.37rem;
-    --font-size-xxl: 1.46rem;
-    --font-size-xxxl: 1.56rem;
+    --font-size-sm: 1.17rem;
+    --font-size-base: 1.25rem;
+    --font-size-md: 1.33rem;
+    --font-size-lg: 1.42rem;
+    --font-size-xl: 1.52rem;
+    --font-size-xxl: 1.62rem;
+    --font-size-xxxl: 1.73rem;
   }
   @media screen and (min-width: 1200px) {
     :root {
-      --font-size-sm: 0.94rem;
-      --font-size-base: 1.13rem;
-      --font-size-md: 1.35rem;
-      --font-size-lg: 1.62rem;
-      --font-size-xl: 1.94rem;
-      --font-size-xxl: 2.33rem;
-      --font-size-xxxl: 2.8rem;
+      --font-size-sm: 1.25rem;
+      --font-size-base: 1.5rem;
+      --font-size-md: 1.8rem;
+      --font-size-lg: 2.16rem;
+      --font-size-xl: 2.59rem;
+      --font-size-xxl: 3.11rem;
+      --font-size-xxxl: 3.73rem;
     }
   }
 }
@@ -138,6 +147,16 @@ body.noscroll {
 .theText h4 {
   font-size: var(--font-size-base);
 }
+.theText :is(h1, h2, h3, h4, h5, h6, .chapterMarker) {
+  color: var(--color-darkAccent);
+}
+.theText .versemarker {
+  color: #5d7596;
+}
+.theText .theText p {
+  color: var(--color-text);
+}
+
 .theText p,
 .theText li {
   font-size: var(--font-size-base);
@@ -332,7 +351,7 @@ a[href*="footnote-target"] {
 }
 
 .versemarker {
-  font-size: 0.5rem;
+  font-size: 0.7rem;
 }
 
 [class^="poetry-"] .versemarker {

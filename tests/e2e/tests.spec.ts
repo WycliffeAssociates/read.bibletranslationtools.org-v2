@@ -103,15 +103,6 @@ test("navigate next button hidden on last chapter", async ({ page }) => {
   await expect(placeholderBtn).toHaveCount(0)
 })
 
-// todo: rewrite tests to look at nav buttons to test query params
-// test.skip("book and chapter query params work", async ({ page }) => {
-//   await page.goto("/WycliffeAssociates/en_ulb/?book=John&chapter=3")
-//   // const display = page.getByTestId("menuLangBookDisplay")
-//   const menuNumInputChapDisplay = page.getByTestId("chapterNavigation")
-//   // await expect(display).toContainText(/English:\s?John/)
-//   // await expect(menuNumInputChapDisplay).toHaveText("3")
-// })
-
 test("Test language change in header", async ({ page }) => {
   await page.goto(
     "http://localhost:3000/WycliffeAssociates/en_ulb/?book=John&chapter=3"

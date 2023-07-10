@@ -48,7 +48,6 @@ function reactToScrollingWhenNoteIsOpen(amount: number) {
 
 export function PreviewPane() {
   // these are hacks to keep typescript from stripping away "unused imports"
-
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const clickout = clickOutside
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -63,9 +62,7 @@ export function PreviewPane() {
         ) => {
           reactToScrollingWhenNoteIsOpen(e.detail.amount)
         }}
-        // eslint-disable-next-line solid/reactivity
         use:clickOutside={() => closeModal()}
-        // eslint-disable-next-line solid/reactivity
         use:escapeOut={() => closeModal()}
         onFocusOut={focusWithinClose}
         style={{ left: pos().x, top: pos().y }}
@@ -76,7 +73,7 @@ export function PreviewPane() {
           <button
             data-testid="closePreviewPane"
             ref={previewCloseButton}
-            class="absolute top-0 right-0 text-red-300 hover:text-red-700"
+            class="absolute right-0 top-0 text-red-300 hover:text-red-700"
             onClick={() => setShowFootnote(false)}
           >
             <svg
@@ -135,11 +132,8 @@ export function hoverOnCrossReferences() {
 
       const newDom = document.createElement("html")
       newDom.innerHTML = text
-      // '[id="#tn-chunk-gen-22-01"] not valid
       const corresponding = newDom.querySelector(`[id="${hashWithoutHashTag}"]`)
       if (!corresponding) return
-      // let htmlContainer: any[] = [corresponding]
-
       function truthyFunction(node: Element) {
         return (
           !!node.id &&
@@ -212,7 +206,6 @@ export function hoverOnCommentaryCrossReferences(user: string, repo: string) {
     const previewPane = document.querySelector("#previewPane")
     if (!previewPane) return
     const commentaryPopups = previewPane?.querySelectorAll("a[href*='popup']")
-    // if (!commentaryPopups.length) return
     commentaryPopups.forEach((link) => {
       link.addEventListener("click", manageLink)
     })
@@ -258,8 +251,6 @@ export function hoverOnFootnotes() {
         x: posX,
         y: posY + "px"
       })
-      // footnote-caller-1
-      // footnote-target-1
       const correspondingA = document.querySelector(
         `a[href*="footnote-caller-${last}"]`
       )

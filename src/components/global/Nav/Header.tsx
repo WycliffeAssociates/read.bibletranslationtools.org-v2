@@ -42,7 +42,7 @@ export function UnwrappedHeader(props: HeaderProps) {
     locale(lang)
     setFlagShowing(lang)
 
-    // NOTE: in a different scenario, the reader pane and this menu would be wrapped in same context, but note that Astro's island architecture does not permit the use of traditional React/Solid context.  Each of these components is wrapped in their own context with the same dictonary, and this custom event call the corresponding locale function there.
+    // NOTE: in a different scenario, the reader pane and this menu would be wrapped in same context, but note that Astro's island architecture does not permit the use of traditional JS SPA types contexts.  Each of these components is wrapped in their own context with the same dictonary, and this custom event call the corresponding locale function there.
     // notify Reader Pane localization event listener
     const changeLanguageEvent = new CustomEvent("changelanguage", {
       detail: {
@@ -70,7 +70,7 @@ export function UnwrappedHeader(props: HeaderProps) {
 
   return (
     <nav class="w-full bg-darkAccent py-5 font-sans print:hidden">
-      <div class="relative mx-auto flex max-w-[1400px] items-center justify-between px-4 text-white">
+      <div class="relative mx-auto flex max-w-[75ch] items-center justify-between px-4 text-varBase text-white">
         {/* https://developer.mozilla.org/en-US/docs/Learn/HTML/Multimedia_and_embedding/Responsive_images#use_modern_image_formats_boldly */}
         <picture>
           <source srcset={props.logoWebP} type="image/webp" />
@@ -81,12 +81,14 @@ export function UnwrappedHeader(props: HeaderProps) {
             class="w-32"
             width="618"
             height="186"
+            elementtiming={""}
+            fetchpriority={"high"}
           />
         </picture>
 
         <button
           onClick={() => manageMobileMenu()}
-          class="inline-flex items-center rounded-md border border-solid border-gray-100 px-6 py-2 capitalize rtl:flex-row-reverse md:hidden"
+          class="inline-flex items-center rounded-md border border-solid border-gray-100 px-6 py-2 capitalize rtl:flex-row-reverse lg:hidden"
         >
           <Show when={!mobileMenuOpen()}>
             <HamburgerSvg classNames="inline-block mr-2 w-6 h-6 fill-white" />
@@ -101,16 +103,18 @@ export function UnwrappedHeader(props: HeaderProps) {
           data-js="mobileMenu"
           class={`${
             mobileMenuOpen() ? "block" : "hidden"
-          } absolute left-0  right-0 top-full  z-50 w-full flex-col bg-darkAccent pt-5 md:static md:flex md:w-auto md:flex-row`}
+          } absolute left-0  right-0 top-full  z-50 w-full flex-col bg-darkAccent pt-5 lg:static lg:flex lg:w-auto lg:flex-row`}
         >
-          <ul class="flex flex-col ltr:pl-4 rtl:pr-4 md:flex-row">
+          <ul class="flex flex-col ltr:pl-4 rtl:pr-4 lg:flex-row">
             <Index each={props.menuItems}>
               {(menuItem) => {
                 return (
-                  <li class="my-2 capitalize hover:text-secondary focus:text-secondary md:mx-4 md:my-0">
-                    <a href={`${props.linkBase}/${menuItem()}`}>
-                      {t(String(menuItem()))}
-                    </a>
+                  <li class="my-2 capitalize hover:text-secondary focus:text-secondary lg:mx-4 lg:my-0">
+                    {
+                      <a href={`${props.linkBase}/${menuItem()}`}>
+                        {t(String(menuItem()))}
+                      </a>
+                    }
                   </li>
                 )
               }}
@@ -118,7 +122,7 @@ export function UnwrappedHeader(props: HeaderProps) {
           </ul>
 
           {/* LANGUAGE PICKER PART OF MENU BUT ADJACENT TO THE NAV PARTS */}
-          <div class="relative my-2 pl-4 md:my-0 md:ml-4 md:pl-0">
+          <div class="relative my-2 pl-4 lg:my-0 lg:ml-4 lg:pl-0">
             <button
               onClick={() => manageLanguagePickerToggle()}
               data-js="languagePicker"
@@ -132,6 +136,8 @@ export function UnwrappedHeader(props: HeaderProps) {
                 class="mr-2 w-4"
                 src={`/flags/${flagShowing()}.svg`}
                 alt=""
+                elementtiming={""}
+                fetchpriority={"auto"}
               />
               {t("thisLanguage", undefined, "English")}
             </button>
@@ -139,7 +145,7 @@ export function UnwrappedHeader(props: HeaderProps) {
             <Show when={languagePickerOpen()}>
               <Suspense
                 fallback={
-                  <div class="absolute left-0 top-full z-20  grid w-full place-content-center bg-darkAccent  py-2 pr-2 text-center md:left-[unset] md:right-0 md:mt-5 md:w-52 rtl:md:-right-full">
+                  <div class="absolute left-0 top-full z-20  grid w-full place-content-center bg-darkAccent  py-2 pr-2 text-center lg:left-[unset] lg:right-0 lg:mt-5 lg:w-52 rtl:lg:-right-full">
                     <LoadingSpinner />
                   </div>
                 }

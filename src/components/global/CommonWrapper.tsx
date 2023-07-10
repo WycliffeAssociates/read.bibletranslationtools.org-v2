@@ -19,7 +19,7 @@ export default function CommonWrapper(props: CommonWrapperProps) {
       data-resourcetype={`resource-${props.resourceType}`}
       data-testid="page-container"
       id="commonWrapper"
-      class={` bg-neutral-50 font-sans resourceType-${props.resourceType}`}
+      class={` bg-[--clrBackground] font-sans resourceType-${props.resourceType}`}
       on:setLastPageVisited={(
         e: CustomEvent<{
           url: string
