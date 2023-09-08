@@ -30,21 +30,12 @@ module.exports = {
           "100%": { transform: "translateX(100%)" }
         },
         fadeIn: {
-<<<<<<< HEAD
           "0%": { opacity: "0" },
           "100%": { opacity: "1" }
         },
         fadeOut: {
           "0%": { opacity: "1" },
           "100%": { opacity: "0" }
-=======
-          "0%": { transform: "opacity(0)" },
-          "100%": { transform: "opacity(1)" }
-        },
-        fadeOut: {
-          "0%": { transform: "opacity(1)" },
-          "100%": { transform: "opacity(0)" }
->>>>>>> read-prod
         }
       }
     }

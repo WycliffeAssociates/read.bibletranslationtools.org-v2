@@ -7,11 +7,7 @@ import { CacheableResponsePlugin } from "workbox-cacheable-response"
 import { ExpirationPlugin } from "workbox-expiration"
 import { get } from "idb-keyval"
 import type { StrategyHandler } from "workbox-strategies"
-<<<<<<< HEAD
 import { CACHENAMES } from "./lib/contants"
-=======
-import { CACHENAMES } from "@lib/contants"
->>>>>>> read-prod
 
 declare const self: ServiceWorkerGlobalScope
 
