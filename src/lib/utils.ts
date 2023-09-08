@@ -1,5 +1,4 @@
-import { i18nDictKeysType, i18nDictMeta } from "@lib/i18n"
-// import { onCleanup } from "solid-js"
+import { type i18nDictKeysType, i18nDictMeta } from "@lib/i18n"
 import type { repoIndexObj } from "@customTypes/types"
 
 /**

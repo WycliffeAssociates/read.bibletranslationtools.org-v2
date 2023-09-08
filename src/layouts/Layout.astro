@@ -61,13 +61,18 @@ const initialDict = {
     <script src="/src/pwa.ts"></script>
     {
       // Astor pwa used to work with just the virtual script, but it wasn't for me during some builds, so going ahead and  making sure to put manifest link here in prod.  As long as the build process spits out manifest.webmanifest, this should be fine.
-      import.meta.env.PROD && (
+      import.meta.env.PROD && pwaInfo && (
         <Fragment
-          set:html={'<link rel="manifest" href="/manifest.webmanifest">'}
+          set:html={pwaInfo.webManifest.linkTag}
         />
       )
     }
     {pwaInfo && <Fragment set:html={pwaInfo.webManifest.linkTag} />}
+
+<!-- LogRocket initialization -->
+<script src="https://cdn.lr-ingest.com/LogRocket.min.js" crossorigin="anonymous"></script>
+<script>window.LogRocket && window.LogRocket.init('ct7zyg/bible-in-every-language', {rootHostname: 'bibleineverylanguage.org'});</script>
+<!-- End LogRocket initialization -->
   </head>
   <body
     style={customFont && customFontFamily
