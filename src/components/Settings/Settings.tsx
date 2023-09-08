@@ -63,7 +63,11 @@ export default function Settings(props: settingsProps) {
             top: props.topAmount()
           }}
           data-title="dialog__settings__content"
+<<<<<<< HEAD
           class="fixed right-0 top-0  z-[60] max-h-[90vh] max-w-sm transform  animate-[fadeOut_.25s_ease-in-out_forwards] overflow-scroll bg-white px-4 pb-10 pt-3 data-[expanded]:animate-[fadeIn_.25s_ease-in-out_forwards]  print:hidden"
+=======
+          class="fixed right-0 top-0  z-[60] max-h-[90vh] max-w-sm transform  animate-[fadeOut.25s_ease-in-out_forwards] overflow-scroll bg-white px-4 pb-10 pt-3 data-[expanded]:animate-[fadeIn.25s_ease-in-out_forwards]  print:hidden"
+>>>>>>> read-prod
         >
           <div
             data-title="dialog__header"
