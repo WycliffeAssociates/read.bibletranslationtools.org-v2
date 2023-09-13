@@ -1,5 +1,5 @@
 import { RadioGroup, Button } from "@kobalte/core"
-import { For, Resource, Setter, createSignal } from "solid-js"
+import { For, type Resource, type Setter, createSignal } from "solid-js"
 import SectionHeader from "./SectionHeader"
 import { useI18n } from "@solid-primitives/i18n"
 import type { storeType } from "@components/ReaderWrapper/ReaderWrapper"

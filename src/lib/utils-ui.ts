@@ -1,4 +1,4 @@
-import { onCleanup, Setter } from "solid-js"
+import { onCleanup, type Setter } from "solid-js"
 import { CACHENAMES } from "@lib/contants"
 import { gunzipSync, gzipSync, strFromU8, strToU8 } from "fflate"
 import type { bibleEntryObj, repoIndexObj } from "@customTypes/types"
