@@ -1,21 +1,18 @@
-import type { i18nDictKeysType } from "@lib/i18n"
-import { createI18nContext, I18nContext } from "@solid-primitives/i18n"
-import { createSignal, createMemo, Show, onMount, batch } from "solid-js"
-import type { JSX } from "solid-js"
-import { createStore, produce } from "solid-js/store"
-import { FUNCTIONS_ROUTES } from "@lib/routes"
-import { LoadingSpinner, ReaderMenu, ReaderPane } from "@components"
-import { strFromU8, gunzipSync } from "fflate"
+import type { i18nDictKeysType } from "@lib/i18n";
+import { createSignal, createMemo, Show, onMount, batch } from "solid-js";
+import { createStore, produce } from "solid-js/store";
+import { FUNCTIONS_ROUTES } from "@lib/routes";
+import { LoadingSpinner, ReaderMenu, ReaderPane } from "@components";
+import { strFromU8, gunzipSync } from "fflate";
 
 import type {
   bibleChapObj,
   bibleEntryObj,
-  i18nDictWithLangCode,
   repoIndexObj
-} from "@customTypes/types"
-import type { Accessor } from "solid-js"
-import { debounce } from "@lib/utils-ui"
-import { CACHENAMES } from "@lib/contants"
+} from "@customTypes/types";
+import type { Accessor } from "solid-js";
+import { debounce } from "@lib/utils-ui";
+import { CACHENAMES } from "@lib/contants";
 
 // parameter types at bottom of file due to verbosity.
 
@@ -347,10 +344,6 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
       when={doRender()}
       fallback={<LoadingSpinner classNames="w-12 mx-auto my-8 text-accent" />}
     >
-      <I18nProvider
-        locale={props.preferredLocale}
-        initialDict={props.initialDict}
-      >
         <div
           onScroll={notifyPreviewPaneOfScroll}
           id="readerWrapper"
@@ -364,7 +357,8 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
               setPrintWholeBook={setPrintWholeBook}
               user={props.user}
               repositoryName={props.repositoryName}
-              hasDownloadIndex={props.hasDownloadIndex}
+            hasDownloadIndex={props.hasDownloadIndex}
+            initialDict={props.initialDict}
             />
           </div>
           <ReaderPane
@@ -377,24 +371,11 @@ export default function ReaderWrapper(props: ReaderWrapperProps) {
           />
         </div>
         <div class="relative mx-auto  max-w-[105ch]" id="menuPortalMount" />
-      </I18nProvider>
+
     </Show>
   )
 }
 
-interface i18Props {
-  locale: i18nDictKeysType
-  children: JSX.Element
-  initialDict: i18nDictWithLangCode
-}
-function I18nProvider(props: i18Props) {
-  // eslint-disable-next-line solid/reactivity
-  const value = createI18nContext(props.initialDict, props.locale)
-
-  return (
-    <I18nContext.Provider value={value}>{props.children}</I18nContext.Provider>
-  )
-}
 
 export type repoShape = {
   [index: string]: {
@@ -420,9 +401,9 @@ export interface ReaderWrapperProps {
   firstBookKey: string
   firstChapterToShow: string
   repoData: repoIndexObj
-  initialDict: i18Props["initialDict"]
   hasDownloadIndex: boolean
   wasPostRequest: boolean
+  initialDict: Record<string,string>
   // isReqToGenerateOnClient: boolean
   // resLevel: string | null
 }

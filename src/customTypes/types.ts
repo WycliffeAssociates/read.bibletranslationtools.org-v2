@@ -26,8 +26,14 @@ declare module "solid-js" {
     }
   }
 }
+declare global {
+  interface Window { 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+    LogRocket:any
+  }
+}
 
-export type i18nDictWithLangCode = Record<string, i18nDict>
+
 export type i18nDict = Record<string, string>
 
 export interface bibleChapObj {

@@ -1,4 +1,4 @@
-import { onMount, Show, createEffect, on, batch, Accessor } from "solid-js"
+import { onMount, Show, createEffect, on, batch, type Accessor } from "solid-js"
 import { SvgArrow } from "@components"
 import NavButtonLinks from "./NavButtons"
 import type { storeType } from "../ReaderWrapper/ReaderWrapper"

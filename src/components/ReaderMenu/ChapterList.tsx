@@ -1,6 +1,6 @@
 import { For, Show } from "solid-js"
-import { useI18n } from "@solid-primitives/i18n"
 import type { storeType } from "@components/ReaderWrapper/ReaderWrapper"
+import type { Translator } from "@solid-primitives/i18n"
 
 interface ChapterProps {
   storeInterface: storeType
@@ -8,17 +8,17 @@ interface ChapterProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   jumpToNewChapIdx: (...args: any) => void
   isMobile: boolean
+  t: Translator<Record<string, string>>
 }
 
 export function ChapterList(props: ChapterProps) {
-  const [t] = useI18n()
   return (
     <>
       <Show when={props.isMobile}>
         <div class="w-full">
           <div class="w-full">
             <h2 class="mt-2 text-2xl capitalize ltr:ml-2 rtl:mr-2 ">
-              {t("chapters")}
+              {props.t("chapters")}
             </h2>
             <div class="mt-2 w-full border-t border-neutral-200 pt-2">
               <div class="p-2">

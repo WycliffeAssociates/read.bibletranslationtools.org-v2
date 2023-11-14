@@ -1,4 +1,4 @@
-import { createSignal, Show, batch, Setter, createResource } from "solid-js"
+import { createSignal, Show, batch, type Setter, createResource } from "solid-js"
 import { SvgSettings, SvgBook, SvgArrow } from "@components"
 import { BookList } from "./BookList"
 import { ChapterList } from "./ChapterList"
@@ -12,7 +12,7 @@ const clickout = clickOutside
 // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 const escape = escapeOut
 
-import { useI18n } from "@solid-primitives/i18n"
+import { translator, resolveTemplate } from "@solid-primitives/i18n"
 import type { Component } from "solid-js"
 import type {
   bibleEntryObj,
@@ -33,10 +33,14 @@ interface MenuProps {
   repositoryName: string
   hasDownloadIndex: boolean
   repoIndex: repoIndexObj
+  initialDict: Record<string,string>
 }
 const ReaderMenu: Component<MenuProps> = (props) => {
   // ====MENU STATE
-  const [t, { add, locale }] = useI18n()
+  const [dict, setDict] = createSignal(props.initialDict)
+// t is tracked here
+  // eslint-disable-next-line solid/reactivity 
+  const t = translator(dict, resolveTemplate)
   const [menuIsOpen, setMenuIsOpen] = createSignal(false)
   const [hasFetchedRepoIndexAfresh, setHasFetchedRepoIndexAfresh] =
     createSignal(false)
@@ -254,15 +258,9 @@ const ReaderMenu: Component<MenuProps> = (props) => {
   }, 400)
 
   function setLanguageFromCustomEvent(
-    langCode: string,
     newDict: Record<string, string>,
-    newDictCode: string,
-    addToOtherDict: boolean
   ) {
-    if (addToOtherDict) {
-      add(newDictCode, newDict)
-    }
-    locale(langCode)
+    setDict(newDict)
   }
 
   function topAmount() {
@@ -282,17 +280,11 @@ const ReaderMenu: Component<MenuProps> = (props) => {
         class="mx-auto w-full"
         on:changelanguage={(
           e: CustomEvent<{
-            language: string
             newDict: Record<string, string>
-            newDictCode: string
-            addToOtherDict: boolean
           }>
         ) => {
           setLanguageFromCustomEvent(
-            e.detail.language,
             e.detail.newDict,
-            e.detail.newDictCode,
-            e.detail.addToOtherDict
           )
         }}
         id="menu"
@@ -395,6 +387,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                                     </span>
                                   </label>
                                   <BookList
+                                    t={t}
                                     onClick={(book: string) =>
                                       switchBooks(book)
                                     }
@@ -409,6 +402,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                             </div>
                           </div>
                           <ChapterList
+                            t={t}
                             storeInterface={props.storeInterface}
                             isActiveBookAndChap={isActiveBookAndChap}
                             jumpToNewChapIdx={jumpToNewChapIdx}
@@ -480,12 +474,14 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                                 filteredMenuBookByCategory
                               }
                               isMobile={true}
+                              t={t}
                             />
                           </div>
                         </Show>
                         {/* MOBILE CHAPTERS */}
                         <Show when={mobileTabOpen() == "chapter"}>
                           <ChapterList
+                            t={t}
                             isActiveBookAndChap={isActiveBookAndChap}
                             isMobile={true}
                             jumpToNewChapIdx={jumpToNewChapIdx}
@@ -504,7 +500,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
               <div class=" relative w-max rounded-md ltr:ml-auto rtl:mr-auto ">
                 <button
                   class="rounded   px-5  py-2 text-slate-700  hover:bg-gray-100 focus:outline-2 focus:outline-accent"
-                  aria-label={t("openSettings", {}, "open settings")}
+                  aria-label={t("openSettings")}
                   onClick={manageOpenSettings}
                 >
                   <SvgSettings classNames="" />
@@ -524,6 +520,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                     downloadSourceUsfmArr={props.storeInterface.getStoreVal(
                       "downloadLinks"
                     )}
+                    t={t}
                   />
                 </Show>
               </div>

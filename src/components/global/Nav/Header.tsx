@@ -1,10 +1,9 @@
 import type { i18nDictKeysType } from "@lib/i18n"
-import { useI18n } from "@solid-primitives/i18n"
+import { resolveTemplate, translator } from "@solid-primitives/i18n"
 import { MobileMenuOpen, HamburgerSvg } from "./MenuButtons"
 import { LoadingSpinner } from "@components"
 import { Index, createSignal, Show, lazy, Suspense } from "solid-js"
-import { I18nProvider, addDict } from "./I18nContext"
-import type { i18nDictWithLangCode } from "@customTypes/types"
+import { addDict } from "./I18nContext"
 const LanguageChoices = lazy(() => import("./LanguageChoices"))
 
 interface HeaderProps {
@@ -13,14 +12,21 @@ interface HeaderProps {
   logoWebP: string
   preferredLocale: i18nDictKeysType
   linkBase: string
-  initialDict: i18nDictWithLangCode
+  initialDict: Record<string,string>
   repoUrl: string
   // children: JSX.Element
 }
 
-export function UnwrappedHeader(props: HeaderProps) {
+export function Header(props: HeaderProps) {
   // full signature
-  const [t, { add, locale }] = useI18n()
+  const [dict, setDict] = createSignal(props.initialDict)
+  const [dictsFetched, setDictsFetched] = createSignal({
+    [props.preferredLocale]: props.initialDict
+  })
+  // t is tracked here
+  // eslint-disable-next-line solid/reactivity 
+  const t = translator(dict, resolveTemplate)
+
   // ignore due to seeding intial state
   // eslint-disable-next-line solid/reactivity
   const [flagShowing, setFlagShowing] = createSignal(props.preferredLocale)
@@ -29,27 +35,32 @@ export function UnwrappedHeader(props: HeaderProps) {
   const [languagePickerOpen, setLanguagePickerOpen] = createSignal(false)
 
   async function changeLanguage(lang: string): Promise<void> {
-    let newDict, newDictCode
-    let addToOtherDict = false
-    if (lang !== props.preferredLocale) {
+    let newDict: Record<string, string> | undefined, newDictCode: string | undefined;
+    if (dictsFetched()[lang]) {
+      setDict(dictsFetched()[lang])
+    } else  {
       const dictCodeAndVal = await addDict(lang)
       newDict = dictCodeAndVal.newDict
       newDictCode = dictCodeAndVal.newDictCode
-      add(newDictCode, newDict)
-      addToOtherDict = true
+      if (newDict && newDictCode) {
+        const coerceTs = newDictCode as string
+        const coerceTsDict = newDict as Record<string, string>
+        setDictsFetched((prev) => {
+          return {
+            ...prev,
+            [coerceTs] : coerceTsDict
+          }
+        })
+        setDict(newDict)
+      }
     }
-
-    locale(lang)
     setFlagShowing(lang)
 
     // NOTE: in a different scenario, the reader pane and this menu would be wrapped in same context, but note that Astro's island architecture does not permit the use of traditional JS SPA types contexts.  Each of these components is wrapped in their own context with the same dictonary, and this custom event call the corresponding locale function there.
     // notify Reader Pane localization event listener
     const changeLanguageEvent = new CustomEvent("changelanguage", {
       detail: {
-        language: lang,
         newDict: newDict,
-        newDictCode,
-        addToOtherDict
       }
     })
     const menu = document.querySelector("#menu")
@@ -64,7 +75,7 @@ export function UnwrappedHeader(props: HeaderProps) {
     setLanguagePickerOpen(!languagePickerOpen())
   }
 
-  function menuText() {
+  function menuText():string {
     return !mobileMenuOpen() ? "menu" : "close"
   }
 
@@ -96,7 +107,7 @@ export function UnwrappedHeader(props: HeaderProps) {
           <Show when={mobileMenuOpen()}>
             <MobileMenuOpen classNames="inline-block mr-2 w-6 h-6" />
           </Show>
-          {t(menuText(), undefined, menuText())}
+          {t(menuText())}
         </button>
 
         <div
@@ -138,7 +149,7 @@ export function UnwrappedHeader(props: HeaderProps) {
                 elementtiming={""}
                 fetchpriority={"auto"}
               />
-              {t("thisLanguage", undefined, "English")}
+              {t("thisLanguage")}
             </button>
             {/* OFFERED LANGUAGES */}
             <Show when={languagePickerOpen()}>
@@ -156,12 +167,5 @@ export function UnwrappedHeader(props: HeaderProps) {
         </div>
       </div>
     </nav>
-  )
-}
-export function Header(props: HeaderProps) {
-  return (
-    <I18nProvider {...props}>
-      <UnwrappedHeader {...props} />
-    </I18nProvider>
   )
 }
