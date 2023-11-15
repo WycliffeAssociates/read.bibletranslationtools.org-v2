@@ -25,9 +25,9 @@ export function DownloadSection(props: IDownloadSection) {
   const [bookOrResource, setBookOrResource] = createSignal("BOOK")
   const [fileType, setFileType] = createSignal(".PDF")
   let printWholeUsfmRef: HTMLAnchorElement | undefined
-  let bttWriterSinglUsfmForm: HTMLFormElement | undefined
+  let bttWriterSingleUsfmForm: HTMLFormElement | undefined
 
-  function buttonIsDisabled() {
+  function buttonStatus() {
     const singleUsfmFileNotSupported =
       bookOrResource() === "BOOK" &&
       fileType() === ".USFM" &&
@@ -84,7 +84,7 @@ export function DownloadSection(props: IDownloadSection) {
 
     function downloadSingleUsfm() {
       if (props.downloadSourceUsfmArr.length) {
-        bttWriterSinglUsfmForm && bttWriterSinglUsfmForm.submiprops.t()
+        bttWriterSingleUsfmForm && bttWriterSingleUsfmForm.submit()
       }
     }
     function downloadWholeUsfm() {
@@ -183,9 +183,9 @@ export function DownloadSection(props: IDownloadSection) {
       <Button.Root
         onClick={handleDownloadSubmission}
         class="mt-4  flex w-full items-center justify-center gap-4 rounded-2xl border border-gray-200 py-3 text-center hover:bg-gray-100 focus:outline-2 focus:outline-accent disabled:border-red-200 disabled:opacity-70"
-        disabled={buttonIsDisabled().enabled}
+        disabled={buttonStatus().enabled}
       >
-        {buttonIsDisabled().text}
+        {buttonStatus().text}
       </Button.Root>
 
       <div data-role="hiddenControls" class="hidden h-0 w-0">
@@ -195,7 +195,7 @@ export function DownloadSection(props: IDownloadSection) {
           href={`https://content.bibletranslationtools.org/${props.user}/${props.repo}/archive/master.zip`}
         />
         <form
-          ref={bttWriterSinglUsfmForm}
+          ref={bttWriterSingleUsfmForm}
           action={FUNCTIONS_ROUTES.downloadUsfmSrc({
             user: props.user,
             repo: props.repo,
