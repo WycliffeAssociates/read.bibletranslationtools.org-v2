@@ -29,4 +29,4 @@ ignore-notes.md
 /functions/\[\[path\]\].js
 # ui.astro is just my (wk) page for designing and rendering components in isolation / debugging etc; 
 ui.astro
-Settings2.tsx
+.wrangler

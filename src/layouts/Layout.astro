@@ -19,9 +19,7 @@ const { title, use100vh, textDir, repoUrl, customFont, customFontFamily } =
 
 const preferredLocale = getPreferredLangFromHeader(Astro.request)
 let initialDictModule = await import(`../translations/${preferredLocale}.js`)
-const initialDict = {
-  [preferredLocale]: initialDictModule.default
-}
+const initialDict = initialDictModule.default
 ---
 
 <!DOCTYPE html>

@@ -16,13 +16,13 @@ import {
   getWholeBook
 } from "@lib/utils-ui"
 import { gzipSync, strToU8 } from "fflate"
-import pLimit, { LimitFunction } from "p-limit"
-import { Resource, Show, createSignal } from "solid-js"
+import pLimit, { type LimitFunction } from "p-limit"
+import { type Resource, Show, createSignal } from "solid-js"
 import Toggle from "./Toggle"
 import SectionHeader from "./SectionHeader"
-import { useI18n } from "@solid-primitives/i18n"
 import { Button, Progress } from "@kobalte/core"
 import { IconX, SvgDownload } from "@components/Icons/Icons"
+import type { Translator } from "@solid-primitives/i18n"
 
 interface IOfflineSection {
   savedInServiceWorker: Resource<ISavedInServiceWorkerStatus>
@@ -37,9 +37,10 @@ interface IOfflineSection {
     | Promise<ISavedInServiceWorkerStatus | undefined>
     | null
     | undefined
+    t: Translator<Record<string, string>>
 }
 export function OfflineSection(props: IOfflineSection) {
-  const [t] = useI18n()
+
   const [saveProgress, setSaveProgress] = createSignal({
     isSaving: false,
     amountStr: "0",
@@ -174,10 +175,8 @@ export function OfflineSection(props: IOfflineSection) {
       <div class="flex items-center justify-between">
         <div class="w-4/5">
           <p class="text-slate-500">
-            {t(
+            {props.t(
               "saveForOfflineReading",
-              {},
-              "Read the current book without internet access."
             )}
           </p>
         </div>
@@ -189,7 +188,7 @@ export function OfflineSection(props: IOfflineSection) {
       <div class="flex items-center justify-between">
         <div class="w-4/5">
           <p class="text-slate-500">
-            {t("saveWhole", {}, "Save whole resource for reading offline")}
+            {props.t("saveWhole")}
           </p>
         </div>
         <Toggle
@@ -208,7 +207,7 @@ export function OfflineSection(props: IOfflineSection) {
             data-title="progress__label-container"
           >
             <Progress.Label class="" data-title="progress__label">
-              {t(
+              {props.t(
                 saveProgress().didAddResources
                   ? "savingPercent"
                   : "removingPercent",
@@ -234,18 +233,17 @@ export function OfflineSection(props: IOfflineSection) {
         >
           <div class="w-10/12">
             <p class="font-bold text-accent">
-              {t("success", {}, "Loading...")}
+              {props.t("success")}
             </p>
 
             <p class="">
-              {t(
+              {props.t(
                 saveProgress().didAddResources
                   ? "successSaving"
                   : "successRemoving",
                 {
                   bookname: successText()
                 },
-                "{{ bookname }} is now available to read without internet.  Bookmark this page so you can easily reference it later."
               )}
             </p>
           </div>
@@ -269,14 +267,12 @@ export function OfflineSection(props: IOfflineSection) {
         <div data-title="successMessage" class="mt-5 bg-accent/10 px-4 py-3">
           <div class="w-10/12">
             <p class="font-bold text-accent">
-              {t("updateAvailable", {}, "Update Available")}
+              {props.t("updateAvailable")}
             </p>
 
             <p class="">
-              {t(
+              {props.t(
                 "wholeSavedAndOutOfDate",
-                {},
-                "A new version of this resource is available."
               )}
             </p>
           </div>
@@ -286,7 +282,7 @@ export function OfflineSection(props: IOfflineSection) {
               toggleWholeResource(true)
             }}
           >
-            <span>{t("updateResource", {}, "Update Resource")}</span>
+            <span>{props.t("updateResource")}</span>
             <span>
               <SvgDownload />
             </span>

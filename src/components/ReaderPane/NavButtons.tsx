@@ -1,5 +1,5 @@
-import { JSXElement, Show } from "solid-js"
-import { useI18n } from "@solid-primitives/i18n"
+import { type JSXElement, Show } from "solid-js"
+
 
 interface navProps {
   classNames?: string
@@ -27,7 +27,7 @@ const forwardClassNamesA =
   "border border-solid rounded-xl ml-auto shadow-[0_1px_3px_rgba(0,21,51,.12),_0px_1px_2px_rgba(0,21,51,.24)] bg-neutral-50 border-zinc-300 h-14  text-center grid shadow-dark-800 w-14 place-content-center  hover:text-accent focus:text-accent  cursor-pointer "
 
 export default function NavButtonLinks(props: navProps) {
-  const [t] = useI18n()
+
 
   return (
     <>
@@ -39,11 +39,6 @@ export default function NavButtonLinks(props: navProps) {
         >
           <a
             data-testid={props.dir !== "BACK" ? "NavForwardBtn" : "NavBackBtn"}
-            aria-label={
-              props.dir !== "BACK"
-                ? t("ariaNavigateForwardsOneChapter")
-                : t("ariaNavigateBackwardsOneChapter")
-            }
             href={`/${props.user}/${props.repo}/?book=${props.book}&chapter=${props.chapter}`}
             class={`${
               props.dir == "BACK" ? backwardClassA : forwardClassNamesA

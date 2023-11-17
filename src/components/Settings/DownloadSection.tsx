@@ -1,7 +1,6 @@
 import { RadioGroup, Button } from "@kobalte/core"
 import { For, type Resource, type Setter, createSignal } from "solid-js"
 import SectionHeader from "./SectionHeader"
-import { useI18n } from "@solid-primitives/i18n"
 import type { storeType } from "@components/ReaderWrapper/ReaderWrapper"
 import type {
   ISavedInServiceWorkerStatus,
@@ -10,6 +9,7 @@ import type {
 } from "@customTypes/types"
 import { getWholeBook, getWholeResource } from "@lib/utils-ui"
 import { FUNCTIONS_ROUTES } from "@lib/routes"
+import type { Translator } from "@solid-primitives/i18n"
 
 interface IDownloadSection {
   storeInterface: storeType
@@ -18,15 +18,16 @@ interface IDownloadSection {
   repo: string
   downloadSourceUsfmArr: repoIndexObj["downloadLinks"]
   setPrintWholeBook: Setter<boolean>
+  t: Translator<Record<string, string>>
 }
 export function DownloadSection(props: IDownloadSection) {
-  const [t] = useI18n()
+
   const [bookOrResource, setBookOrResource] = createSignal("BOOK")
   const [fileType, setFileType] = createSignal(".PDF")
   let printWholeUsfmRef: HTMLAnchorElement | undefined
-  let bttWriterSinglUsfmForm: HTMLFormElement | undefined
+  let bttWriterSingleUsfmForm: HTMLFormElement | undefined
 
-  function buttonIsDisabled() {
+  function buttonStatus() {
     const singleUsfmFileNotSupported =
       bookOrResource() === "BOOK" &&
       fileType() === ".USFM" &&
@@ -34,8 +35,8 @@ export function DownloadSection(props: IDownloadSection) {
     const retVal = {
       enabled: singleUsfmFileNotSupported,
       text: singleUsfmFileNotSupported
-        ? t("notYetSupported", {}, "That combination is not yet supported")
-        : t("download", {}, "Download")
+        ? props.t("notYetSupported")
+        : props.t("download")
     }
     return retVal
   }
@@ -83,7 +84,7 @@ export function DownloadSection(props: IDownloadSection) {
 
     function downloadSingleUsfm() {
       if (props.downloadSourceUsfmArr.length) {
-        bttWriterSinglUsfmForm && bttWriterSinglUsfmForm.submit()
+        bttWriterSingleUsfmForm && bttWriterSingleUsfmForm.submit()
       }
     }
     function downloadWholeUsfm() {
@@ -103,20 +104,20 @@ export function DownloadSection(props: IDownloadSection) {
   }
   return (
     <div data-title="downloadSection">
-      <SectionHeader component="h2" text={t("download", {}, "Download")} />
+      <SectionHeader component="h2" text={props.t("download")} />
       <RadioGroup.Root
         defaultValue="Book"
         data-title="bookOrResourceRadio"
         onChange={(val) => setBookOrResource(val.toUpperCase())}
       >
         <RadioGroup.Label data-title="radio-group__label" class="text-gray-400">
-          {t("fileSize", {}, "File Size")}
+          {props.t("fileSize")}
         </RadioGroup.Label>
         <div
           data-title="radio-group__items"
           class="flex divide-x divide-accent overflow-hidden rounded-lg border border-accent"
         >
-          <For each={[t("book", {}, "Book"), t("resource", {}, "Resource")]}>
+          <For each={[props.t("book"), props.t("resource")]}>
             {(choice) => (
               <RadioGroup.Item
                 value={choice}
@@ -148,7 +149,7 @@ export function DownloadSection(props: IDownloadSection) {
         onChange={(val) => setFileType(val.toUpperCase())}
       >
         <RadioGroup.Label data-title="radio-group__label" class="text-gray-400">
-          {t("fileType", {}, "File Type")}
+          {props.t("fileType")}
         </RadioGroup.Label>
         <div data-title="radio-group__items" class="flex flex-col">
           <For each={[".pdf", ".usfm"]}>
@@ -182,9 +183,9 @@ export function DownloadSection(props: IDownloadSection) {
       <Button.Root
         onClick={handleDownloadSubmission}
         class="mt-4  flex w-full items-center justify-center gap-4 rounded-2xl border border-gray-200 py-3 text-center hover:bg-gray-100 focus:outline-2 focus:outline-accent disabled:border-red-200 disabled:opacity-70"
-        disabled={buttonIsDisabled().enabled}
+        disabled={buttonStatus().enabled}
       >
-        {buttonIsDisabled().text}
+        {buttonStatus().text}
       </Button.Root>
 
       <div data-role="hiddenControls" class="hidden h-0 w-0">
@@ -194,7 +195,7 @@ export function DownloadSection(props: IDownloadSection) {
           href={`https://content.bibletranslationtools.org/${props.user}/${props.repo}/archive/master.zip`}
         />
         <form
-          ref={bttWriterSinglUsfmForm}
+          ref={bttWriterSingleUsfmForm}
           action={FUNCTIONS_ROUTES.downloadUsfmSrc({
             user: props.user,
             repo: props.repo,

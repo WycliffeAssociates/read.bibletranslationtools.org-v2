@@ -1,5 +1,5 @@
 import type { IBibleMenuBooksByCategory } from "@customTypes/types"
-import { useI18n } from "@solid-primitives/i18n"
+import type { Translator } from "@solid-primitives/i18n"
 import { For, Show } from "solid-js"
 
 interface propsInterface {
@@ -7,9 +7,10 @@ interface propsInterface {
   isActiveBook: (book: string) => boolean
   bibleMenuBooksByCategory: () => IBibleMenuBooksByCategory | undefined
   isMobile: boolean
+  t: Translator<Record<string, string>>
 }
 export function BookList(props: propsInterface) {
-  const [t] = useI18n()
+
   const outterClassNames = () => {
     return props.isMobile
       ? "h-[95vh] overflow-y-auto pb-96"
@@ -26,7 +27,7 @@ export function BookList(props: propsInterface) {
         {/* OT */}
         <Show when={props.bibleMenuBooksByCategory()?.OT.length}>
           <span class="block px-4 pb-1 pt-5 text-base uppercase italic text-gray-800">
-            {t("oldTestament", undefined, "Old Testament")}
+            {props.t("oldTestament")}
           </span>
           <ul class="" aria-label="">
             <For each={props.bibleMenuBooksByCategory()?.OT}>
@@ -50,7 +51,7 @@ export function BookList(props: propsInterface) {
         {/* NT */}
         <Show when={props.bibleMenuBooksByCategory()?.NT.length}>
           <span class="block px-4 pb-1 pt-5 text-base uppercase italic text-gray-800">
-            {t("newTestament", undefined, "New Testament")}
+            {props.t("newTestament")}
           </span>
           <ul>
             <For each={props.bibleMenuBooksByCategory()?.NT}>

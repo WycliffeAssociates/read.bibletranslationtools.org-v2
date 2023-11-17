@@ -1,5 +1,5 @@
 import type { Setter, Accessor, Resource } from "solid-js"
-import { useI18n } from "@solid-primitives/i18n"
+import { type Translator } from "@solid-primitives/i18n"
 import type { storeType } from "../ReaderWrapper/ReaderWrapper"
 import type {
   ISavedInServiceWorkerStatus,
@@ -37,10 +37,11 @@ interface settingsProps {
     | Promise<ISavedInServiceWorkerStatus | undefined>
     | null
     | undefined
+  t: Translator<Record<string, string>>
 }
 
 export default function Settings(props: settingsProps) {
-  const [t] = useI18n()
+
   const resTypeName = () => {
     return (
       props.repoIndex.resourceType?.charAt(0).toLocaleUpperCase() +
@@ -73,7 +74,7 @@ export default function Settings(props: settingsProps) {
               data-title="dialog__title"
               class="text-xl font-bold md:text-2xl"
             >
-              {t("settings", {}, "settings")}
+              {props.t("settings")}
             </Dialog.Title>
             <Dialog.CloseButton
               data-title="dialog__close-button"
@@ -84,26 +85,26 @@ export default function Settings(props: settingsProps) {
           </div>
           <div data-title="detailsSection">
             {/* <h2 class="mb-4 text-lg font-bold">Details</h2> */}
-            <SectionHeader component="h2" text={t("details", {}, "Details")} />
+            <SectionHeader component="h2" text={props.t("details")} />
             <ul class="flex flex-col gap-3">
               <DetailItem
                 icon={<IconDocument />}
-                header={t("resourceType", {}, "Resource Type")}
+                header={props.t("resourceType")}
                 detail={resTypeName()}
               />
               <DetailItem
                 icon={<IconBookMark />}
-                header={t("currentBook", {}, "Current Book")}
+                header={props.t("currentBook")}
                 detail={props.storeInterface.currentBookObj()?.label || ""}
               />
               <DetailItem
                 icon={<IconWeb />}
-                header={t("language", {}, "Language")}
+                header={props.t("language")}
                 detail={props.repoIndex.languageName}
               />
               <DetailItem
                 icon={<IconClock />}
-                header={t("lastModified", {}, "Last Modified")}
+                header={props.t("lastModified")}
                 detail={intlDate(
                   props.repoIndex.lastRendered,
                   [...navigator.languages],
@@ -117,6 +118,7 @@ export default function Settings(props: settingsProps) {
           </div>
           <div data-title="offlineSection" class="">
             <OfflineSection
+              t={props.t}
               repoIndex={props.repoIndex}
               savedInServiceWorker={props.savedInServiceWorker}
               storeInterface={props.storeInterface}
@@ -127,6 +129,7 @@ export default function Settings(props: settingsProps) {
           </div>
           <span class="my-9 block h-[1px] w-full bg-gray-200" />
           <DownloadSection
+            t={props.t}
             storeInterface={props.storeInterface}
             repo={props.repo}
             user={props.user}

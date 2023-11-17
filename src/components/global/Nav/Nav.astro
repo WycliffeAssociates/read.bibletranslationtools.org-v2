@@ -1,10 +1,9 @@
 ---
-import type { i18nDictWithLangCode } from "@customTypes/types"
 const linkBase = "https://bibleineverylanguage.org"
 import type { i18nDictKeysType } from "@lib/i18n"
 export interface Props {
   preferredLocale: i18nDictKeysType
-  initialDict: i18nDictWithLangCode
+  initialDict: Record<string,string>
   repoUrl: string
 }
 const menu = [

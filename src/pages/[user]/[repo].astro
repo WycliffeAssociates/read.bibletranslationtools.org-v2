@@ -169,9 +169,7 @@ const initialDictModule = await import(
   `../../translations/${preferredLocale}.js`
 )
 
-const initialDict = {
-  [preferredLocale]: initialDictModule.default
-}
+const initialDict =  initialDictModule.default as Record<string,string>
 
 const customFont =
   repoIndex.appMeta?.fontUrl && typeof repoIndex.appMeta?.fontUrl == "string"

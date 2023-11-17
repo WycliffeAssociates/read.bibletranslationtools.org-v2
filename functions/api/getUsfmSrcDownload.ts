@@ -24,8 +24,13 @@ export const onRequestPost: PagesFunction = async (context) => {
     const finalUrl = `${baseUrl}/${user}/${repo}/source.usfm`
     const response = await fetch(finalUrl)
 
+    // @ NOTE! There is a convention in bible translation world (at least told to me) of NT matthew starting at 41 instead of 40:  So, if the bibleBookSortOrder[book?.toUpperCase()] is > = 40, we need to plus 1 it. 
+    let sortOrder = bibleBookSortOrder[book?.toUpperCase()];
+    if (sortOrder >= 40) {
+      sortOrder = sortOrder += 1; 
+    }
     const fileName = `${
-      bibleBookSortOrder[book?.toUpperCase()]
+      sortOrder
     }-${book?.toUpperCase()}`
     const newResp = new Response(response.body, {
       headers: {
