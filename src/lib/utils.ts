@@ -51,11 +51,15 @@ export function getBookAndChapterFromUrl({
   const firstBibBookChap = chapter || firstBibBook.chapters[0].label
   const bookToSearch = book || firstBibBook.slug
   // most things in app use slug.  But for initial render, its fine to check for if the whole book label was passed instead of only slug
-  const matchingBook = repoIndex.bible?.find(
+  let matchingBook = repoIndex.bible?.find(
     (repoBook) =>
-      repoBook.slug.toLowerCase() == bookToSearch.toLowerCase() ||
-      repoBook.label.toLowerCase() == firstBibBook.label.toLowerCase()
+      repoBook.slug.toLowerCase() == bookToSearch.toLowerCase() 
   )
+  if (!matchingBook) {
+    // Fallback to use first book; 
+    matchingBook = 
+    repoIndex.bible?.find( (repoBook) => repoBook.label.toLowerCase() == firstBibBook.label.toLowerCase())
+  }
   const matchingChapter =
     matchingBook &&
     matchingBook.chapters.find(
