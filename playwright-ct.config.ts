@@ -1,5 +1,5 @@
-import type { PlaywrightTestConfig } from "@playwright/experimental-ct-solid"
-import { devices } from "@playwright/experimental-ct-solid"
+import type { PlaywrightTestConfig } from "@playwright/experimental-ct-solid";
+import { devices } from "@playwright/experimental-ct-solid";
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -56,6 +56,6 @@ const config: PlaywrightTestConfig = {
       }
     }
   ]
-}
+};
 
-export default config
+export default config;

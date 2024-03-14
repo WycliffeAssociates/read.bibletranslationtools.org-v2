@@ -1,9 +1,9 @@
-import type { JSX } from "solid-js"
+import type { JSX } from "solid-js";
 
 interface IDetailItem {
-  icon: JSX.Element
-  header: string
-  detail: string
+  icon: JSX.Element;
+  header: string;
+  detail: string;
 }
 export default function DetailItem(props: IDetailItem) {
   return (
@@ -16,5 +16,5 @@ export default function DetailItem(props: IDetailItem) {
         <p class="text-xl text-slate-700">{props.detail}</p>
       </div>
     </li>
-  )
+  );
 }

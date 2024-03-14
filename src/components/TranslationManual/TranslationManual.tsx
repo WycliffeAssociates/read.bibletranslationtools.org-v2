@@ -1,21 +1,21 @@
-import { HamburgerSvg } from "@components/global/Nav/MenuButtons"
-import type { tmProps } from "@src/customTypes/types"
-import { createSignal, Show } from "solid-js"
-import { TMNav } from "./TmNav"
+import { HamburgerSvg } from "@components/global/Nav/MenuButtons";
+import type { tmProps } from "@src/customTypes/types";
+import { createSignal, Show } from "solid-js";
+import { TMNav } from "./TmNav";
 
 export default function TranslationManual(props: tmProps) {
-  const [navIsOpen, setNavIsOpen] = createSignal(false)
+  const [navIsOpen, setNavIsOpen] = createSignal(false);
 
   return (
     <div class="h-full border-x border-gray-200 bg-white px-4 md:px-4 md:py-4">
       <div class="sticky top-0 z-20 pt-4 md:hidden md:pt-0 ">
         <button
-          class={`ml-auto flex items-center gap-2 rounded-md border border-solid  border-white bg-darkAccent px-4 py-2 capitalize text-white rtl:flex-row-reverse md:hidden ${
+          class={`ml-auto flex items-center gap-2 rounded-md border border-solid  border-white bg-darkAccent px-4 py-2 capitalize text-white md:hidden rtl:flex-row-reverse ${
             navIsOpen() && "hidden"
           }`}
           onClick={() => {
-            setNavIsOpen(!navIsOpen())
-            document.body.classList.toggle("noscroll")
+            setNavIsOpen(!navIsOpen());
+            document.body.classList.toggle("noscroll");
           }}
         >
           See outline <HamburgerSvg classNames="fill-white" />
@@ -36,10 +36,10 @@ export default function TranslationManual(props: tmProps) {
           <div class="h-full w-0  md:sticky md:top-0 md:w-2/5 md:bg-transparent lg:w-1/5">
             <Show when={navIsOpen()}>
               <button
-                class="fixed right-8 top-8 z-20 flex items-center gap-2 rounded-md border border-solid border-white  bg-darkAccent px-4 py-2 capitalize text-white rtl:flex-row-reverse md:hidden "
+                class="fixed right-8 top-8 z-20 flex items-center gap-2 rounded-md border border-solid border-white  bg-darkAccent px-4 py-2 capitalize text-white md:hidden rtl:flex-row-reverse "
                 onClick={() => {
-                  setNavIsOpen(!navIsOpen())
-                  document.body.classList.toggle("noscroll")
+                  setNavIsOpen(!navIsOpen());
+                  document.body.classList.toggle("noscroll");
                 }}
               >
                 Close outline <HamburgerSvg classNames="fill-white" />
@@ -63,5 +63,5 @@ export default function TranslationManual(props: tmProps) {
         )}
       </div>
     </div>
-  )
+  );
 }

@@ -1,105 +1,106 @@
-import { RadioGroup, Button } from "@kobalte/core"
-import { For, type Resource, type Setter, createSignal } from "solid-js"
-import SectionHeader from "./SectionHeader"
-import type { storeType } from "@components/ReaderWrapper/ReaderWrapper"
+import { RadioGroup, Button } from "@kobalte/core";
+import { For, type Resource, type Setter, createSignal } from "solid-js";
+import SectionHeader from "./SectionHeader";
+import type { storeType } from "@components/ReaderWrapper/ReaderWrapper";
 import type {
   ISavedInServiceWorkerStatus,
   bibleEntryObj,
   repoIndexObj
-} from "@customTypes/types"
-import { getWholeBook, getWholeResource } from "@lib/utils-ui"
-import { FUNCTIONS_ROUTES } from "@lib/routes"
-import type { Translator } from "@solid-primitives/i18n"
+} from "@customTypes/types";
+import { getWholeBook, getWholeResource } from "@lib/utils-ui";
+import { FUNCTIONS_ROUTES } from "@lib/routes";
+import type { Translator } from "@solid-primitives/i18n";
 
 interface IDownloadSection {
-  storeInterface: storeType
-  savedInServiceWorker: Resource<ISavedInServiceWorkerStatus>
-  user: string
-  repo: string
-  downloadSourceUsfmArr: repoIndexObj["downloadLinks"]
-  setPrintWholeBook: Setter<boolean>
-  t: Translator<Record<string, string>>
+  storeInterface: storeType;
+  savedInServiceWorker: Resource<ISavedInServiceWorkerStatus>;
+  user: string;
+  repo: string;
+  downloadSourceUsfmArr: repoIndexObj["downloadLinks"];
+  setPrintWholeBook: Setter<boolean>;
+  t: Translator<Record<string, string>>;
 }
 export function DownloadSection(props: IDownloadSection) {
-
-  const [bookOrResource, setBookOrResource] = createSignal("BOOK")
-  const [fileType, setFileType] = createSignal(".PDF")
-  let printWholeUsfmRef: HTMLAnchorElement | undefined
-  let bttWriterSingleUsfmForm: HTMLFormElement | undefined
+  const [bookOrResource, setBookOrResource] = createSignal("BOOK");
+  const [fileType, setFileType] = createSignal(".PDF");
+  let printWholeUsfmRef: HTMLAnchorElement | undefined;
+  let bttWriterSingleUsfmForm: HTMLFormElement | undefined;
 
   function buttonStatus() {
     const singleUsfmFileNotSupported =
       bookOrResource() === "BOOK" &&
       fileType() === ".USFM" &&
-      !props.downloadSourceUsfmArr.length
+      !props.downloadSourceUsfmArr.length;
     const retVal = {
       enabled: singleUsfmFileNotSupported,
       text: singleUsfmFileNotSupported
         ? props.t("notYetSupported")
         : props.t("download")
-    }
-    return retVal
+    };
+    return retVal;
   }
   function handleDownloadSubmission() {
-    const bookOrRes = bookOrResource()
-    const type = fileType()
+    const bookOrRes = bookOrResource();
+    const type = fileType();
 
     async function downloadSinglePdf() {
-      const storeBook = props.storeInterface.currentBookObj()
-      const bookSlug = storeBook?.slug
-      if (!bookSlug) return
+      const storeBook = props.storeInterface.currentBookObj();
+      const bookSlug = storeBook?.slug;
+      if (!bookSlug) return;
       const book = await getWholeBook({
         user: props.user,
         repo: props.repo,
         bookSlug,
         savedResponse: props.savedInServiceWorker()?.wholeResponse,
         storeBook
-      })
-      if (!book) return
-      const text = book.chapters.map((chap) => chap.content).join("")
-      if (!text) return
-      props.storeInterface.mutateStore("printHtml", text)
+      });
+      if (!book) return;
+      const text = book.chapters.map((chap) => chap.content).join("");
+      if (!text) return;
+      props.storeInterface.mutateStore("printHtml", text);
 
-      props.setPrintWholeBook(true)
-      window.print() //not a true pdf, but more helpful than any js lib or trickery will be since you can save to pdf with options.
-      props.setPrintWholeBook(false)
+      props.setPrintWholeBook(true);
+      window.print(); //not a true pdf, but more helpful than any js lib or trickery will be since you can save to pdf with options.
+      props.setPrintWholeBook(false);
     }
     async function downloadWholePdf() {
-      const bibArr = props.storeInterface.getStoreVal("text") as bibleEntryObj[]
+      const bibArr = props.storeInterface.getStoreVal(
+        "text"
+      ) as bibleEntryObj[];
       const completeTextIndex = await getWholeResource({
         user: props.user,
         repo: props.repo,
         bibArr: bibArr
-      })
+      });
       if (!completeTextIndex)
-        return console.error("could not get whole resource")
-      props.storeInterface.mutateStore("text", completeTextIndex)
-      const allHtml = props.storeInterface.wholeResourceHtml()
-      if (!allHtml) return
-      props.storeInterface.mutateStore("printHtml", allHtml)
-      props.setPrintWholeBook(true)
-      window.print()
-      props.setPrintWholeBook(false)
+        return console.error("could not get whole resource");
+      props.storeInterface.mutateStore("text", completeTextIndex);
+      const allHtml = props.storeInterface.wholeResourceHtml();
+      if (!allHtml) return;
+      props.storeInterface.mutateStore("printHtml", allHtml);
+      props.setPrintWholeBook(true);
+      window.print();
+      props.setPrintWholeBook(false);
     }
 
     function downloadSingleUsfm() {
       if (props.downloadSourceUsfmArr.length) {
-        bttWriterSingleUsfmForm && bttWriterSingleUsfmForm.submit()
+        bttWriterSingleUsfmForm && bttWriterSingleUsfmForm.submit();
       }
     }
     function downloadWholeUsfm() {
-      printWholeUsfmRef && printWholeUsfmRef.click()
+      printWholeUsfmRef && printWholeUsfmRef.click();
     }
 
     switch (type) {
       case ".PDF":
-        bookOrRes == "BOOK" ? downloadSinglePdf() : downloadWholePdf()
-        break
+        bookOrRes == "BOOK" ? downloadSinglePdf() : downloadWholePdf();
+        break;
       case ".USFM":
-        bookOrRes == "BOOK" ? downloadSingleUsfm() : downloadWholeUsfm()
-        break
+        bookOrRes == "BOOK" ? downloadSingleUsfm() : downloadWholeUsfm();
+        break;
       default:
-        break
+        break;
     }
   }
   return (
@@ -158,9 +159,12 @@ export function DownloadSection(props: IDownloadSection) {
                 <RadioGroup.Item
                   value={choice}
                   data-title="radio"
-                  class="flex cursor-pointer items-center justify-between rounded-lg px-4 py-3 hover:bg-gray-100 focus:outline-2 focus:outline-accent data-[checked]:bg-accent/10 data-[checked]:text-accent/90"
+                  class="flex cursor-pointer items-center justify-between rounded-lg  px-2 hover:bg-gray-100 focus:outline-2 focus:outline-accent data-[checked]:bg-accent/10 data-[checked]:text-accent/90"
                 >
-                  <RadioGroup.ItemLabel data-title="radio__label" class="">
+                  <RadioGroup.ItemLabel
+                    data-title="radio__label"
+                    class="w-full px-4 py-3"
+                  >
                     {choice}
                   </RadioGroup.ItemLabel>
 
@@ -192,7 +196,7 @@ export function DownloadSection(props: IDownloadSection) {
         <a
           ref={printWholeUsfmRef}
           class="sentenceCase inline-block hover:text-accent focus:text-accent"
-          href={`https://content.bibletranslationtools.org/${props.user}/${props.repo}/archive/master.zip`}
+          href={`${import.meta.env.PUBLIC_WACS_URL}/${props.user}/${props.repo}/archive/master.zip`}
         />
         <form
           ref={bttWriterSingleUsfmForm}
@@ -205,5 +209,5 @@ export function DownloadSection(props: IDownloadSection) {
         />
       </div>
     </div>
-  )
+  );
 }

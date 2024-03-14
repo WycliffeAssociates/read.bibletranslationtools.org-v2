@@ -1,17 +1,17 @@
-import { FUNCTIONS_ROUTES } from "@lib/routes"
-import type { IDownloadIndex, repoIndexObj } from "@customTypes/types"
+import { FUNCTIONS_ROUTES } from "@lib/routes";
+import type { IDownloadIndex, repoIndexObj } from "@customTypes/types";
 
 interface baseApiInfo {
-  user: string
-  repo: string
+  user: string;
+  repo: string;
 }
 interface getRepoInfo extends baseApiInfo {
-  book: string
-  chapter: string
-  navSection?: string
+  book: string;
+  chapter: string;
+  navSection?: string;
 }
 interface commentaryIndividual extends baseApiInfo {
-  file: string
+  file: string;
 }
 export async function getChapterHtml({
   user,
@@ -19,40 +19,40 @@ export async function getChapterHtml({
   book,
   chapter
 }: getRepoInfo): Promise<string | undefined> {
-  if (!repo) return
-  const fetchUrl = FUNCTIONS_ROUTES.getRepoHtml({ user, repo, book, chapter })
+  if (!repo) return;
+  const fetchUrl = FUNCTIONS_ROUTES.getRepoHtml({ user, repo, book, chapter });
   try {
-    const response = await fetch(fetchUrl)
-    const data = await response.text()
-    return data
+    const response = await fetch(fetchUrl);
+    const data = await response.text();
+    return data;
   } catch (error) {
-    console.error(error)
-    return
+    console.error(error);
+    return;
   }
 }
 interface getNonBibleSchemaHtmlParams {
-  navSection: string
-  user: string
-  repo: string
+  navSection: string;
+  user: string;
+  repo: string;
 }
 export async function getTwSchemaHtml({
   navSection,
   user,
   repo
 }: getNonBibleSchemaHtmlParams): Promise<string | undefined> {
-  if (!repo || !user || !navSection) return
+  if (!repo || !user || !navSection) return;
   const fetchUrl = FUNCTIONS_ROUTES.getHtmlForTw({
     user,
     repo,
     navSection
-  })
+  });
   try {
-    const response = await fetch(fetchUrl)
-    const data = await response.text()
-    return data
+    const response = await fetch(fetchUrl);
+    const data = await response.text();
+    return data;
   } catch (error) {
-    console.error(error)
-    return
+    console.error(error);
+    return;
   }
 }
 
@@ -61,19 +61,19 @@ export async function getTmSchemaHtml({
   user,
   repo
 }: getNonBibleSchemaHtmlParams): Promise<string | undefined> {
-  if (!repo || !user || !navSection) return
+  if (!repo || !user || !navSection) return;
   const fetchUrl = FUNCTIONS_ROUTES.getHtmlForTm({
     user,
     repo,
     navSection
-  })
+  });
   try {
-    const response = await fetch(fetchUrl)
-    const data = await response.text()
-    return data
+    const response = await fetch(fetchUrl);
+    const data = await response.text();
+    return data;
   } catch (error) {
-    console.error(error)
-    return
+    console.error(error);
+    return;
   }
 }
 
@@ -81,22 +81,22 @@ export async function getRepoIndex({
   user,
   repo
 }: baseApiInfo): Promise<repoIndexObj | null> {
-  if (!user || !repo) return null
-  const fetchUrl = FUNCTIONS_ROUTES.getRepoIndex({ user, repo })
+  if (!user || !repo) return null;
+  const fetchUrl = FUNCTIONS_ROUTES.getRepoIndex({ user, repo });
   try {
     const response = await fetch(fetchUrl, {
       headers: {
         "Content-Type": "application/json"
       }
-    })
-    const data: repoIndexObj = await response.json()
+    });
+    const data: repoIndexObj = await response.json();
     if (typeof data == "string") {
-      return null
+      return null;
     }
-    return data
+    return data;
   } catch (error) {
-    console.error(error)
-    return null
+    console.error(error);
+    return null;
   }
 }
 export async function checkForOrDownloadWholeRepo({
@@ -104,26 +104,30 @@ export async function checkForOrDownloadWholeRepo({
   repo,
   method
 }: baseApiInfo & {
-  method: "GET" | "HEAD"
+  method: "GET" | "HEAD";
 }): Promise<IDownloadIndex | null | boolean> {
-  if (!user || !repo || !method) return null
-  const fetchUrl = FUNCTIONS_ROUTES.getWholeRepoDownload({ user, repo, method })
+  if (!user || !repo || !method) return null;
+  const fetchUrl = FUNCTIONS_ROUTES.getWholeRepoDownload({
+    user,
+    repo,
+    method
+  });
   try {
-    const response = await fetch(fetchUrl)
+    const response = await fetch(fetchUrl);
     if (method == "HEAD") {
-      return response.ok
+      return response.ok;
     } else if (method == "GET") {
-      const data: IDownloadIndex = await response.json()
-      return data
+      const data: IDownloadIndex = await response.json();
+      return data;
     }
-    const data: IDownloadIndex = await response.json()
+    const data: IDownloadIndex = await response.json();
     if (typeof data == "string") {
-      return null
+      return null;
     }
-    return data
+    return data;
   } catch (error) {
-    console.error(error)
-    return null
+    console.error(error);
+    return null;
   }
 }
 
@@ -131,15 +135,15 @@ export async function isValidRepo({
   user,
   repo
 }: baseApiInfo): Promise<boolean> {
-  if (typeof user !== "string" || typeof repo !== "string") return false
-  const fetchUrl = FUNCTIONS_ROUTES.isValidRepo({ user, repo })
+  if (typeof user !== "string" || typeof repo !== "string") return false;
+  const fetchUrl = FUNCTIONS_ROUTES.isValidRepo({ user, repo });
   try {
-    const response = await fetch(fetchUrl)
-    const isValid = await response.text()
-    return !!(isValid == "true") || !!(isValid !== "false")
+    const response = await fetch(fetchUrl);
+    const isValid = await response.text();
+    return !!(isValid == "true") || !!(isValid !== "false");
   } catch (error) {
-    console.error(error)
-    return false
+    console.error(error);
+    return false;
   }
 }
 
@@ -148,18 +152,18 @@ export async function getCommentarySectionHtml({
   user,
   repo
 }: commentaryIndividual): Promise<string | undefined> {
-  if (!file || !user || !repo) return
+  if (!file || !user || !repo) return;
   const fetchUrl = FUNCTIONS_ROUTES.getHtmlForCommentaryIndividualSection({
     file,
     user,
     repo
-  })
+  });
   try {
-    const response = await fetch(fetchUrl)
-    const data = await response.text()
-    return data
+    const response = await fetch(fetchUrl);
+    const data = await response.text();
+    return data;
   } catch (error) {
-    console.error(error)
-    return
+    console.error(error);
+    return;
   }
 }

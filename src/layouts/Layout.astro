@@ -1,28 +1,28 @@
 ---
 export interface Props {
-  title: string
-  use100vh?: boolean
-  textDir: string
-  repoUrl: string
-  customFont?: string | null
-  customFontFamily?: string | null
+  title: string;
+  use100vh?: boolean;
+  textDir: string;
+  repoUrl: string;
+  customFont?: string | null;
+  customFontFamily?: string | null;
 }
 // imports
-import { pwaInfo } from "virtual:pwa-info"
-import "../styles/global.css"
-import { Nav } from "@components"
-import { getPreferredLangFromHeader } from "@lib/utils"
+import { pwaInfo } from "virtual:pwa-info";
+import "../styles/global.css";
+import { Nav } from "@components";
+import { getPreferredLangFromHeader } from "@lib/utils";
 
 // data
 const { title, use100vh, textDir, repoUrl, customFont, customFontFamily } =
-  Astro.props
+  Astro.props;
 
-const preferredLocale = getPreferredLangFromHeader(Astro.request)
-let initialDictModule = await import(`../translations/${preferredLocale}.js`)
-const initialDict = initialDictModule.default
+const preferredLocale = getPreferredLangFromHeader(Astro.request);
+let initialDictModule = await import(`../translations/${preferredLocale}.js`);
+const initialDict = initialDictModule.default;
 ---
 
-<!DOCTYPE html>
+<!doctype html>
 <html lang={preferredLocale} dir={textDir}>
   <head>
     <meta charset="UTF-8" />
@@ -60,17 +60,22 @@ const initialDict = initialDictModule.default
     {
       // Astor pwa used to work with just the virtual script, but it wasn't for me during some builds, so going ahead and  making sure to put manifest link here in prod.  As long as the build process spits out manifest.webmanifest, this should be fine.
       import.meta.env.PROD && pwaInfo && (
-        <Fragment
-          set:html={pwaInfo.webManifest.linkTag}
-        />
+        <Fragment set:html={pwaInfo.webManifest.linkTag} />
       )
     }
     {pwaInfo && <Fragment set:html={pwaInfo.webManifest.linkTag} />}
 
-<!-- LogRocket initialization -->
-<script src="https://cdn.lr-ingest.com/LogRocket.min.js" crossorigin="anonymous"></script>
-<script>window.LogRocket && window.LogRocket.init('ct7zyg/bible-in-every-language', {rootHostname: 'bibleineverylanguage.org'});</script>
-<!-- End LogRocket initialization -->
+    <!-- LogRocket initialization -->
+    <script
+      src="https://cdn.lr-ingest.com/LogRocket.min.js"
+      crossorigin="anonymous"></script>
+    <script>
+      window.LogRocket &&
+        window.LogRocket.init("ct7zyg/bible-in-every-language", {
+          rootHostname: "bibleineverylanguage.org"
+        });
+    </script>
+    <!-- End LogRocket initialization -->
   </head>
   <body
     style={customFont && customFontFamily
@@ -90,8 +95,7 @@ const initialDict = initialDictModule.default
     <script
       defer
       src="https://static.cloudflareinsights.com/beacon.min.js"
-      data-cf-beacon='{"token": "feb40c2dec594227888151cf163244d6"}'
-    ></script>
+      data-cf-beacon='{"token": "feb40c2dec594227888151cf163244d6"}'></script>
     <!-- End Cloudflare Web Analytics -->
   </body>
 </html>

@@ -1,9 +1,9 @@
-import { i18nDictMeta } from "@lib/i18n"
-import { Index } from "solid-js"
+import { i18nDictMeta } from "@lib/i18n";
+import { Index } from "solid-js";
 
 interface LanguageChoicesI {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onClick: (...args: any) => unknown
+  onClick: (...args: any) => unknown;
 }
 
 export default function LanguageChoices(props: LanguageChoicesI) {
@@ -19,7 +19,7 @@ export default function LanguageChoices(props: LanguageChoicesI) {
               <li class={`${idx > 0 ? "mt-1" : ""}`}>
                 <button
                   onClick={() => {
-                    props.onClick(lang().code)
+                    props.onClick(lang().code);
                   }}
                   class="changeLangBtn capitalize hover:text-secondary focus:text-secondary ltr:pl-6 rtl:pr-6"
                   data-lang={lang().code}
@@ -34,10 +34,10 @@ export default function LanguageChoices(props: LanguageChoicesI) {
                   {lang().name}
                 </button>
               </li>
-            )
+            );
           }}
         </Index>
       </ul>
     </div>
-  )
+  );
 }
