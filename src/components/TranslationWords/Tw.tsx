@@ -1,67 +1,67 @@
-import { createSignal, createMemo, createEffect, on, Show } from "solid-js"
-import type { twProps } from "@src/customTypes/types"
-import { getTwSchemaHtml } from "@lib/api"
+import { createSignal, createMemo, createEffect, on, Show } from "solid-js";
+import type { twProps } from "@src/customTypes/types";
+import { getTwSchemaHtml } from "@lib/api";
 import {
   getHtmlWithinSpan,
   clickOutside,
   escapeOut,
   positionPreviewPane
-} from "@lib/utils-ui"
-import { BeyondSmallNav, MobileTwNav } from "./TwNav"
+} from "@lib/utils-ui";
+import { BeyondSmallNav, MobileTwNav } from "./TwNav";
 
 // these are hacks to keep typescript from stripping away "unused imports" the actual names are unimportant; These are solid custom directives;
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const clickout = clickOutside
+const clickout = clickOutside;
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const escape = escapeOut
+const escape = escapeOut;
 
 export default function TranslationWords(props: twProps) {
-  const [searchTerm, setSearchTerm] = createSignal("")
+  const [searchTerm, setSearchTerm] = createSignal("");
   const [sectionsHTML, setSectionsHTML] = createSignal({
     [props.initialPage]: props.initialHtml ? props.initialHtml : undefined
-  })
-  const [activeSection, setActiveSection] = createSignal(props.initialPage)
+  });
+  const [activeSection, setActiveSection] = createSignal(props.initialPage);
   const [pos, setPos] = createSignal({
     x: "0px",
     y: "0px"
-  })
-  const [showPreviewPane, setShowPreviewPane] = createSignal(false)
-  const [previewPaneHtml, setpreviewPaneHtml] = createSignal("")
+  });
+  const [showPreviewPane, setShowPreviewPane] = createSignal(false);
+  const [previewPaneHtml, setpreviewPaneHtml] = createSignal("");
 
   const allWords = () => {
     const wordsList: Array<{
-      slug: string
-      label: string
-      section: string
-    }> = []
+      slug: string;
+      label: string;
+      section: string;
+    }> = [];
     props.repoIndex.words?.forEach((word) => {
       word.words.forEach((single) => {
         wordsList.push({
           section: word.slug,
           slug: single.slug,
           label: single.label
-        })
-        return
-      })
-    })
+        });
+        return;
+      });
+    });
     wordsList.sort((first, second) => {
-      const firstLabel = first.label.toUpperCase()
-      const secondLabel = second.label.toUpperCase()
-      return firstLabel > secondLabel ? 1 : firstLabel < secondLabel ? -1 : 0
-    })
-    return wordsList
-  }
+      const firstLabel = first.label.toUpperCase();
+      const secondLabel = second.label.toUpperCase();
+      return firstLabel > secondLabel ? 1 : firstLabel < secondLabel ? -1 : 0;
+    });
+    return wordsList;
+  };
 
   const filteredWords = createMemo(() => {
     return allWords().filter(
       (word) =>
         word.slug.toLowerCase().includes(searchTerm().toLowerCase().trim()) ||
         word.label.toLowerCase().includes(searchTerm().toLowerCase().trim())
-    )
-  })
+    );
+  });
   function searchWords(event: Event) {
-    const target = event.target as HTMLInputElement
-    setSearchTerm(target.value)
+    const target = event.target as HTMLInputElement;
+    setSearchTerm(target.value);
   }
   async function fetchSectionAndNav(
     event: Event,
@@ -69,28 +69,28 @@ export default function TranslationWords(props: twProps) {
     hash: string
   ) {
     if (sectionsHTML()[section] && activeSection() == section) {
-      return //same 'page' hash scroll;
+      return; //same 'page' hash scroll;
     }
-    event.preventDefault()
+    event.preventDefault();
     //  loaded page, not active one:
     if (sectionsHTML()[section]) {
-      setActiveSection(section)
-      document.getElementById(hash)?.scrollIntoView()
+      setActiveSection(section);
+      document.getElementById(hash)?.scrollIntoView();
     }
     // not loaded page
 
-    const text = await fetchSection(section)
+    const text = await fetchSection(section);
 
     if (text) {
-      const current = sectionsHTML()
+      const current = sectionsHTML();
       const newVal = {
         ...current,
         [section]: text
-      }
-      setSectionsHTML(newVal)
+      };
+      setSectionsHTML(newVal);
     }
-    setActiveSection(section)
-    document.getElementById(hash)?.scrollIntoView()
+    setActiveSection(section);
+    document.getElementById(hash)?.scrollIntoView();
   }
   async function fetchSection(section: string) {
     try {
@@ -98,84 +98,84 @@ export default function TranslationWords(props: twProps) {
         navSection: section,
         user: props.user,
         repo: props.repo
-      })
+      });
       if (!newHTML) {
-        throw new Error("no html returned")
+        throw new Error("no html returned");
       } else {
-        return newHTML
+        return newHTML;
       }
     } catch (error) {
-      console.error(error)
-      return
+      console.error(error);
+      return;
     }
   }
 
   function hoverOnCrossReferences() {
     const crossReferences = document.querySelectorAll(
       "a[data-crossref='true']"
-    ) as NodeListOf<HTMLElement>
+    ) as NodeListOf<HTMLElement>;
 
-    const memoryDom = document.createElement("html")
+    const memoryDom = document.createElement("html");
     crossReferences.forEach((ref) => {
-      const section = String(ref.dataset?.section)
-      const hash = String(ref.dataset?.hash)
+      const section = String(ref.dataset?.section);
+      const hash = String(ref.dataset?.hash);
       ref.addEventListener("click", (ev) => {
-        setShowPreviewPane(false)
-        fetchSectionAndNav(ev, section, hash)
-      })
+        setShowPreviewPane(false);
+        fetchSectionAndNav(ev, section, hash);
+      });
       ref.addEventListener("mouseover", async (event) => {
         // GENERATE A DOM FROM AN
-        const existingHtml = sectionsHTML()[section]
+        const existingHtml = sectionsHTML()[section];
         if (existingHtml) {
-          memoryDom.innerHTML = existingHtml
+          memoryDom.innerHTML = existingHtml;
         } else {
-          const newSectionText = await fetchSection(section)
-          if (!newSectionText) return
+          const newSectionText = await fetchSection(section);
+          if (!newSectionText) return;
           // we had to fetch, so go ahead and stick in memory
-          const current = sectionsHTML()
+          const current = sectionsHTML();
           const newVal = {
             ...current,
             [section]: newSectionText
-          }
-          setSectionsHTML(newVal)
-          memoryDom.innerHTML = newSectionText
+          };
+          setSectionsHTML(newVal);
+          memoryDom.innerHTML = newSectionText;
         }
 
         // Get and Set html
-        const firstElWithHashId = memoryDom.querySelector(`#${hash}`)
+        const firstElWithHashId = memoryDom.querySelector(`#${hash}`);
 
         const firstSib =
-          firstElWithHashId && firstElWithHashId.nextElementSibling
-        if (!firstSib) return
+          firstElWithHashId && firstElWithHashId.nextElementSibling;
+        if (!firstSib) return;
         function truthyFunction(htmlNode: Element) {
           return (
             !!htmlNode.id &&
             !!htmlNode.previousElementSibling &&
             htmlNode.previousElementSibling.tagName === "HR"
-          )
+          );
         }
-        const previewPaneHtml = getHtmlWithinSpan(firstSib, truthyFunction)
-        setpreviewPaneHtml(previewPaneHtml)
+        const previewPaneHtml = getHtmlWithinSpan(firstSib, truthyFunction);
+        setpreviewPaneHtml(previewPaneHtml);
 
         // show and position:
-        const target = event.target as HTMLAnchorElement
+        const target = event.target as HTMLAnchorElement;
         positionPreviewPane({
           target,
           previewPaneSelector: "#previewPane",
           previewPaneSetter: setShowPreviewPane,
           setPos
-        })
+        });
         // reset memory dom
-        memoryDom.innerHTML = ""
-      })
-    })
+        memoryDom.innerHTML = "";
+      });
+    });
   }
 
   createEffect(
     on([sectionsHTML], () => {
-      hoverOnCrossReferences()
+      hoverOnCrossReferences();
     })
-  )
+  );
 
   return (
     <>
@@ -211,7 +211,7 @@ export default function TranslationWords(props: twProps) {
           <div class="p-6" innerHTML={previewPaneHtml()} />
         </div>
       </Show>
-      <div class="theTextWrapper mx-auto h-full  max-w-[105ch] bg-white px-2 print:h-min print:overflow-y-visible sm:pl-4 sm:pr-0">
+      <div class="theTextWrapper mx-auto h-full  max-w-[105ch] bg-white px-2 sm:pl-4 sm:pr-0 print:h-min print:overflow-y-visible">
         <div class="relative h-full gap-8   overflow-y-scroll sm:flex">
           <div
             class="theText tw-theText h-full w-full max-w-[75ch] scroll-pt-16 overflow-y-scroll pt-16  sm:w-4/5 sm:scroll-pt-0  sm:pt-0"
@@ -224,7 +224,7 @@ export default function TranslationWords(props: twProps) {
               searchWords={searchWords}
             />
           </div>
-          <div class="customScrollBar sticky right-0 top-0 ml-auto  hidden h-full w-1/5 overflow-y-auto print:hidden sm:block">
+          <div class="customScrollBar sticky right-0 top-0 ml-auto  hidden h-full w-1/5 overflow-y-auto sm:block print:hidden">
             <BeyondSmallNav
               filteredWords={filteredWords}
               fetchSectionAndNav={fetchSectionAndNav}
@@ -234,5 +234,5 @@ export default function TranslationWords(props: twProps) {
         </div>
       </div>
     </>
-  )
+  );
 }

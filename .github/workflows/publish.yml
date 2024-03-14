@@ -9,6 +9,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Set environment variable
+        run: |
+          if [ ${{ github.ref }} = 'refs/heads/read-prod' ]; then
+            echo "PUBLIC_WACS_URL=https://content.bibletranslationtools.org" >> $GITHUB_ENV
+          else
+            echo "PUBLIC_WACS_URL=https://wacs-dev.bibletranslationtools.org" >> $GITHUB_ENV
+          fi
       # Run your project's build step
       # - name: Build
       #   run: npm install && npm run build
@@ -31,6 +38,8 @@ jobs:
         # ADD YOUR CUSTOM DEPENDENCY UPGRADE COMMANDS BELOW
         run: |
           pnpm install && pnpm build
+        env:
+          PUBLIC_WACS_URL: ${{ env.PUBLIC_WACS_URL }}
       - name: Publish
         uses: cloudflare/pages-action@1
         with:

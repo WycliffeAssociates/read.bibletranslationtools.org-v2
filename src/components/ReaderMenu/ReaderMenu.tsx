@@ -1,108 +1,119 @@
-import { createSignal, Show, batch, type Setter, createResource } from "solid-js"
-import { SvgSettings, SvgBook, SvgArrow } from "@components"
-import { BookList } from "./BookList"
-import { ChapterList } from "./ChapterList"
-import { clickOutside, escapeOut, debounce, getPortalSpot } from "@lib/utils-ui"
-import { Dialog } from "@kobalte/core"
+import {
+  createSignal,
+  Show,
+  batch,
+  type Setter,
+  createResource
+} from "solid-js";
+import { SvgSettings, SvgBook, SvgArrow } from "@components";
+import { BookList } from "./BookList";
+import { ChapterList } from "./ChapterList";
+import {
+  clickOutside,
+  escapeOut,
+  debounce,
+  getPortalSpot
+} from "@lib/utils-ui";
+import { Dialog } from "@kobalte/core";
 
 // https://github.com/solidjs/solid/discussions/845
 // these are hacks (name doesn't matter) to keep typescript from stripping away "unused imports", but these are used as custom solid directives below:
 // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-const clickout = clickOutside
+const clickout = clickOutside;
 // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-const escape = escapeOut
+const escape = escapeOut;
 
-import { translator, resolveTemplate } from "@solid-primitives/i18n"
-import type { Component } from "solid-js"
+import { translator, resolveTemplate } from "@solid-primitives/i18n";
+import type { Component } from "solid-js";
 import type {
   bibleEntryObj,
   IBibleMenuBooksByCategory,
   repoIndexObj
-} from "@customTypes/types"
-import type { storeType } from "@components/ReaderWrapper/ReaderWrapper"
-import { BibleBookCategories } from "@lib/contants"
-import { CACHENAMES } from "../../lib/contants"
-import { getRepoIndex } from "@lib/api"
-import { IconMagnifyingGlass } from "@components/Icons/Icons"
-import Settings from "../Settings/Settings"
+} from "@customTypes/types";
+import type { storeType } from "@components/ReaderWrapper/ReaderWrapper";
+import { BibleBookCategories } from "@lib/contants";
+import { CACHENAMES } from "../../lib/contants";
+import { getRepoIndex } from "@lib/api";
+import { IconMagnifyingGlass } from "@components/Icons/Icons";
+import Settings from "../Settings/Settings";
 
 interface MenuProps {
-  storeInterface: storeType
-  setPrintWholeBook: Setter<boolean>
-  user: string
-  repositoryName: string
-  hasDownloadIndex: boolean
-  repoIndex: repoIndexObj
-  initialDict: Record<string,string>
+  storeInterface: storeType;
+  setPrintWholeBook: Setter<boolean>;
+  user: string;
+  repositoryName: string;
+  hasDownloadIndex: boolean;
+  repoIndex: repoIndexObj;
+  initialDict: Record<string, string>;
 }
 const ReaderMenu: Component<MenuProps> = (props) => {
   // ====MENU STATE
-  const [dict, setDict] = createSignal(props.initialDict)
-// t is tracked here
-  // eslint-disable-next-line solid/reactivity 
-  const t = translator(dict, resolveTemplate)
-  const [menuIsOpen, setMenuIsOpen] = createSignal(false)
+  const [dict, setDict] = createSignal(props.initialDict);
+  // t is tracked here
+  // eslint-disable-next-line solid/reactivity
+  const t = translator(dict, resolveTemplate);
+  const [menuIsOpen, setMenuIsOpen] = createSignal(false);
   const [hasFetchedRepoIndexAfresh, setHasFetchedRepoIndexAfresh] =
-    createSignal(false)
+    createSignal(false);
   // eslint-disable-next-line solid/reactivity
   const [savedInServiceWorker, { refetch }] = createResource(
     () => props.storeInterface.currentBookObj(),
     checkIfCurrentBookOrResIsSaved
-  )
+  );
 
   // While maybe the not most solid-like pattern, creating state from new props is still an acceptable pattern in solid with ssr, hence the disable next line
   const [mobileTabOpen, setMobileTabOpen] = createSignal(
     // eslint-disable-next-line solid/reactivity
     props.storeInterface.isOneBook() ? "chapter" : "book"
-  )
-  const [settingsAreOpen, setSettingsAreOpen] = createSignal(false)
-  const [searchQuery, setSearchQuery] = createSignal("")
+  );
+  const [settingsAreOpen, setSettingsAreOpen] = createSignal(false);
+  const [searchQuery, setSearchQuery] = createSignal("");
 
   const filteredMenuBookByCategory = () => {
     const bibleMenuBooksByCategory: IBibleMenuBooksByCategory = {
       OT: [],
       NT: []
-    }
+    };
     const booksToSearch = searchQuery()
       ? props.storeInterface.getStoreVal("searchableBooks")
-      : props.storeInterface.menuBookNames()
+      : props.storeInterface.menuBookNames();
 
-    if (!booksToSearch || !Array.isArray(booksToSearch)) return
+    if (!booksToSearch || !Array.isArray(booksToSearch)) return;
     booksToSearch.forEach((book) => {
       BibleBookCategories.OT.includes(book.slug.toUpperCase())
         ? bibleMenuBooksByCategory.OT.push(book)
-        : bibleMenuBooksByCategory.NT.push(book)
-    })
-    return bibleMenuBooksByCategory
-  }
+        : bibleMenuBooksByCategory.NT.push(book);
+    });
+    return bibleMenuBooksByCategory;
+  };
 
   async function checkIfCurrentBookOrResIsSaved() {
-    const currentBook = props.storeInterface.currentBookObj()
-    if (!currentBook)
+    const currentBook = props.storeInterface.currentBookObj();
+    if (!currentBook || typeof window === "undefined")
       return {
         wholeResponse: null,
         wholeIsComplete: null,
         wholeIsOutOfDate: null,
         currentBooksIsDownloaded: null,
         currentBookIsOutOfDate: null
-      }
-    const completeResourceCache = await caches.open(CACHENAMES.complete)
+      };
+    const completeResourceCache = await caches.open(CACHENAMES.complete);
 
     const wholeMatch = await completeResourceCache.match(
       `${window.location.origin}/${props.user}/${props.repositoryName}`
-    )
-    let wholeIsOutOfDate = null
-    let wholeIsComplete = null
-    let currentBooksIsDownloaded = null
-    let currentBookIsOutOfDate = null
-    let repoIndex: repoIndexObj | null = null
+    );
+    let wholeIsOutOfDate = null;
+    let wholeIsComplete = null;
+    let currentBooksIsDownloaded = null;
+    let currentBookIsOutOfDate = null;
+    let repoIndex: repoIndexObj | null = null;
     if (wholeMatch) {
       const lastGenHeader =
         wholeMatch.headers?.get("X-Last-Generated") ||
-        props.repoIndex.lastRendered
+        props.repoIndex.lastRendered;
       wholeIsOutOfDate = lastGenHeader
         ? lastGenHeader < props.repoIndex.lastRendered
-        : null
+        : null;
 
       if (navigator.onLine && !hasFetchedRepoIndexAfresh()) {
         // when we have internet, see if there is a newer version of the whole or the book by getting the latest repoIndex from blob storage and checking its timestamps against the saved service worker timestamp.
@@ -110,42 +121,42 @@ const ReaderMenu: Component<MenuProps> = (props) => {
           repoIndex = await getRepoIndex({
             user: props.user,
             repo: props.repositoryName
-          })
+          });
           // frepoIndex?.lastRendered higher (e.g. "2023-04-06T16:47:31.7484775Z" > "2023-04-05T20:44:06.3942103Z") than currentBook from sw response.
           wholeIsOutOfDate = repoIndex?.lastRendered
             ? repoIndex?.lastRendered > lastGenHeader
-            : null
-          setHasFetchedRepoIndexAfresh(true)
+            : null;
+          setHasFetchedRepoIndexAfresh(true);
         } catch (error) {
-          console.error(error)
+          console.error(error);
         }
       }
       const currentBookIsDownloadedJson =
-        wholeMatch.headers?.get("X-Complete-Books") || ""
+        wholeMatch.headers?.get("X-Complete-Books") || "";
       if (currentBookIsDownloadedJson) {
-        const completeBooks = JSON.parse(currentBookIsDownloadedJson)
+        const completeBooks = JSON.parse(currentBookIsDownloadedJson);
         const currentBookFromHeader =
           Array.isArray(completeBooks) &&
-          completeBooks.find((book) => book.slug == currentBook.slug)
+          completeBooks.find((book) => book.slug == currentBook.slug);
         //
         if (currentBookFromHeader) {
-          currentBooksIsDownloaded = true
+          currentBooksIsDownloaded = true;
           // saved Res is Younger than currentBook loaded
           currentBookIsOutOfDate =
-            currentBookFromHeader.lastRendered < currentBook.lastRendered
+            currentBookFromHeader.lastRendered < currentBook.lastRendered;
           if (repoIndex) {
             const freshlyFetchedBook = repoIndex.bible?.find(
               (book) => book.slug == currentBook.slug
-            )
+            );
             // freshly fetched is older than currentBook from sw response.
             currentBookIsOutOfDate = freshlyFetchedBook
               ? freshlyFetchedBook.lastRendered > currentBook.lastRendered
-              : null
+              : null;
           }
         }
       }
 
-      wholeIsComplete = wholeMatch.headers?.get("X-Is-Complete") == "1"
+      wholeIsComplete = wholeMatch.headers?.get("X-Is-Complete") == "1";
     }
 
     return {
@@ -154,123 +165,121 @@ const ReaderMenu: Component<MenuProps> = (props) => {
       wholeIsOutOfDate,
       currentBooksIsDownloaded,
       currentBookIsOutOfDate
-    }
+    };
   }
 
   // ====MENU FXNS
   // eslint disabled. This is a derived function really, but the rules wants to be sure that we are aware that its deps aren't auto-tracked here, but that's fine, because the only reactive dependency here is the storeInterface which isn't going to change identity from the ssr render.
   // eslint-disable-next-line solid/reactivity
   const jumpToNewChapIdx = debounce(async (evt: InputEvent, value: string) => {
-    const storeInterface = props.storeInterface
-    const target = evt.target as HTMLInputElement
-    const menuBook = storeInterface.getStoreVal("menuBook") as string
-    const chapter: string = value ? value : target.value
+    const storeInterface = props.storeInterface;
+    const target = evt.target as HTMLInputElement;
+    const menuBook = storeInterface.getStoreVal("menuBook") as string;
+    const chapter: string = value ? value : target.value;
     // validate
     if (
       !chapter ||
       (Number(chapter) &&
         Number(chapter) > Number(props.storeInterface.maxChapter()))
     ) {
-      return
+      return;
     }
 
     const menuBookObj = props.storeInterface.getChapObjFromGivenBook(
       menuBook,
       chapter
-    )
+    );
 
-    let text: string | false | void
+    let text: string | false | void;
     if (menuBookObj?.content) {
-      text = menuBookObj.content
+      text = menuBookObj.content;
     } else {
       text = await storeInterface.fetchHtml({
         book: menuBook,
         chapter: String(chapter)
-      })
+      });
     }
     // Early bail, no text given
-    if (!text) return
+    if (!text) return;
     batch(() => {
       storeInterface.mutateStoreText({
         book: menuBook,
         chapter: String(chapter),
         val: String(text)
-      })
-      storeInterface.mutateStore("currentBook", menuBook)
-      storeInterface.mutateStore("currentChapter", String(chapter))
-      scrollToTop()
-    })
-    togglePanel(false)
-  }, 300)
+      });
+      storeInterface.mutateStore("currentBook", menuBook);
+      storeInterface.mutateStore("currentChapter", String(chapter));
+      scrollToTop();
+    });
+    togglePanel(false);
+  }, 300);
 
   function scrollToTop() {
-    const scrollPane = document.querySelector('[data-js="scrollToTop"]')
+    const scrollPane = document.querySelector('[data-js="scrollToTop"]');
     if (scrollPane) {
-      scrollPane.scrollTop = 0
+      scrollPane.scrollTop = 0;
     }
   }
 
   const togglePanel = (bool?: boolean) => {
-    const val = bool === false ? bool : !menuIsOpen()
+    const val = bool === false ? bool : !menuIsOpen();
     if (val == true && settingsAreOpen() && window.innerWidth < 640) {
-      setSettingsAreOpen(false)
+      setSettingsAreOpen(false);
     }
-    const menuBook = props.storeInterface.getStoreVal("menuBook") as string
+    const menuBook = props.storeInterface.getStoreVal("menuBook") as string;
     const currentBook = props.storeInterface.getStoreVal(
       "currentBook"
-    ) as string
+    ) as string;
     batch(() => {
       // IF someone opens the menu, clicks a book but not chapter, and then changes mind and closes menu, some oddness could happen.  Keeping them in sync here;
       if (menuBook != currentBook) {
-        props.storeInterface.mutateStore("menuBook", currentBook)
+        props.storeInterface.mutateStore("menuBook", currentBook);
       }
-      setMenuIsOpen(val)
-    })
-  }
+      setMenuIsOpen(val);
+    });
+  };
   function manageOpenSettings() {
-    const newState = !settingsAreOpen()
-    setSettingsAreOpen(newState)
+    const newState = !settingsAreOpen();
+    setSettingsAreOpen(newState);
   }
   function switchBooks(book: string) {
-    props.storeInterface.mutateStore("menuBook", book)
+    props.storeInterface.mutateStore("menuBook", book);
   }
   function isActiveBookAndChap(label: string) {
-    const menuBook = props.storeInterface.getMenuBook()
-    const currentBook = props.storeInterface.currentBookObj()
-    const currentChap = props.storeInterface.currentChapObj()
-    return currentChap?.label == label && menuBook?.label == currentBook?.label
+    const menuBook = props.storeInterface.getMenuBook();
+    const currentBook = props.storeInterface.currentBookObj();
+    const currentChap = props.storeInterface.currentChapObj();
+    return currentChap?.label == label && menuBook?.label == currentBook?.label;
   }
   function isActiveBook(book: string) {
-    return props.storeInterface.getStoreVal("currentBook") == book
+    return props.storeInterface.getStoreVal("currentBook") == book;
   }
 
   // eslint-disable-next-line solid/reactivity
   const searchBooks = debounce((): void => {
-    const allBooks = props.storeInterface.getStoreVal<bibleEntryObj[]>("text")
-    const search = searchQuery().toLowerCase()
-    !search && props.storeInterface.mutateStore("searchableBooks", allBooks)
+    const allBooks = props.storeInterface.getStoreVal<bibleEntryObj[]>("text");
+    const search = searchQuery().toLowerCase();
+    !search && props.storeInterface.mutateStore("searchableBooks", allBooks);
     const filtered = allBooks.filter(
       (book) =>
         book.label.toLowerCase().includes(search) ||
         book.slug.toLowerCase().includes(search)
-    )
-    props.storeInterface.mutateStore("searchableBooks", filtered)
-  }, 400)
+    );
+    props.storeInterface.mutateStore("searchableBooks", filtered);
+  }, 400);
 
-  function setLanguageFromCustomEvent(
-    newDict: Record<string, string>,
-  ) {
-    setDict(newDict)
+  function setLanguageFromCustomEvent(newDict: Record<string, string>) {
+    setDict(newDict);
   }
 
   function topAmount() {
     if (import.meta.env.SSR) {
-      return "5rem"
+      return "5rem";
     } else {
-      const nav = document.querySelector("nav") as HTMLElement
-      const compstyle = window.getComputedStyle(nav)
-      const height = compstyle.getPropertyValue("height")
-      return height
+      const nav = document.querySelector("nav") as HTMLElement;
+      const compstyle = window.getComputedStyle(nav);
+      const height = compstyle.getPropertyValue("height");
+      return height;
     }
   }
 
@@ -280,12 +289,10 @@ const ReaderMenu: Component<MenuProps> = (props) => {
         class="mx-auto w-full"
         on:changelanguage={(
           e: CustomEvent<{
-            newDict: Record<string, string>
+            newDict: Record<string, string>;
           }>
         ) => {
-          setLanguageFromCustomEvent(
-            e.detail.newDict,
-          )
+          setLanguageFromCustomEvent(e.detail.newDict);
         }}
         id="menu"
       >
@@ -293,7 +300,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
           use:escapeOut={() => setMenuIsOpen(false)}
           class="mx-auto flex w-full flex-wrap items-center bg-[--clrBackground]"
         >
-          <div class="relative mx-auto flex w-full max-w-[75ch] items-center  justify-between gap-3  bg-white p-3 text-varBase print:hidden sm:px-8 ">
+          <div class="relative mx-auto flex w-full max-w-[75ch] items-center  justify-between gap-3  bg-white p-3 text-varBase sm:px-8 print:hidden ">
             <div class="flex w-full justify-between overflow-hidden  rounded-lg bg-white outline outline-1 outline-gray-300 focus-within:outline-2 focus-within:outline-accent">
               <button
                 class="flex h-12 w-full flex-grow items-center justify-between rounded-md  hover:bg-gray-100 ltr:pl-4 rtl:pr-4"
@@ -319,7 +326,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
               open={menuIsOpen()}
               // open={true}
               onOpenChange={(val) => {
-                setMenuIsOpen(val)
+                setMenuIsOpen(val);
               }}
             >
               <Dialog.Portal mount={getPortalSpot()}>
@@ -373,9 +380,9 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                                     <input
                                       onInput={(e: InputEvent) => {
                                         const target =
-                                          e.target as HTMLInputElement
-                                        setSearchQuery(target.value)
-                                        searchBooks()
+                                          e.target as HTMLInputElement;
+                                        setSearchQuery(target.value);
+                                        searchBooks();
                                       }}
                                       type="text"
                                       class="w-full rounded-full border border-neutral-300 px-12 py-2 capitalize"
@@ -424,7 +431,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                                   : "underline"
                               }  py-3 text-xl capitalize`}
                               onClick={() => {
-                                setMobileTabOpen("book")
+                                setMobileTabOpen("book");
                               }}
                             >
                               {t("books")}
@@ -438,7 +445,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                                   : "underline"
                               } py-3 text-xl capitalize`}
                               onClick={() => {
-                                setMobileTabOpen("chapter")
+                                setMobileTabOpen("chapter");
                               }}
                             >
                               {t("chapters")}
@@ -451,9 +458,9 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                             <label for="" class="relative block p-4">
                               <input
                                 onInput={(e: InputEvent) => {
-                                  const target = e.target as HTMLInputElement
-                                  setSearchQuery(target.value)
-                                  searchBooks()
+                                  const target = e.target as HTMLInputElement;
+                                  setSearchQuery(target.value);
+                                  searchBooks();
                                 }}
                                 type="text"
                                 class="w-full rounded-full border border-neutral-300 px-12 py-2 capitalize"
@@ -466,8 +473,8 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                             </label>
                             <BookList
                               onClick={(bookSlug: string) => {
-                                switchBooks(bookSlug)
-                                setMobileTabOpen("chapter")
+                                switchBooks(bookSlug);
+                                setMobileTabOpen("chapter");
                               }}
                               isActiveBook={isActiveBook}
                               bibleMenuBooksByCategory={
@@ -529,6 +536,6 @@ const ReaderMenu: Component<MenuProps> = (props) => {
         </div>
       </div>
     </div>
-  )
-}
-export default ReaderMenu
+  );
+};
+export default ReaderMenu;

@@ -8,4 +8,4 @@ export const langMeta = [
     code: "es",
     name: "Español"
   }
-]
+];

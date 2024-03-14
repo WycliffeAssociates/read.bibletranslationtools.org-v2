@@ -1,11 +1,11 @@
-import { createSignal, For, Setter, Switch, Match } from "solid-js"
-import type { tmSingle } from "@customTypes/types"
+import { createSignal, For, type Setter, Switch, Match } from "solid-js";
+import type { tmSingle } from "@customTypes/types";
 
 interface propsType {
-  navigation: Array<tmSingle>
-  initialPage: string
-  isNested?: boolean
-  setNavIsOpen: Setter<boolean>
+  navigation: Array<tmSingle>;
+  initialPage: string;
+  isNested?: boolean;
+  setNavIsOpen: Setter<boolean>;
 }
 
 export function TMNav(props: propsType) {
@@ -21,38 +21,38 @@ export function TMNav(props: propsType) {
                 navObj={navObj}
                 isNested={!!props.isNested}
               />
-            )
+            );
           }}
         </For>
       </ul>
     </nav>
-  )
+  );
 }
 
 interface NavSectionProps {
-  navObj: tmSingle
-  initialPage: string
-  isNested: boolean
-  setNavIsOpen: Setter<boolean>
+  navObj: tmSingle;
+  initialPage: string;
+  isNested: boolean;
+  setNavIsOpen: Setter<boolean>;
 }
 function NavSection(props: NavSectionProps) {
   function isOpenFromProps() {
     return (
       !props.isNested &&
       props.navObj.File.replace(".html", "") === props.initialPage
-    )
+    );
   }
   // eslint-disable-next-line solid/reactivity
-  const [isOpen, setIsOpen] = createSignal(isOpenFromProps())
+  const [isOpen, setIsOpen] = createSignal(isOpenFromProps());
 
-  let heightRef: HTMLDivElement | undefined
+  let heightRef: HTMLDivElement | undefined;
   function heightRefFxn() {
-    const val = isOpen() ? `height: auto; ` : `height: 0;`
-    return val
+    const val = isOpen() ? `height: auto; ` : `height: 0;`;
+    return val;
   }
   const hasChildren = () => {
-    return props.navObj.Children.length
-  }
+    return props.navObj.Children.length;
+  };
   return (
     <li class="navSection">
       <div class="flex">
@@ -66,7 +66,7 @@ function NavSection(props: NavSectionProps) {
           aria-controls={`${props.navObj.Label}`}
           aria-expanded={isOpen()}
           onClick={() => {
-            setIsOpen(!isOpen())
+            setIsOpen(!isOpen());
           }}
           class="flex"
         >
@@ -107,7 +107,7 @@ function NavSection(props: NavSectionProps) {
         </div>
       ) : null}
     </li>
-  )
+  );
 }
 
 function NavSingleLink(props: NavSectionProps) {
@@ -116,14 +116,14 @@ function NavSingleLink(props: NavSectionProps) {
       ? `?section=${props.navObj.File.replace(".html", "")}#${
           props.navObj.Slug
         }`
-      : `?section=${props.navObj.File.replace(".html", "")}`
+      : `?section=${props.navObj.File.replace(".html", "")}`;
 
   const isSameSection = () =>
-    props.initialPage === props.navObj.File.replace(".html", "")
+    props.initialPage === props.navObj.File.replace(".html", "");
 
   function onClick() {
-    document.body.classList.remove("noscroll")
-    props.setNavIsOpen(false)
+    document.body.classList.remove("noscroll");
+    props.setNavIsOpen(false);
   }
   return (
     <Switch>
@@ -141,5 +141,5 @@ function NavSingleLink(props: NavSectionProps) {
         </a>
       </Match>
     </Switch>
-  )
+  );
 }

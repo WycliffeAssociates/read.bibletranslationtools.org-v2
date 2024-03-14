@@ -1,5 +1,5 @@
 // Type imports
-import type { ManifestOptions } from "vite-plugin-pwa"
+import type { ManifestOptions } from "vite-plugin-pwa";
 
 /**
  * Defines the configuration for PWA webmanifest.
@@ -50,4 +50,4 @@ export const manifest: Partial<ManifestOptions> = {
       type: "image/png"
     }
   ]
-}
+};

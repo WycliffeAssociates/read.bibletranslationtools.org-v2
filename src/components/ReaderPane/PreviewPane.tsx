@@ -1,66 +1,66 @@
-import { createSignal, Show, Signal } from "solid-js"
+import { createSignal, Show, type Signal } from "solid-js";
 import {
   clickOutside,
   escapeOut,
   positionPreviewPane,
   getHtmlWithinSpan
-} from "@lib/utils-ui"
-import { getCommentarySectionHtml } from "@lib/api"
+} from "@lib/utils-ui";
+import { getCommentarySectionHtml } from "@lib/api";
 
 const [pos, setPos] = createSignal({
   x: "0px",
   y: "0px"
-})
-const [mousedIn, setMousedIn] = createSignal(false)
-const [showFootnote, setShowFootnote] = createSignal(false)
-const [footnoteText, setFootnoteText] = createSignal("")
-const [currentScrollTop, setCurrentScrollTop] = createSignal(0)
+});
+const [mousedIn, setMousedIn] = createSignal(false);
+const [showFootnote, setShowFootnote] = createSignal(false);
+const [footnoteText, setFootnoteText] = createSignal("");
+const [currentScrollTop, setCurrentScrollTop] = createSignal(0);
 const [lastFocused, setLastFocused] =
-  createSignal() as Signal<HTMLElement | null>
-const previewPaneDebounceWait = 375
-let previewCloseButton: HTMLButtonElement //ref
+  createSignal() as Signal<HTMLElement | null>;
+const previewPaneDebounceWait = 375;
+let previewCloseButton: HTMLButtonElement; //ref
 
 function closeModal() {
-  setShowFootnote(false)
-  lastFocused()?.focus()
-  setMousedIn(false)
-  setCurrentScrollTop(0)
+  setShowFootnote(false);
+  lastFocused()?.focus();
+  setMousedIn(false);
+  setCurrentScrollTop(0);
 }
 function focusWithinClose(ev: FocusEvent) {
-  const currentTarget = ev.currentTarget as Node
-  const relatedTaret = ev.relatedTarget as Node
-  if (!currentTarget) return
-  if (!relatedTaret) return
+  const currentTarget = ev.currentTarget as Node;
+  const relatedTaret = ev.relatedTarget as Node;
+  if (!currentTarget) return;
+  if (!relatedTaret) return;
 
   if (!currentTarget?.contains(relatedTaret)) {
-    closeModal()
+    closeModal();
   }
 }
 function reactToScrollingWhenNoteIsOpen(amount: number) {
   if (!showFootnote()) {
-    return
+    return;
   }
-  const diffFromStart = Math.abs(amount - currentScrollTop())
+  const diffFromStart = Math.abs(amount - currentScrollTop());
   if (diffFromStart > 100) {
-    closeModal()
+    closeModal();
   }
 }
 
 export function PreviewPane() {
   // these are hacks to keep typescript from stripping away "unused imports"
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const clickout = clickOutside
+  const clickout = clickOutside;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const escape = escapeOut
+  const escape = escapeOut;
   return (
     <Show when={showFootnote()}>
       <div
         on:notifiedOfScrollTop={(
           e: CustomEvent<{
-            amount: number
+            amount: number;
           }>
         ) => {
-          reactToScrollingWhenNoteIsOpen(e.detail.amount)
+          reactToScrollingWhenNoteIsOpen(e.detail.amount);
         }}
         use:clickOutside={() => closeModal()}
         use:escapeOut={() => closeModal()}
@@ -95,54 +95,56 @@ export function PreviewPane() {
         <div class="p-6" innerHTML={footnoteText()} />
       </div>
     </Show>
-  )
+  );
 }
 
 export function hoverOnCrossReferences() {
-  const crossReferences = document.querySelectorAll("a[data-crossref='true']")
+  const crossReferences = document.querySelectorAll("a[data-crossref='true']");
 
   function managePreviewPane(e: Event) {
-    setMousedIn(true)
+    setMousedIn(true);
     setTimeout(() => {
-      const scrollPane = document.querySelector('[data-js="scrollToTop"]')
+      const scrollPane = document.querySelector('[data-js="scrollToTop"]');
       if (scrollPane) {
-        setCurrentScrollTop(scrollPane.scrollTop)
+        setCurrentScrollTop(scrollPane.scrollTop);
       }
-      populatePreviewPane()
-    }, previewPaneDebounceWait)
+      populatePreviewPane();
+    }, previewPaneDebounceWait);
 
     async function populatePreviewPane() {
       if (!mousedIn()) {
-        return
+        return;
       }
-      const target = e.target as HTMLAnchorElement
-      const hashWithoutHashTag = target.dataset.hash
-      const book = target.dataset.book
-      const chapter = target.dataset.chapter
-      let response: Response
-      let text: string
+      const target = e.target as HTMLAnchorElement;
+      const hashWithoutHashTag = target.dataset.hash;
+      const book = target.dataset.book;
+      const chapter = target.dataset.chapter;
+      let response: Response;
+      let text: string;
 
       try {
-        response = await fetch(`?book=${book}&chapter=${chapter}`)
-        text = await response.text()
+        response = await fetch(`?book=${book}&chapter=${chapter}`);
+        text = await response.text();
       } catch (error) {
-        console.error(error)
-        return
+        console.error(error);
+        return;
       }
 
-      const newDom = document.createElement("html")
-      newDom.innerHTML = text
-      const corresponding = newDom.querySelector(`[id="${hashWithoutHashTag}"]`)
-      if (!corresponding) return
+      const newDom = document.createElement("html");
+      newDom.innerHTML = text;
+      const corresponding = newDom.querySelector(
+        `[id="${hashWithoutHashTag}"]`
+      );
+      if (!corresponding) return;
       function truthyFunction(node: Element) {
         return (
           !!node.id &&
           node.id !== hashWithoutHashTag &&
           node.id.includes("tn-chunk")
-        )
+        );
       }
-      const html = getHtmlWithinSpan(corresponding, truthyFunction)
-      setFootnoteText(html)
+      const html = getHtmlWithinSpan(corresponding, truthyFunction);
+      setFootnoteText(html);
 
       // positionion logic:
       positionPreviewPane({
@@ -150,122 +152,122 @@ export function hoverOnCrossReferences() {
         previewPaneSelector: "#previewPane",
         previewPaneSetter: setShowFootnote,
         setPos
-      })
+      });
 
       // manage focus
-      setLastFocused(document.activeElement as HTMLElement)
-      previewCloseButton.focus()
+      setLastFocused(document.activeElement as HTMLElement);
+      previewCloseButton.focus();
     }
   }
 
   crossReferences.forEach((ref) => {
-    ref.addEventListener("mouseover", managePreviewPane)
+    ref.addEventListener("mouseover", managePreviewPane);
     ref.addEventListener("mouseout", () => {
-      setMousedIn(false)
-    })
-  })
+      setMousedIn(false);
+    });
+  });
 }
 export function hoverOnCommentaryCrossReferences(user: string, repo: string) {
-  if (!document.querySelector("[data-resourcetype*='commentary']")) return
+  if (!document.querySelector("[data-resourcetype*='commentary']")) return;
 
-  const commentaryPopups = document.querySelectorAll("a[href*='popup']")
+  const commentaryPopups = document.querySelectorAll("a[href*='popup']");
   commentaryPopups.forEach((link) => {
-    link.addEventListener("click", manageLink)
-    link.addEventListener("mouseenter", manageLink)
+    link.addEventListener("click", manageLink);
+    link.addEventListener("mouseenter", manageLink);
     link.addEventListener("mouseout", () => {
-      setMousedIn(false)
-    })
-  })
+      setMousedIn(false);
+    });
+  });
   async function activateLink(e: Event) {
-    if (e.type == "mouseenter" && !mousedIn()) return
-    e?.preventDefault()
-    const target = e.target as HTMLAnchorElement
-    const href = target.href
-    const fileParts = href.split("popup://")
-    const file = fileParts[1]
-    let text: string | undefined
+    if (e.type == "mouseenter" && !mousedIn()) return;
+    e?.preventDefault();
+    const target = e.target as HTMLAnchorElement;
+    const href = target.href;
+    const fileParts = href.split("popup://");
+    const file = fileParts[1];
+    let text: string | undefined;
     try {
-      text = await getCommentarySectionHtml({ file, user, repo })
-      if (!text) return
+      text = await getCommentarySectionHtml({ file, user, repo });
+      if (!text) return;
     } catch (error) {
-      return
+      return;
     }
     // set new text
-    setFootnoteText(text)
+    setFootnoteText(text);
     // positionion logic:
     positionPreviewPane({
       target,
       previewPaneSelector: "#previewPane",
       previewPaneSetter: setShowFootnote,
       setPos
-    })
-    setLastFocused(document.activeElement as HTMLElement)
-    previewCloseButton.focus()
+    });
+    setLastFocused(document.activeElement as HTMLElement);
+    previewCloseButton.focus();
 
     // To hook up links inside of the preview pane:
-    const previewPane = document.querySelector("#previewPane")
-    if (!previewPane) return
-    const commentaryPopups = previewPane?.querySelectorAll("a[href*='popup']")
+    const previewPane = document.querySelector("#previewPane");
+    if (!previewPane) return;
+    const commentaryPopups = previewPane?.querySelectorAll("a[href*='popup']");
     commentaryPopups.forEach((link) => {
-      link.addEventListener("click", manageLink)
-    })
+      link.addEventListener("click", manageLink);
+    });
   }
   async function manageLink(e: Event) {
     if (e.type == "mouseenter") {
-      setMousedIn(true)
+      setMousedIn(true);
       setTimeout(() => {
-        activateLink(e)
-      }, previewPaneDebounceWait)
+        activateLink(e);
+      }, previewPaneDebounceWait);
     }
   }
 }
 export function hoverOnFootnotes() {
   const footnotes: NodeListOf<HTMLAnchorElement> = document.querySelectorAll(
     'a[href*="footnote-target"]'
-  )
+  );
   function manageNote(ev: MouseEvent | FocusEvent) {
     if (ev.type == "mouseenter") {
-      setMousedIn(true)
+      setMousedIn(true);
       setTimeout(() => {
-        doHoverNote()
-      }, previewPaneDebounceWait)
+        doHoverNote();
+      }, previewPaneDebounceWait);
     }
     function doHoverNote() {
-      if (!mousedIn()) return
-      const target = ev.target as HTMLAnchorElement
-      const rect = target.getBoundingClientRect()
-      const last = target.href.split("-").pop()
-      setShowFootnote(true)
-      setShowFootnote(true)
-      const previewPane = document.querySelector("#previewPane") //stick in DOM to measure it's vh client height. This runs quickly enough that you won't get some flashing before we position it;
+      if (!mousedIn()) return;
+      const target = ev.target as HTMLAnchorElement;
+      const rect = target.getBoundingClientRect();
+      const last = target.href.split("-").pop();
+      setShowFootnote(true);
+      setShowFootnote(true);
+      const previewPane = document.querySelector("#previewPane"); //stick in DOM to measure it's vh client height. This runs quickly enough that you won't get some flashing before we position it;
 
-      if (!previewPane) return
-      const windowMidPoint = window.innerWidth / 2
+      if (!previewPane) return;
+      const windowMidPoint = window.innerWidth / 2;
       const posX =
-        rect.x > windowMidPoint ? rect.x - 50 + "px" : rect.x + 50 + "px"
+        rect.x > windowMidPoint ? rect.x - 50 + "px" : rect.x + 50 + "px";
       const posY =
         rect.y > window.innerHeight / 2
           ? rect.y - previewPane.clientHeight
-          : rect.y + 30
+          : rect.y + 30;
       setPos({
         x: posX,
         y: posY + "px"
-      })
+      });
       const correspondingA = document.querySelector(
         `a[href*="footnote-caller-${last}"]`
-      )
-      if (!correspondingA) return
-      const parent = correspondingA.parentElement?.parentElement
-      const footnoteText = parent ? parent.innerText : ""
-      setFootnoteText(footnoteText)
+      );
+      if (!correspondingA) return;
+      const parent = correspondingA.parentElement?.parentElement;
+      const footnoteText = parent ? parent.innerText : "";
+      setFootnoteText(footnoteText);
     }
   }
 
   footnotes.forEach((note) => {
-    note.addEventListener("mouseenter", manageNote)
+    note.addEventListener("mouseenter", manageNote);
     note.addEventListener("mouseout", () => {
-      setMousedIn(false)
-    })
-    note.addEventListener("focusout", () => setMousedIn(false))
-  })
+      setMousedIn(false);
+    });
+    note.addEventListener("focusout", () => setMousedIn(false));
+  });
 }

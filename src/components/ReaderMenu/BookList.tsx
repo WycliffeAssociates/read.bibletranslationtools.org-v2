@@ -1,21 +1,20 @@
-import type { IBibleMenuBooksByCategory } from "@customTypes/types"
-import type { Translator } from "@solid-primitives/i18n"
-import { For, Show } from "solid-js"
+import type { IBibleMenuBooksByCategory } from "@customTypes/types";
+import type { Translator } from "@solid-primitives/i18n";
+import { For, Show } from "solid-js";
 
 interface propsInterface {
-  onClick: (book: string) => void
-  isActiveBook: (book: string) => boolean
-  bibleMenuBooksByCategory: () => IBibleMenuBooksByCategory | undefined
-  isMobile: boolean
-  t: Translator<Record<string, string>>
+  onClick: (book: string) => void;
+  isActiveBook: (book: string) => boolean;
+  bibleMenuBooksByCategory: () => IBibleMenuBooksByCategory | undefined;
+  isMobile: boolean;
+  t: Translator<Record<string, string>>;
 }
 export function BookList(props: propsInterface) {
-
   const outterClassNames = () => {
     return props.isMobile
       ? "h-[95vh] overflow-y-auto pb-96"
-      : "max-h-[70vh] min-h-[100px] overflow-y-auto pb-32"
-  }
+      : "max-h-[70vh] min-h-[100px] overflow-y-auto pb-32";
+  };
   return (
     <Show
       when={
@@ -74,5 +73,5 @@ export function BookList(props: propsInterface) {
         </Show>
       </div>
     </Show>
-  )
+  );
 }

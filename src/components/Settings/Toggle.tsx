@@ -1,10 +1,10 @@
-import { IconX, IconCheck } from "@components/Icons/Icons"
-import { ToggleButton } from "@kobalte/core"
-import { Show } from "solid-js"
+import { IconX, IconCheck } from "@components/Icons/Icons";
+import { ToggleButton } from "@kobalte/core";
+import { Show } from "solid-js";
 
 interface IDetailItem {
-  pressed?: boolean
-  onChangeFxn: (isPressed: boolean) => void
+  pressed?: boolean;
+  onChangeFxn: (isPressed: boolean) => void;
 }
 export default function DetailItem(props: IDetailItem) {
   return (
@@ -34,5 +34,5 @@ export default function DetailItem(props: IDetailItem) {
         </span>
       )}
     </ToggleButton.Root>
-  )
+  );
 }

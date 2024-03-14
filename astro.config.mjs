@@ -1,22 +1,22 @@
-import { defineConfig } from "astro/config"
+import { defineConfig } from "astro/config";
 
 // https://astro.build/config
-import tailwind from "@astrojs/tailwind"
+import tailwind from "@astrojs/tailwind";
 
 // https://astro.build/config
-import cloudflare from "@astrojs/cloudflare"
+import cloudflare from "@astrojs/cloudflare";
 
 // https://astro.build/config
-import solidJs from "@astrojs/solid-js"
+import solidJs from "@astrojs/solid-js";
 // https://vite-pwa-org.netlify.app/frameworks/astro.html
-import AstroPWA from "@vite-pwa/astro"
-import { manifest } from "./manifest"
-import { visualizer } from "rollup-plugin-visualizer"
+import AstroPWA from "@vite-pwa/astro";
+import { manifest } from "./manifest";
+import { visualizer } from "rollup-plugin-visualizer";
 const siteUrl = import.meta.env.PROD
   ? "https://read.bibleineverylanguage.org"
   : import.meta.env.DEV
-  ? "https://read-dev.bibleineverylanguage.org"
-  : ""
+    ? "https://read-dev.bibleineverylanguage.org"
+    : "";
 // https://astro.build/config
 export default defineConfig({
   site: siteUrl,
@@ -59,4 +59,4 @@ export default defineConfig({
       })
     ]
   }
-})
+});
