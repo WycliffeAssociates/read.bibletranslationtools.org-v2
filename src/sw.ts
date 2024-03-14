@@ -1,46 +1,47 @@
 /// <reference lib="webworker" />
-import { precacheAndRoute, cleanupOutdatedCaches } from "workbox-precaching"
-import { clientsClaim } from "workbox-core"
-import { registerRoute } from "workbox-routing"
-import { Strategy, CacheFirst } from "workbox-strategies"
-import { CacheableResponsePlugin } from "workbox-cacheable-response"
-import { ExpirationPlugin } from "workbox-expiration"
-import { get } from "idb-keyval"
-import type { StrategyHandler } from "workbox-strategies"
-import { CACHENAMES } from "./lib/contants"
+import { precacheAndRoute, cleanupOutdatedCaches } from "workbox-precaching";
+import { clientsClaim } from "workbox-core";
+import { registerRoute } from "workbox-routing";
+import { Strategy, CacheFirst } from "workbox-strategies";
+import { CacheableResponsePlugin } from "workbox-cacheable-response";
+import { ExpirationPlugin } from "workbox-expiration";
+import { get } from "idb-keyval";
+import type { StrategyHandler } from "workbox-strategies";
+import { CACHENAMES } from "./lib/contants";
 
-declare const self: ServiceWorkerGlobalScope
+declare const self: ServiceWorkerGlobalScope;
 
 // Adds an activate event listener which will clean up incompatible precaches that were created by older versions of Workbox.
-self.skipWaiting()
-clientsClaim()
-cleanupOutdatedCaches()
+self.skipWaiting();
+self.__WB_DISABLE_DEV_LOGS = true;
+clientsClaim();
+cleanupOutdatedCaches();
 
 async function tryNetwork(handler: StrategyHandler, request: Request) {
   try {
-    const response = await handler.fetchAndCachePut(request)
+    const response = await handler.fetchAndCachePut(request);
     if (response && response.ok) {
-      return response
+      return response;
     }
   } catch (error) {
-    console.error(error)
-    return
+    console.error(error);
+    return;
   }
 }
 async function tryLocalCache(handler: StrategyHandler, request: Request) {
   try {
     // cache first
-    const response = await handler.cacheMatch(request)
+    const response = await handler.cacheMatch(request);
     // default to sending cache match if there
     if (response && response.ok) {
-      return response
+      return response;
     } else {
-      throw new Error("No response or not ok")
+      throw new Error("No response or not ok");
     }
   } catch (error) {
     // network fallback and put
-    console.error(error)
-    return
+    console.error(error);
+    return;
   }
 }
 // provided here
@@ -51,50 +52,50 @@ class CacheNetworkRace extends Strategy {
     handler: StrategyHandler
   ): Promise<Response | undefined> {
     const isPagesReq =
-      request.mode == "navigate" && this.cacheName == CACHENAMES.lrPagesCache
+      request.mode == "navigate" && this.cacheName == CACHENAMES.lrPagesCache;
     function regularRace(
       resolve: (
         value: Response | PromiseLike<Response | undefined> | undefined
       ) => void,
       reject: (reason?: unknown) => void
     ) {
-      const fetchAndCachePutDone = handler.fetchAndCachePut(request)
-      const cacheMatchDone = handler.cacheMatch(request)
+      const fetchAndCachePutDone = handler.fetchAndCachePut(request);
+      const cacheMatchDone = handler.cacheMatch(request);
 
-      cacheMatchDone.then((response) => response && resolve(response))
-      fetchAndCachePutDone.then(resolve)
+      cacheMatchDone.then((response) => response && resolve(response));
+      fetchAndCachePutDone.then(resolve);
 
       // Reject if both network and cache error or find no response.
       Promise.allSettled([fetchAndCachePutDone, cacheMatchDone]).then(
         (results) => {
-          const [fetchAndCachePutResult, cacheMatchResult] = results
+          const [fetchAndCachePutResult, cacheMatchResult] = results;
           if (
             fetchAndCachePutResult.status === "rejected" &&
             !cacheMatchResult
           ) {
-            reject(fetchAndCachePutResult.reason)
+            reject(fetchAndCachePutResult.reason);
           }
         }
-      )
+      );
     }
 
     return new Promise((resolve, reject) => {
       if (isPagesReq) {
-        const url = new URL(request.url)
-        let pathname = url.pathname
+        const url = new URL(request.url);
+        let pathname = url.pathname;
         if (pathname.lastIndexOf("/") === pathname.length - 1) {
-          pathname = pathname.slice(0, -1)
+          pathname = pathname.slice(0, -1);
         }
-        const urlCompleteWithSearchParams = `${url.origin}${pathname}/complete`
+        const urlCompleteWithSearchParams = `${url.origin}${pathname}/complete`;
         handler.cacheMatch(urlCompleteWithSearchParams).then((successVal) => {
           if (successVal) {
-            resolve(successVal)
+            resolve(successVal);
           } else {
-            regularRace(resolve, reject)
+            regularRace(resolve, reject);
           }
-        })
-      } else regularRace(resolve, reject)
-    })
+        });
+      } else regularRace(resolve, reject);
+    });
   }
 }
 
@@ -112,47 +113,47 @@ class variableCacheOrNetwork extends Strategy {
   ): Promise<Response | undefined> {
     // https://developer.chrome.com/docs/workbox/modules/workbox-strategies/
     return new Promise(async (res, rej) => {
-      const cacheStrategy = await get("cacheStrategy")
+      const cacheStrategy = await get("cacheStrategy");
       if (cacheStrategy === "networkFirst" || !cacheStrategy) {
-        const response = await tryNetwork(handler, request)
+        const response = await tryNetwork(handler, request);
         if (response && response.ok) {
-          return res(response)
+          return res(response);
         } else {
-          const resp = await tryLocalCache(handler, request)
+          const resp = await tryLocalCache(handler, request);
           if (resp) {
-            res(resp)
+            res(resp);
           } else {
-            rej("cannot fetch from network and not in cache.")
+            rej("cannot fetch from network and not in cache.");
           }
         }
       } else if (cacheStrategy === "cacheFirst") {
-        const response = await tryLocalCache(handler, request)
+        const response = await tryLocalCache(handler, request);
         if (response && response.ok) {
-          return res(response)
+          return res(response);
         } else {
-          const resp = tryNetwork(handler, request)
+          const resp = tryNetwork(handler, request);
           if (resp) {
-            res(resp)
+            res(resp);
           } else {
-            rej("Not in cache and cannot fetch from network")
+            rej("Not in cache and cannot fetch from network");
           }
         }
       } else if (cacheStrategy === "cacheOnly") {
         try {
           // cache only
-          const response = await tryLocalCache(handler, request)
+          const response = await tryLocalCache(handler, request);
           if (response && response.ok) {
-            return res(response)
+            return res(response);
           } else {
-            rej("no cache match")
+            rej("no cache match");
           }
         } catch (error) {
-          console.error({ error })
+          console.error({ error });
           // can't go to network to fetch;  Must reject since wasn't in cache.
-          rej(error)
+          rej(error);
         }
       }
-    })
+    });
   }
 }
 
@@ -162,7 +163,7 @@ if (import.meta.env.DEV) {
   // Can just return true
   registerRoute(
     ({ request }) => {
-      if (request.mode == "navigate") return true
+      if (request.mode == "navigate") return true;
     },
     // new NetworkFirst({
     //   cacheName: "all-dev"
@@ -176,18 +177,18 @@ if (import.meta.env.DEV) {
       cacheName: CACHENAMES.lrPagesCache,
       plugins: [new CacheableResponsePlugin({ statuses: [-1] })]
     })
-  )
+  );
 
   //----- HTML DOCS ----
   registerRoute(
     ({ request, url }) => {
-      const isSameOrigin = self.origin === url.origin
-      const isDoc = request.destination === "document"
+      const isSameOrigin = self.origin === url.origin;
+      const isDoc = request.destination === "document";
 
       if (isSameOrigin && isDoc && !url.href?.includes("sw.js")) {
-        return true
+        return true;
       }
-      return false
+      return false;
     },
     new variableCacheOrNetwork({
       cacheName: CACHENAMES.lrPagesCache,
@@ -201,24 +202,24 @@ if (import.meta.env.DEV) {
         })
       ]
     })
-  )
+  );
 }
 
 // @ PROD ROUTES
 if (import.meta.env.PROD) {
-  const precacheUrls = self.__WB_MANIFEST
+  const precacheUrls = self.__WB_MANIFEST;
 
-  precacheAndRoute(precacheUrls)
+  precacheAndRoute(precacheUrls);
 
   //----- HTML DOCS ----
   registerRoute(
     ({ request, url }) => {
-      const isSameOrigin = self.origin === url.origin
-      const isDoc = request.destination === "document"
+      const isSameOrigin = self.origin === url.origin;
+      const isDoc = request.destination === "document";
       if (isSameOrigin && isDoc) {
-        return true
+        return true;
       }
-      return false
+      return false;
     },
     new CacheNetworkRace({
       cacheName: CACHENAMES.lrPagesCache,
@@ -232,12 +233,12 @@ if (import.meta.env.PROD) {
         })
       ]
     })
-  )
+  );
   // # API / Serverless responses
   registerRoute(
     ({ url }) => {
       if (url.href.includes("/api/")) {
-        return true
+        return true;
       }
     },
     new CacheNetworkRace({
@@ -252,12 +253,12 @@ if (import.meta.env.PROD) {
         })
       ]
     })
-  )
+  );
 
   // images
   registerRoute(
     ({ request, sameOrigin }) => {
-      return sameOrigin && request.destination === "image"
+      return sameOrigin && request.destination === "image";
     },
     new CacheFirst({
       cacheName: "live-reader-assets",
@@ -271,5 +272,5 @@ if (import.meta.env.PROD) {
         })
       ]
     })
-  )
+  );
 }

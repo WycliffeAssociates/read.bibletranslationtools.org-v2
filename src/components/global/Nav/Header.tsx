@@ -1,82 +1,83 @@
-import type { i18nDictKeysType } from "@lib/i18n"
-import { resolveTemplate, translator } from "@solid-primitives/i18n"
-import { MobileMenuOpen, HamburgerSvg } from "./MenuButtons"
-import { LoadingSpinner } from "@components"
-import { Index, createSignal, Show, lazy, Suspense } from "solid-js"
-import { addDict } from "./I18nContext"
-const LanguageChoices = lazy(() => import("./LanguageChoices"))
+import type { i18nDictKeysType } from "@lib/i18n";
+import { resolveTemplate, translator } from "@solid-primitives/i18n";
+import { MobileMenuOpen, HamburgerSvg } from "./MenuButtons";
+import { LoadingSpinner } from "@components";
+import { Index, createSignal, Show, lazy, Suspense } from "solid-js";
+import { addDict } from "./I18nContext";
+const LanguageChoices = lazy(() => import("./LanguageChoices"));
 
 interface HeaderProps {
-  menuItems: string[]
-  logo: string
-  logoWebP: string
-  preferredLocale: i18nDictKeysType
-  linkBase: string
-  initialDict: Record<string,string>
-  repoUrl: string
+  menuItems: string[];
+  logo: string;
+  logoWebP: string;
+  preferredLocale: i18nDictKeysType;
+  linkBase: string;
+  initialDict: Record<string, string>;
+  repoUrl: string;
   // children: JSX.Element
 }
 
 export function Header(props: HeaderProps) {
   // full signature
-  const [dict, setDict] = createSignal(props.initialDict)
+  const [dict, setDict] = createSignal(props.initialDict);
   const [dictsFetched, setDictsFetched] = createSignal({
     [props.preferredLocale]: props.initialDict
-  })
+  });
   // t is tracked here
-  // eslint-disable-next-line solid/reactivity 
-  const t = translator(dict, resolveTemplate)
+  // eslint-disable-next-line solid/reactivity
+  const t = translator(dict, resolveTemplate);
 
   // ignore due to seeding intial state
   // eslint-disable-next-line solid/reactivity
-  const [flagShowing, setFlagShowing] = createSignal(props.preferredLocale)
+  const [flagShowing, setFlagShowing] = createSignal(props.preferredLocale);
 
-  const [mobileMenuOpen, setMobileMenuOpen] = createSignal(false)
-  const [languagePickerOpen, setLanguagePickerOpen] = createSignal(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = createSignal(false);
+  const [languagePickerOpen, setLanguagePickerOpen] = createSignal(false);
 
   async function changeLanguage(lang: string): Promise<void> {
-    let newDict: Record<string, string> | undefined, newDictCode: string | undefined;
+    let newDict: Record<string, string> | undefined,
+      newDictCode: string | undefined;
     if (dictsFetched()[lang]) {
-      setDict(dictsFetched()[lang])
-    } else  {
-      const dictCodeAndVal = await addDict(lang)
-      newDict = dictCodeAndVal.newDict
-      newDictCode = dictCodeAndVal.newDictCode
+      setDict(dictsFetched()[lang]);
+    } else {
+      const dictCodeAndVal = await addDict(lang);
+      newDict = dictCodeAndVal.newDict;
+      newDictCode = dictCodeAndVal.newDictCode;
       if (newDict && newDictCode) {
-        const coerceTs = newDictCode as string
-        const coerceTsDict = newDict as Record<string, string>
+        const coerceTs = newDictCode as string;
+        const coerceTsDict = newDict as Record<string, string>;
         setDictsFetched((prev) => {
           return {
             ...prev,
-            [coerceTs] : coerceTsDict
-          }
-        })
-        setDict(newDict)
+            [coerceTs]: coerceTsDict
+          };
+        });
+        setDict(newDict);
       }
     }
-    setFlagShowing(lang)
+    setFlagShowing(lang);
 
     // NOTE: in a different scenario, the reader pane and this menu would be wrapped in same context, but note that Astro's island architecture does not permit the use of traditional JS SPA types contexts.  Each of these components is wrapped in their own context with the same dictonary, and this custom event call the corresponding locale function there.
     // notify Reader Pane localization event listener
     const changeLanguageEvent = new CustomEvent("changelanguage", {
       detail: {
-        newDict: newDict,
+        newDict: newDict
       }
-    })
-    const menu = document.querySelector("#menu")
-    menu && menu.dispatchEvent(changeLanguageEvent)
+    });
+    const menu = document.querySelector("#menu");
+    menu && menu.dispatchEvent(changeLanguageEvent);
 
-    setLanguagePickerOpen(false)
+    setLanguagePickerOpen(false);
   }
   function manageMobileMenu() {
-    setMobileMenuOpen(!mobileMenuOpen())
+    setMobileMenuOpen(!mobileMenuOpen());
   }
   function manageLanguagePickerToggle() {
-    setLanguagePickerOpen(!languagePickerOpen())
+    setLanguagePickerOpen(!languagePickerOpen());
   }
 
-  function menuText():string {
-    return !mobileMenuOpen() ? "menu" : "close"
+  function menuText(): string {
+    return !mobileMenuOpen() ? "menu" : "close";
   }
 
   return (
@@ -99,7 +100,7 @@ export function Header(props: HeaderProps) {
 
         <button
           onClick={() => manageMobileMenu()}
-          class="inline-flex items-center rounded-md border border-solid border-gray-100 px-6 py-2 capitalize rtl:flex-row-reverse lg:hidden"
+          class="inline-flex items-center rounded-md border border-solid border-gray-100 px-6 py-2 capitalize lg:hidden rtl:flex-row-reverse"
         >
           <Show when={!mobileMenuOpen()}>
             <HamburgerSvg classNames="inline-block mr-2 w-6 h-6 fill-white" />
@@ -115,9 +116,8 @@ export function Header(props: HeaderProps) {
           class={`${
             mobileMenuOpen() ? "block" : "hidden"
           } absolute left-0  right-0 top-full  z-50 w-full flex-col bg-darkAccent pt-5 md:static md:flex md:w-auto md:flex-row`}
-
         >
-          <ul class="flex flex-col ltr:pl-4 rtl:pr-4 lg:flex-row">
+          <ul class="flex flex-col lg:flex-row ltr:pl-4 rtl:pr-4">
             <Index each={props.menuItems}>
               {(menuItem) => {
                 return (
@@ -126,7 +126,7 @@ export function Header(props: HeaderProps) {
                       {t(String(menuItem()))}
                     </a>
                   </li>
-                )
+                );
               }}
             </Index>
           </ul>
@@ -167,5 +167,5 @@ export function Header(props: HeaderProps) {
         </div>
       </div>
     </nav>
-  )
+  );
 }

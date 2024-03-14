@@ -17,7 +17,7 @@ export function MobileMenuOpen(props: { classNames?: string }) {
         />
       </svg>
     </>
-  )
+  );
 }
 
 export function HamburgerSvg(props: { classNames?: string }) {
@@ -36,5 +36,5 @@ export function HamburgerSvg(props: { classNames?: string }) {
         fill-opacity="0.8"
       />
     </svg>
-  )
+  );
 }

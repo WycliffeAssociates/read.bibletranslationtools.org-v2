@@ -1,53 +1,52 @@
-import type { Setter, Accessor, Resource } from "solid-js"
-import { type Translator } from "@solid-primitives/i18n"
-import type { storeType } from "../ReaderWrapper/ReaderWrapper"
+import type { Setter, Accessor, Resource } from "solid-js";
+import { type Translator } from "@solid-primitives/i18n";
+import type { storeType } from "../ReaderWrapper/ReaderWrapper";
 import type {
   ISavedInServiceWorkerStatus,
   repoIndexObj
-} from "@customTypes/types"
-import { Dialog } from "@kobalte/core"
+} from "@customTypes/types";
+import { Dialog } from "@kobalte/core";
 import {
   IconClose,
   IconDocument,
   IconBookMark,
   IconWeb,
   IconClock
-} from "@components/Icons/Icons"
-import { DetailItem, SectionHeader } from "./index"
-import { intlDate } from "@lib/utils"
-import { OfflineSection } from "./OfflineSection"
-import { DownloadSection } from "./DownloadSection"
-import { getPortalSpot } from "@lib/utils-ui"
+} from "@components/Icons/Icons";
+import { DetailItem, SectionHeader } from "./index";
+import { intlDate } from "@lib/utils";
+import { OfflineSection } from "./OfflineSection";
+import { DownloadSection } from "./DownloadSection";
+import { getPortalSpot } from "@lib/utils-ui";
 
 interface settingsProps {
-  settingsAreOpen: Accessor<boolean>
-  setSettingsOpen: Setter<boolean>
-  topAmount: () => string
-  repoIndex: repoIndexObj
-  storeInterface: storeType
-  savedInServiceWorker: Resource<ISavedInServiceWorkerStatus>
-  user: string
-  repo: string
-  downloadSourceUsfmArr: repoIndexObj["downloadLinks"]
-  setPrintWholeBook: Setter<boolean>
+  settingsAreOpen: Accessor<boolean>;
+  setSettingsOpen: Setter<boolean>;
+  topAmount: () => string;
+  repoIndex: repoIndexObj;
+  storeInterface: storeType;
+  savedInServiceWorker: Resource<ISavedInServiceWorkerStatus>;
+  user: string;
+  repo: string;
+  downloadSourceUsfmArr: repoIndexObj["downloadLinks"];
+  setPrintWholeBook: Setter<boolean>;
   refetchSwResponses: (
     info?: unknown
   ) =>
     | ISavedInServiceWorkerStatus
     | Promise<ISavedInServiceWorkerStatus | undefined>
     | null
-    | undefined
-  t: Translator<Record<string, string>>
+    | undefined;
+  t: Translator<Record<string, string>>;
 }
 
 export default function Settings(props: settingsProps) {
-
   const resTypeName = () => {
     return (
       props.repoIndex.resourceType?.charAt(0).toLocaleUpperCase() +
       props.repoIndex.resourceType?.slice(1)
-    )
-  }
+    );
+  };
 
   return (
     <Dialog.Root
@@ -140,5 +139,5 @@ export default function Settings(props: settingsProps) {
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
-  )
+  );
 }

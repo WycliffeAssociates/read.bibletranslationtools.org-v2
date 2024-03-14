@@ -1,15 +1,19 @@
-import { createSignal, For, Show } from "solid-js"
+import { createSignal, For, Show } from "solid-js";
 interface mobileTwNavProps {
   filteredWords: () => {
-    slug: string
-    label: string
-    section: string
-  }[]
-  fetchSectionAndNav(event: Event, section: string, hash: string): Promise<void>
-  searchWords(event: Event): void
+    slug: string;
+    label: string;
+    section: string;
+  }[];
+  fetchSectionAndNav(
+    event: Event,
+    section: string,
+    hash: string
+  ): Promise<void>;
+  searchWords(event: Event): void;
 }
 export function MobileTwNav(props: mobileTwNavProps) {
-  const [mobileNavIsOpen, setMobileNavIsOpen] = createSignal(false)
+  const [mobileNavIsOpen, setMobileNavIsOpen] = createSignal(false);
 
   return (
     <>
@@ -80,8 +84,8 @@ export function MobileTwNav(props: mobileTwNavProps) {
                     <a
                       class="ml-2 inline-block px-1 py-2 text-accent underline"
                       onClick={(e) => {
-                        props.fetchSectionAndNav(e, word.section, word.slug)
-                        setMobileNavIsOpen(false)
+                        props.fetchSectionAndNav(e, word.section, word.slug);
+                        setMobileNavIsOpen(false);
                       }}
                       href={`?section=${word.section}#${word.slug}`}
                       data-section={word.section}
@@ -90,14 +94,14 @@ export function MobileTwNav(props: mobileTwNavProps) {
                       {word.label}
                     </a>
                   </li>
-                )
+                );
               }}
             </For>
           </ul>
         </Show>
       </div>
     </>
-  )
+  );
 }
 
 export function BeyondSmallNav(props: mobileTwNavProps) {
@@ -129,10 +133,10 @@ export function BeyondSmallNav(props: mobileTwNavProps) {
                   {word.label}
                 </a>
               </li>
-            )
+            );
           }}
         </For>
       </ul>
     </>
-  )
+  );
 }

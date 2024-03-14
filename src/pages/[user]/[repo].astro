@@ -1,117 +1,117 @@
 ---
-import Layout from "@layouts/Layout.astro"
+import Layout from "@layouts/Layout.astro";
 import {
   ReaderWrapper,
   TranslationWords,
   TranslationManual,
   CommonWrapper
-} from "@components"
+} from "@components";
 import {
   getChapterHtml,
   getTwSchemaHtml,
   getRepoIndex,
   getTmSchemaHtml,
   checkForOrDownloadWholeRepo
-} from "@lib/api"
+} from "@lib/api";
 import {
   getBookAndChapterFromUrl,
   getTwQueryParamOrDefault,
   getPreferredLangFromHeader,
   seedAndMutateInitialDataRepoIndex,
   getTmQueryParamOrDefault
-} from "@lib/utils"
-import { setOriginUrl } from "@lib/routes"
+} from "@lib/utils";
+import { setOriginUrl } from "@lib/routes";
 import type {
   tmProps,
   twProps,
   bibleSchemaProps,
   repoIndexObj
-} from "@src/customTypes/types"
-import { gunzipSync, strFromU8 } from "fflate"
+} from "@src/customTypes/types";
+import { gunzipSync, strFromU8 } from "fflate";
 
-setOriginUrl(Astro.url.origin)
-let { repo, user } = Astro.params
+setOriginUrl(Astro.url.origin);
+let { repo, user } = Astro.params;
 
 const res404 = new Response(null, {
   status: 404
-})
+});
 // url routes validation check
 if (!repo || !user) {
-  return res404
+  return res404;
 }
 
-repo = String(repo)
-user = String(user)
+repo = String(repo);
+user = String(user);
 
-let repoIndex: repoIndexObj | null = null
-let hasDownloadIndex = false
-let wasPostRequest = false
+let repoIndex: repoIndexObj | null = null;
+let hasDownloadIndex = false;
+let wasPostRequest = false;
 // POST REQUESTS COME FROM SETTINGS ACTION WHEN SAVING ENTIRE BOOK OFFLINE..POST BODY IS AN ALREADY DOWNLOADED INDEX AND CONTENT FOR THIS RESOURCE.
 if (Astro.request.method === "POST") {
   try {
-    const body = Astro.request.body
-    if (!body) return
+    const body = Astro.request.body;
+    if (!body) return;
 
-    const arrBuff = await Astro.request.arrayBuffer()
-    const u8Array = new Uint8Array(arrBuff)
-    const decodedU8 = gunzipSync(u8Array)
-    const decodedRepoIndex = JSON.parse(strFromU8(decodedU8)) as repoIndexObj
-    if (!decodedRepoIndex) return
-    repoIndex = decodedRepoIndex
-    wasPostRequest = true
-    hasDownloadIndex = true
+    const arrBuff = await Astro.request.arrayBuffer();
+    const u8Array = new Uint8Array(arrBuff);
+    const decodedU8 = gunzipSync(u8Array);
+    const decodedRepoIndex = JSON.parse(strFromU8(decodedU8)) as repoIndexObj;
+    if (!decodedRepoIndex) return;
+    repoIndex = decodedRepoIndex;
+    wasPostRequest = true;
+    hasDownloadIndex = true;
   } catch (error) {
-    console.error(error)
+    console.error(error);
     return new Response(null, {
       status: 500
-    })
+    });
   }
 }
 
 // NORMAL GET SCENARIO
 if (!repoIndex) {
-  repoIndex = await getRepoIndex({ user, repo })
+  repoIndex = await getRepoIndex({ user, repo });
   hasDownloadIndex = !!(await checkForOrDownloadWholeRepo({
     user,
     repo,
     method: "HEAD"
-  }))
+  }));
 }
 
-if (!repoIndex) return res404
+if (!repoIndex) return res404;
 
 const isBibleSchema = ["bible", "tn", "tq", "commentary"].includes(
   repoIndex.resourceType
-)
-const isTw = repoIndex.resourceType === "tw"
+);
+const isTw = repoIndex.resourceType === "tw";
 
 // grab query params (if present) for initial HTML
 let repoProps: tmProps | twProps | bibleSchemaProps = {
   repoIndex: repoIndex,
   templateType: isBibleSchema ? "BIBLE" : isTw ? "TW" : "TM"
-} as tmProps | twProps | bibleSchemaProps
+} as tmProps | twProps | bibleSchemaProps;
 
 if (repoProps.templateType === "TW") {
   // initial NAV
   const section = getTwQueryParamOrDefault({
     navParam: Astro.url.searchParams.get("section"),
     repoIndex
-  })
-  if (!section) return res404
+  });
+  if (!section) return res404;
 
   // Initial HTML for no bible schema:
   const intialHTML = await getTwSchemaHtml({
     navSection: section,
     user,
     repo
-  })
-  if (!intialHTML) return res404
+  });
+  if (!intialHTML) return res404;
   // ADD PROPS FOR TW PAGES
-  repoProps.initialHtml = intialHTML
-  repoProps.initialPage = section
-  repoProps.pageTitle = `${user}-${repo}`
-  repoProps.user = user
-  repoProps.repo = repo
+  repoProps.initialHtml = intialHTML;
+  repoProps.initialPage = section;
+  repoProps.pageTitle = `${user}-${repo}`;
+  repoProps.user = user;
+  repoProps.repo = repo;
 }
 //# BIBLE SCHEMA PAGE PROPS
 else if (repoProps.templateType === "BIBLE") {
@@ -119,67 +119,67 @@ else if (repoProps.templateType === "BIBLE") {
     book: Astro.url.searchParams.get("book"),
     chapter: Astro.url.searchParams.get("chapter"),
     repoIndex
-  })
+  });
 
-  if (!book && !chapter) return res404
+  if (!book && !chapter) return res404;
 
   //  intial props/data for page;
-  let initialHtml = null
+  let initialHtml = null;
   // post has a complete index
   if (Astro.request.method !== "POST") {
-    if (!repoIndex.bible?.length) return res404
-    initialHtml = await getChapterHtml({ user, repo, book, chapter })
-    if (!initialHtml) return res404
+    if (!repoIndex.bible?.length) return res404;
+    initialHtml = await getChapterHtml({ user, repo, book, chapter });
+    if (!initialHtml) return res404;
     seedAndMutateInitialDataRepoIndex({
       repoIndex,
       book, //slug, not native label;
       chapter,
       initialHtml
-    })
+    });
   }
 
-  repoProps.pageTitle = `${user}-${repo}-${book}-${chapter}`
-  repoProps.book = book
-  repoProps.chapter = chapter
+  repoProps.pageTitle = `${user}-${repo}-${book}-${chapter}`;
+  repoProps.book = book;
+  repoProps.chapter = chapter;
 } else if (repoProps.templateType === "TM") {
   // initial section of TM
   const initialPage = getTmQueryParamOrDefault({
     navParam: Astro.url.searchParams.get("section"),
     repoIndex
-  })
-  if (!initialPage) return res404
+  });
+  if (!initialPage) return res404;
 
   // Initial HTML for no bible schema:
   const intialHTML = await getTmSchemaHtml({
     navSection: initialPage,
     user,
     repo
-  })
-  if (!intialHTML) return res404
+  });
+  if (!intialHTML) return res404;
 
   // ADD PROPS FOR TW PAGES
-  repoProps.pageTitle = `${user}-${repo}-${initialPage}`
-  repoProps.initialPage = initialPage
-  repoProps.initialHtml = intialHTML
+  repoProps.pageTitle = `${user}-${repo}-${initialPage}`;
+  repoProps.initialPage = initialPage;
+  repoProps.initialHtml = intialHTML;
 }
 
 // Set props common to all pages:
-const preferredLocale = getPreferredLangFromHeader(Astro.request)
+const preferredLocale = getPreferredLangFromHeader(Astro.request);
 const initialDictModule = await import(
   `../../translations/${preferredLocale}.js`
-)
+);
 
-const initialDict =  initialDictModule.default as Record<string,string>
+const initialDict = initialDictModule.default as Record<string, string>;
 
 const customFont =
   repoIndex.appMeta?.fontUrl && typeof repoIndex.appMeta?.fontUrl == "string"
     ? repoIndex.appMeta?.fontUrl
-    : null
+    : null;
 const customFontFamily =
   repoIndex.appMeta?.fontFamily &&
   typeof repoIndex.appMeta?.fontFamily == "string"
     ? repoIndex.appMeta?.fontFamily
-    : null
+    : null;
 ---
 
 <Layout
@@ -236,12 +236,12 @@ const customFontFamily =
   // The mobile version of site uses 100vh.. Safari and other mobile browsers have weird 100vh usage though with the changing scrollbars... It's either do to get a true 100vh, until one day
   // https://caniuse.com/?search=svh
   function secDocHeight() {
-    let root = document.documentElement
+    let root = document.documentElement;
     // hacky stuff to adjust based on JS load for a true 100vh, but normalize the behavior between
-    const amount = window.innerHeight + "px"
-    root.style.setProperty("--screenHeight", amount)
+    const amount = window.innerHeight + "px";
+    root.style.setProperty("--screenHeight", amount);
   }
-  window.addEventListener("load", secDocHeight)
-  window.addEventListener("resize", secDocHeight)
-  window.addEventListener("orientationchange", secDocHeight)
+  window.addEventListener("load", secDocHeight);
+  window.addEventListener("resize", secDocHeight);
+  window.addEventListener("orientationchange", secDocHeight);
 </script>

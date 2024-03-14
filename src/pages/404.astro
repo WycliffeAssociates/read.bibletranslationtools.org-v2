@@ -1,13 +1,9 @@
 ---
-import MainLayout from "@layouts/Layout.astro"
+import MainLayout from "@layouts/Layout.astro";
 // export const prerender = true
 ---
 
-<MainLayout
-  title="404"
-  textDir="ltr"
-  repoUrl="https://content.bibletranslationtools.org/"
->
+<MainLayout title="404" textDir="ltr" repoUrl={import.meta.env.PUBLIC_WACS_URL}>
   <body>
     <div class="grid place-content-center w-full pt-16 text-center">
       <h1 class="text-secondary text-[128px]">404</h1>

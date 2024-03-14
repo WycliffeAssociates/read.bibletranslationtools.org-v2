@@ -1,54 +1,53 @@
 import type {
   storeType,
   updateStoreTextParams
-} from "@components/ReaderWrapper/ReaderWrapper"
+} from "@components/ReaderWrapper/ReaderWrapper";
 import type {
   ISavedInServiceWorkerStatus,
   bibleEntryObj,
   repoIndexObj
-} from "@customTypes/types"
-import { checkForOrDownloadWholeRepo } from "@lib/api"
-import { CACHENAMES } from "@lib/contants"
+} from "@customTypes/types";
+import { checkForOrDownloadWholeRepo } from "@lib/api";
+import { CACHENAMES } from "@lib/contants";
 import {
   deleteAllResourceFromSw,
   deleteSingleBookFromSw,
   extractRepoIndexFromSavedWhole,
   getWholeBook
-} from "@lib/utils-ui"
-import { gzipSync, strToU8 } from "fflate"
-import pLimit, { type LimitFunction } from "p-limit"
-import { type Resource, Show, createSignal } from "solid-js"
-import Toggle from "./Toggle"
-import SectionHeader from "./SectionHeader"
-import { Button, Progress } from "@kobalte/core"
-import { IconX, SvgDownload } from "@components/Icons/Icons"
-import type { Translator } from "@solid-primitives/i18n"
+} from "@lib/utils-ui";
+import { gzipSync, strToU8 } from "fflate";
+import pLimit, { type LimitFunction } from "p-limit";
+import { type Resource, Show, createSignal } from "solid-js";
+import Toggle from "./Toggle";
+import SectionHeader from "./SectionHeader";
+import { Button, Progress } from "@kobalte/core";
+import { IconX, SvgDownload } from "@components/Icons/Icons";
+import type { Translator } from "@solid-primitives/i18n";
 
 interface IOfflineSection {
-  savedInServiceWorker: Resource<ISavedInServiceWorkerStatus>
-  repoIndex: repoIndexObj
-  user: string
-  repo: string
-  storeInterface: storeType
+  savedInServiceWorker: Resource<ISavedInServiceWorkerStatus>;
+  repoIndex: repoIndexObj;
+  user: string;
+  repo: string;
+  storeInterface: storeType;
   refetchSwResponses: (
     info?: unknown
   ) =>
     | ISavedInServiceWorkerStatus
     | Promise<ISavedInServiceWorkerStatus | undefined>
     | null
-    | undefined
-    t: Translator<Record<string, string>>
+    | undefined;
+  t: Translator<Record<string, string>>;
 }
 export function OfflineSection(props: IOfflineSection) {
-
   const [saveProgress, setSaveProgress] = createSignal({
     isSaving: false,
     amountStr: "0",
     amountNum: 0,
     isFinished: false,
     didAddResources: false
-  })
-  const [successText, setSuccessText] = createSignal("")
+  });
+  const [successText, setSuccessText] = createSignal("");
 
   function handleProgress(
     limit: LimitFunction,
@@ -56,21 +55,21 @@ export function OfflineSection(props: IOfflineSection) {
     scope: "WHOLE" | "BOOK",
     didAddResources: boolean
   ) {
-    let start: DOMHighResTimeStamp
+    let start: DOMHighResTimeStamp;
 
     function doRafProgress(timestamp: DOMHighResTimeStamp) {
       if (start === undefined) {
-        start = timestamp
+        start = timestamp;
       }
-      const elapsed = timestamp - start
+      const elapsed = timestamp - start;
 
-      const allPromiseLength = promises.length
-      const formatter = new Intl.NumberFormat(navigator.language)
+      const allPromiseLength = promises.length;
+      const formatter = new Intl.NumberFormat(navigator.language);
 
       const numPercent = Math.ceil(
         ((allPromiseLength - limit.pendingCount) / allPromiseLength) * 100
-      )
-      const stringPercent = formatter.format(numPercent)
+      );
+      const stringPercent = formatter.format(numPercent);
       // technically we are saving here, but we want to delay setting the isSaving bool some (200ms here).  Small projects on good internet save instanteously, so it's a little weird to flash the bar.
       setSaveProgress({
         isSaving: elapsed > 200 ? true : false,
@@ -78,9 +77,9 @@ export function OfflineSection(props: IOfflineSection) {
         amountNum: numPercent,
         isFinished: false,
         didAddResources
-      })
+      });
       if (numPercent < Number(formatter.format(100))) {
-        window.requestAnimationFrame(doRafProgress)
+        window.requestAnimationFrame(doRafProgress);
       } else {
         setTimeout(() => {
           setSaveProgress({
@@ -89,26 +88,26 @@ export function OfflineSection(props: IOfflineSection) {
             amountNum: 0,
             isFinished: true,
             didAddResources
-          })
-        }, 2000)
+          });
+        }, 2000);
       }
     }
-    const label = props.storeInterface.currentBookObj()?.label || ""
+    const label = props.storeInterface.currentBookObj()?.label || "";
     scope === "BOOK"
       ? setSuccessText(label)
-      : setSuccessText(`${props.user}/${props.repo}`)
-    window.requestAnimationFrame(doRafProgress)
+      : setSuccessText(`${props.user}/${props.repo}`);
+    window.requestAnimationFrame(doRafProgress);
   }
 
   async function toggleSingleBook(isToggledOn: boolean) {
-    const currentBook = props.storeInterface.currentBookObj()
+    const currentBook = props.storeInterface.currentBookObj();
     const currentChapter = props.storeInterface.getStoreVal(
       "currentChapter"
-    ) as string
-    const bookSlug = currentBook?.slug || ""
-    const bookChapters = currentBook?.chapters.map((chap) => chap.label) || []
-    let promises: Promise<unknown>[] | undefined
-    const limit = pLimit(20)
+    ) as string;
+    const bookSlug = currentBook?.slug || "";
+    const bookChapters = currentBook?.chapters.map((chap) => chap.label) || [];
+    let promises: Promise<unknown>[] | undefined;
+    const limit = pLimit(20);
     if (isToggledOn) {
       promises = await saveSingleBookToSwCache({
         currentBook,
@@ -119,7 +118,7 @@ export function OfflineSection(props: IOfflineSection) {
         currentChapter,
         mutateStoreText: props.storeInterface.mutateStoreText,
         promiseLimit: limit
-      })
+      });
     } else {
       promises = await deleteSingleBookFromSw({
         bookSlug: bookSlug,
@@ -127,21 +126,21 @@ export function OfflineSection(props: IOfflineSection) {
         repo: props.repo,
         user: props.user,
         promiseLimit: limit
-      })
+      });
     }
     if (promises) {
-      await Promise.allSettled(promises)
+      await Promise.allSettled(promises);
     }
-    props.refetchSwResponses()
+    props.refetchSwResponses();
   }
   async function toggleWholeResource(isToggledOn: boolean) {
-    const currentBook = props.storeInterface.currentBookObj()
+    const currentBook = props.storeInterface.currentBookObj();
     const currentChapter = props.storeInterface.getStoreVal(
       "currentChapter"
-    ) as string
-    const bookSlug = currentBook?.slug || ""
-    let promises: Promise<unknown>[] | undefined
-    const limit = pLimit(20)
+    ) as string;
+    const bookSlug = currentBook?.slug || "";
+    let promises: Promise<unknown>[] | undefined;
+    const limit = pLimit(20);
     if (isToggledOn) {
       promises = await saveEntireResourceOffline({
         currentBook,
@@ -152,7 +151,7 @@ export function OfflineSection(props: IOfflineSection) {
         currentChapter,
         mutateStoreText: props.storeInterface.mutateStore,
         promiseLimit: limit
-      })
+      });
     } else {
       promises = await deleteAllResourceFromSw({
         bookSlug: bookSlug,
@@ -160,25 +159,21 @@ export function OfflineSection(props: IOfflineSection) {
         user: props.user,
         repoIndex: props.repoIndex,
         promiseLimit: limit
-      })
+      });
     }
     if (promises) {
-      handleProgress(limit, promises, "WHOLE", isToggledOn)
-      await Promise.allSettled(promises)
+      handleProgress(limit, promises, "WHOLE", isToggledOn);
+      await Promise.allSettled(promises);
     }
 
-    props.refetchSwResponses()
+    props.refetchSwResponses();
   }
   return (
     <div data-title="offlineSection" class="">
       <SectionHeader component="h2" text={"Offline Reading"} />
       <div class="flex items-center justify-between">
         <div class="w-4/5">
-          <p class="text-slate-500">
-            {props.t(
-              "saveForOfflineReading",
-            )}
-          </p>
+          <p class="text-slate-500">{props.t("saveForOfflineReading")}</p>
         </div>
         <Toggle
           onChangeFxn={toggleSingleBook}
@@ -187,9 +182,7 @@ export function OfflineSection(props: IOfflineSection) {
       </div>
       <div class="flex items-center justify-between">
         <div class="w-4/5">
-          <p class="text-slate-500">
-            {props.t("saveWhole")}
-          </p>
+          <p class="text-slate-500">{props.t("saveWhole")}</p>
         </div>
         <Toggle
           onChangeFxn={toggleWholeResource}
@@ -232,9 +225,7 @@ export function OfflineSection(props: IOfflineSection) {
           class="mt-5 flex items-center justify-between bg-accent/10 px-4 py-3"
         >
           <div class="w-10/12">
-            <p class="font-bold text-accent">
-              {props.t("success")}
-            </p>
+            <p class="font-bold text-accent">{props.t("success")}</p>
 
             <p class="">
               {props.t(
@@ -243,7 +234,7 @@ export function OfflineSection(props: IOfflineSection) {
                   : "successRemoving",
                 {
                   bookname: successText()
-                },
+                }
               )}
             </p>
           </div>
@@ -256,7 +247,7 @@ export function OfflineSection(props: IOfflineSection) {
                 amountNum: 0,
                 isFinished: false,
                 didAddResources: false
-              })
+              });
             }}
           >
             <IconX />
@@ -266,20 +257,14 @@ export function OfflineSection(props: IOfflineSection) {
       <Show when={props.savedInServiceWorker()?.wholeIsOutOfDate}>
         <div data-title="successMessage" class="mt-5 bg-accent/10 px-4 py-3">
           <div class="w-10/12">
-            <p class="font-bold text-accent">
-              {props.t("updateAvailable")}
-            </p>
+            <p class="font-bold text-accent">{props.t("updateAvailable")}</p>
 
-            <p class="">
-              {props.t(
-                "wholeSavedAndOutOfDate",
-              )}
-            </p>
+            <p class="">{props.t("wholeSavedAndOutOfDate")}</p>
           </div>
           <Button.Root
             class="mt-3 flex w-auto items-center gap-3 rounded-lg border-gray-200 bg-white px-4 py-3"
             onClick={() => {
-              toggleWholeResource(true)
+              toggleWholeResource(true);
             }}
           >
             <span>{props.t("updateResource")}</span>
@@ -290,20 +275,20 @@ export function OfflineSection(props: IOfflineSection) {
         </div>
       </Show>
     </div>
-  )
+  );
 }
 
 interface ISaveOfflineCommon {
-  user: string
-  repo: string
-  currentBook: bibleEntryObj | undefined
-  savedInServiceWorker: Resource<ISavedInServiceWorkerStatus>
-  repoIndex: repoIndexObj
-  currentChapter: string
+  user: string;
+  repo: string;
+  currentBook: bibleEntryObj | undefined;
+  savedInServiceWorker: Resource<ISavedInServiceWorkerStatus>;
+  repoIndex: repoIndexObj;
+  currentChapter: string;
 }
 interface IsaveSingleBookToSwCache extends ISaveOfflineCommon {
-  mutateStoreText({ book, chapter, val }: updateStoreTextParams): void
-  promiseLimit: LimitFunction
+  mutateStoreText({ book, chapter, val }: updateStoreTextParams): void;
+  promiseLimit: LimitFunction;
 }
 async function saveSingleBookToSwCache({
   currentBook,
@@ -315,10 +300,10 @@ async function saveSingleBookToSwCache({
   mutateStoreText,
   promiseLimit
 }: IsaveSingleBookToSwCache) {
-  const bookSlug = currentBook && currentBook.slug
-  const promises: Array<Promise<unknown>> = []
+  const bookSlug = currentBook && currentBook.slug;
+  const promises: Array<Promise<unknown>> = [];
 
-  if (!bookSlug) return
+  if (!bookSlug) return;
   try {
     const data = await getWholeBook({
       user,
@@ -326,67 +311,70 @@ async function saveSingleBookToSwCache({
       bookSlug,
       savedResponse: savedInServiceWorker()?.wholeResponse,
       storeBook: currentBook
-    })
+    });
     if (!data)
-      throw new Error("There was a problem saving this resource offline")
+      throw new Error("There was a problem saving this resource offline");
 
     // IF SOMEONE HAS PREVIOUSLY SAVED THE WHOLE RESOURCE, WE want to update just that book in the whole offline ready response. IF not, we want to create a origin/pathname/complete resource (even if it is just one book, such as a btt writer project), which can be added to incrementally if desired.
     // open caches once and operate in loop.
     // ROW WHOLE RESOURCE IS FOR JSON
-    const rowWholeResourcesCache = await caches.open(CACHENAMES.complete)
+    const rowWholeResourcesCache = await caches.open(CACHENAMES.complete);
     // LRPAGES IS FOR HTML ONLY
-    const lrApiCache = await caches.open(CACHENAMES.lrApi)
-    const lrPagesCache = await caches.open(CACHENAMES.lrPagesCache)
-    const wholeResourceMatch = savedInServiceWorker()?.wholeResponse?.clone()
-    let indexToPostWith
+    const lrApiCache = await caches.open(CACHENAMES.lrApi);
+    const lrPagesCache = await caches.open(CACHENAMES.lrPagesCache);
+    const wholeResourceMatch = savedInServiceWorker()?.wholeResponse?.clone();
+    let indexToPostWith;
     if (wholeResourceMatch) {
-      const originalRepoIndex = await extractRepoIndexFromSavedWhole(
-        wholeResourceMatch
-      )
+      const originalRepoIndex =
+        await extractRepoIndexFromSavedWhole(wholeResourceMatch);
       if (!originalRepoIndex || !originalRepoIndex.bible)
-        throw new Error("problem fetching repoIndex from service worker")
-      const bib = originalRepoIndex.bible
-      if (!bib) return
-      const correspondingBook = bib?.findIndex((book) => book.slug == data.slug)
-      if (correspondingBook < 0) return
-      bib[correspondingBook] = data
-      indexToPostWith = originalRepoIndex
+        throw new Error("problem fetching repoIndex from service worker");
+      const bib = originalRepoIndex.bible;
+      if (!bib) return;
+      const correspondingBook = bib?.findIndex(
+        (book) => book.slug == data.slug
+      );
+      if (correspondingBook < 0) return;
+      bib[correspondingBook] = data;
+      indexToPostWith = originalRepoIndex;
     } else {
-      const indexClone = structuredClone(repoIndex)
-      const bib = indexClone.bible
-      if (!bib) return
-      const correspondingBook = bib?.findIndex((book) => book.slug == data.slug)
-      if (correspondingBook < 0) return
-      bib[correspondingBook] = data
-      indexToPostWith = indexClone
+      const indexClone = structuredClone(repoIndex);
+      const bib = indexClone.bible;
+      if (!bib) return;
+      const correspondingBook = bib?.findIndex(
+        (book) => book.slug == data.slug
+      );
+      if (correspondingBook < 0) return;
+      bib[correspondingBook] = data;
+      indexToPostWith = indexClone;
     }
 
     const booksWithAllContent = indexToPostWith.bible
       ?.filter((book) => {
-        return book.chapters.every((chap) => !!chap.content)
+        return book.chapters.every((chap) => !!chap.content);
       })
       .map((book) => {
         return {
           slug: book.slug,
           lastRendered: book.lastRendered,
           size: book.chapters.reduce((acc, cur) => (acc += cur.byteCount), 0)
-        }
-      })
+        };
+      });
     const bookWithAllContentSize =
       (booksWithAllContent &&
         booksWithAllContent.reduce((acc, current) => {
-          acc += current.size
-          return acc
+          acc += current.size;
+          return acc;
         }, 0)) ||
-      0
+      0;
     const allContentIsPopulated =
       booksWithAllContent &&
-      booksWithAllContent.length === indexToPostWith.bible?.length
-    const wholeResUrl = new URL(`${window.location.origin}/${user}/${repo}`)
+      booksWithAllContent.length === indexToPostWith.bible?.length;
+    const wholeResUrl = new URL(`${window.location.origin}/${user}/${repo}`);
 
-    const ssrPostPayload = JSON.stringify(indexToPostWith)
+    const ssrPostPayload = JSON.stringify(indexToPostWith);
     // compress to minimize transfer to try to avoid CF timeouts
-    const gzippedPayload = gzipSync(strToU8(ssrPostPayload))
+    const gzippedPayload = gzipSync(strToU8(ssrPostPayload));
 
     promises.push(
       promiseLimit(() => {
@@ -403,9 +391,9 @@ async function saveSingleBookToSwCache({
               "Content-Length": String(bookWithAllContentSize)
             }
           })
-        )
+        );
       })
-    )
+    );
 
     // HTML version to cache
     const htmlSsrUrl = getHtmlSsrUrl({
@@ -413,7 +401,7 @@ async function saveSingleBookToSwCache({
       chapter: currentChapter,
       repo,
       user
-    })
+    });
 
     const htmlSsrUrlRes = await fetch(htmlSsrUrl, {
       method: "POST",
@@ -421,7 +409,7 @@ async function saveSingleBookToSwCache({
       headers: {
         "Content-Type": "text/html"
       }
-    })
+    });
     // will overwrite any existing /complete, but should be fine since it augments existing downloaded books or downloaded whole
     if (htmlSsrUrlRes.ok) {
       promises.push(
@@ -437,21 +425,21 @@ async function saveSingleBookToSwCache({
                 "Content-Length": String(bookWithAllContentSize)
               }
             })
-          )
+          );
         })
-      )
+      );
     }
 
     data.chapters.forEach((chapter) => {
-      const content = chapter.content
-      if (!content) return
+      const content = chapter.content;
+      if (!content) return;
 
       // add to memory
       mutateStoreText({
         book: bookSlug,
         chapter: chapter.label,
         val: content
-      })
+      });
 
       // add to api
       const { apiReq, apiRes } = getApiUrlAndResponse({
@@ -461,37 +449,37 @@ async function saveSingleBookToSwCache({
         lastRendered: repoIndex.lastRendered,
         repo,
         user
-      })
+      });
       promises.push(
         promiseLimit(() => {
-          return lrApiCache.put(apiReq, apiRes)
+          return lrApiCache.put(apiReq, apiRes);
         })
-      )
-    })
-    return promises
+      );
+    });
+    return promises;
   } catch (error) {
-    console.error(error)
+    console.error(error);
   }
 }
 
 interface IgetHtmlSsrUrl {
-  repo: string
-  user: string
-  bookSlug: string
-  chapter: string
+  repo: string;
+  user: string;
+  bookSlug: string;
+  chapter: string;
 }
 function getHtmlSsrUrl({ user, repo, bookSlug, chapter }: IgetHtmlSsrUrl) {
   return new URL(
     `${window.location.origin}/${user}/${repo}?book=${bookSlug}&chapter=${chapter}`
-  )
+  );
 }
 interface IGetApiUrlAndResponse {
-  user: string
-  repo: string
-  bookSlug: string
-  chapter: string
-  content: string
-  lastRendered: string
+  user: string;
+  repo: string;
+  bookSlug: string;
+  chapter: string;
+  content: string;
+  lastRendered: string;
 }
 function getApiUrlAndResponse({
   user,
@@ -503,8 +491,10 @@ function getApiUrlAndResponse({
 }: IGetApiUrlAndResponse) {
   const apiReq = new URL(
     `${window.location.origin}/api/getHtmlForChap?user=${user}&repo=${repo}&book=${bookSlug}&chapter=${chapter}`
-  )
-  const contentLength = String(new TextEncoder().encode(String(content)).length)
+  );
+  const contentLength = String(
+    new TextEncoder().encode(String(content)).length
+  );
   const apiRes = new Response(content, {
     status: 200,
     statusText: "OK",
@@ -513,16 +503,16 @@ function getApiUrlAndResponse({
       "X-Last-Generated": lastRendered,
       "Content-Length": contentLength
     }
-  })
+  });
   return {
     apiReq,
     apiRes
-  }
+  };
 }
 
 interface ISaveEntireResourceOffline extends ISaveOfflineCommon {
-  mutateStoreText(key: "text", val: bibleEntryObj[] | null): void
-  promiseLimit: LimitFunction
+  mutateStoreText(key: "text", val: bibleEntryObj[] | null): void;
+  promiseLimit: LimitFunction;
 }
 async function saveEntireResourceOffline({
   currentBook,
@@ -533,42 +523,42 @@ async function saveEntireResourceOffline({
   mutateStoreText,
   promiseLimit
 }: ISaveEntireResourceOffline) {
-  const promises: Array<Promise<unknown>> = []
+  const promises: Array<Promise<unknown>> = [];
   try {
     const downloadIndex = await checkForOrDownloadWholeRepo({
       user: user,
       repo: repo,
       method: "GET"
-    })
+    });
     if (
       !downloadIndex ||
       typeof downloadIndex != "object" ||
       !downloadIndex.content.length
     )
-      throw new Error("failed to fetch download index")
+      throw new Error("failed to fetch download index");
 
     // response is same shape as working memory, so add to working memory and eliminate need for any other api calls
-    mutateStoreText("text", downloadIndex.content)
+    mutateStoreText("text", downloadIndex.content);
 
     //  clone the current index bc it has some metadata on it, and we are ultimately going to save a complete version of it once merging in the download index.
-    const indexClone = structuredClone(repoIndex)
-    indexClone.bible = downloadIndex.content
-    const ssrPostPayload = JSON.stringify(indexClone)
+    const indexClone = structuredClone(repoIndex);
+    indexClone.bible = downloadIndex.content;
+    const ssrPostPayload = JSON.stringify(indexClone);
 
     // compress to minimize transfer to try to avoid CF timeouts
-    const gzippedPayload = gzipSync(strToU8(ssrPostPayload))
-    const rowWholeResourcesCache = await caches.open(CACHENAMES.complete)
-    const lrApiCache = await caches.open(CACHENAMES.lrApi)
-    const lrPagesCache = await caches.open(CACHENAMES.lrPagesCache)
+    const gzippedPayload = gzipSync(strToU8(ssrPostPayload));
+    const rowWholeResourcesCache = await caches.open(CACHENAMES.complete);
+    const lrApiCache = await caches.open(CACHENAMES.lrApi);
+    const lrPagesCache = await caches.open(CACHENAMES.lrPagesCache);
 
     // SAVE THE WHOLE DOWNLOAD INDEX
-    const swUrl = new URL(`${window.location.origin}/${user}/${repo}`)
+    const swUrl = new URL(`${window.location.origin}/${user}/${repo}`);
     const allBookSlugAndRendered = indexClone.bible.map((book) => {
       return {
         slug: book.slug,
         lastRendered: book.lastRendered
-      }
-    })
+      };
+    });
 
     promises.push(
       promiseLimit(() =>
@@ -587,20 +577,20 @@ async function saveEntireResourceOffline({
           })
         )
       )
-    )
+    );
 
     // GET A SSR'D REQ/RESPONSE THAT WILL SERVE FOR ALL HTML PAGES OF THIS RESOURCE
-    const slug = currentBook?.slug ?? ""
+    const slug = currentBook?.slug ?? "";
     const htmlSsrUrl = getHtmlSsrUrl({
       bookSlug: slug,
       chapter: currentChapter,
       repo,
       user
-    })
+    });
 
-    const smallIndex = JSON.stringify(repoIndex)
+    const smallIndex = JSON.stringify(repoIndex);
     // using the small index here bc in prod I hit the CF limit for execution time several times with big resources (e.g. compressing 20mb json payload).  Since we already are saving the html as a json structure in the cache, we will just load in when the app mounts from the browser in an onMount.  The other reason is that we incrementally delete / update the object in the cache, but have to wholesale replace a cached html response, so, despite the extra bit of onMount loading, it lets the json in the cache be the updateable source of truth and not the html response from the site.
-    const smallPayload = gzipSync(strToU8(smallIndex))
+    const smallPayload = gzipSync(strToU8(smallIndex));
 
     const smallerHtmlSsrUrlRes = await fetch(htmlSsrUrl, {
       method: "POST",
@@ -609,9 +599,9 @@ async function saveEntireResourceOffline({
         "Content-Type": "text/html",
         "Accept-Encoding": "gzip"
       }
-    })
-    const blob = await smallerHtmlSsrUrlRes.blob()
-    const size = blob.size
+    });
+    const blob = await smallerHtmlSsrUrlRes.blob();
+    const size = blob.size;
 
     promises.push(
       promiseLimit(() =>
@@ -628,15 +618,15 @@ async function saveEntireResourceOffline({
           })
         )
       )
-    )
+    );
 
     // We will save each html page below, but we are saving one SSR reponse under a URL that the user shouldn't naturally arrive at (e.g. /complete). When processing a document request in the SW script, it will check to see if there is a match for /origin/user/repo/complete, and serve this (offline ready) response here.
     downloadIndex.content.forEach((book) => {
       // eslint-disable-next-line solid/reactivity
       book.chapters.forEach(async (chapter) => {
         //@ HANDLE STORING CF/AJAX REQS IN SW
-        const content = chapter.content
-        if (!content) return
+        const content = chapter.content;
+        if (!content) return;
 
         const { apiReq, apiRes } = getApiUrlAndResponse({
           bookSlug: book.slug,
@@ -645,17 +635,17 @@ async function saveEntireResourceOffline({
           lastRendered: repoIndex.lastRendered,
           repo,
           user
-        })
+        });
         promises.push(
           promiseLimit(() => {
-            return lrApiCache.put(apiReq, apiRes)
+            return lrApiCache.put(apiReq, apiRes);
           })
-        )
-      })
-    })
+        );
+      });
+    });
 
-    return promises
+    return promises;
   } catch (error) {
-    console.error(error)
+    console.error(error);
   }
 }

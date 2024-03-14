@@ -1,14 +1,14 @@
-import { For, Show } from "solid-js"
-import type { storeType } from "@components/ReaderWrapper/ReaderWrapper"
-import type { Translator } from "@solid-primitives/i18n"
+import { For, Show } from "solid-js";
+import type { storeType } from "@components/ReaderWrapper/ReaderWrapper";
+import type { Translator } from "@solid-primitives/i18n";
 
 interface ChapterProps {
-  storeInterface: storeType
-  isActiveBookAndChap: (str: string) => boolean
+  storeInterface: storeType;
+  isActiveBookAndChap: (str: string) => boolean;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  jumpToNewChapIdx: (...args: any) => void
-  isMobile: boolean
-  t: Translator<Record<string, string>>
+  jumpToNewChapIdx: (...args: any) => void;
+  isMobile: boolean;
+  t: Translator<Record<string, string>>;
 }
 
 export function ChapterList(props: ChapterProps) {
@@ -40,7 +40,7 @@ export function ChapterList(props: ChapterProps) {
                           //   jumpToNewChapIdx(e, idx() + 1)
                           // }}
                           onClick={(e) => {
-                            props.jumpToNewChapIdx(e, book.label)
+                            props.jumpToNewChapIdx(e, book.label);
                           }}
                         >
                           {book.label.replace(/^(0+)/, "")}
@@ -67,7 +67,7 @@ export function ChapterList(props: ChapterProps) {
                       "text-accent": props.isActiveBookAndChap(book.label)
                     }}
                     onClick={(e) => {
-                      props.jumpToNewChapIdx(e, book.label)
+                      props.jumpToNewChapIdx(e, book.label);
                     }}
                   >
                     {book.label.replace(/^(0+)/, "")}
@@ -79,5 +79,5 @@ export function ChapterList(props: ChapterProps) {
         </div>
       </Show>
     </>
-  )
+  );
 }

@@ -61,7 +61,8 @@ html #commonWrapper * {
   font-family: "Atkinson Hyperlegible";
   font-style: normal;
   font-weight: 400;
-  src: local(""),
+  src:
+    local(""),
     url("/fonts/atkinson/atkinson-hyperlegible-v10-latin-ext_latin-regular.woff2")
       format("woff2"),
     url("/fonts/atkinson/atkinson-hyperlegible-v10-latin-ext_latin-regular.woff")
@@ -72,7 +73,8 @@ html #commonWrapper * {
   font-family: "Atkinson Hyperlegible";
   font-style: italic;
   font-weight: 400;
-  src: local(""),
+  src:
+    local(""),
     url("/fonts/atkinson/atkinson-hyperlegible-v10-latin-ext_latin-italic.woff2")
       format("woff2"),
     url("/fonts/atkinson/atkinson-hyperlegible-v10-latin-ext_latin-italic.woff")
@@ -83,7 +85,8 @@ html #commonWrapper * {
   font-family: "Atkinson Hyperlegible";
   font-style: normal;
   font-weight: 700;
-  src: local(""),
+  src:
+    local(""),
     url("/fonts/atkinson/atkinson-hyperlegible-v10-latin-ext_latin-700.woff2")
       format("woff2"),
     url("/fonts/atkinson/atkinson-hyperlegible-v10-latin-ext_latin-700.woff")
@@ -473,7 +476,6 @@ html[dir="rtl"] [class^="poetry-"] .versemarker {
   right: 0;
   left: unset;
 }
-
 
 /* @keyframes fadeIn {
   from {

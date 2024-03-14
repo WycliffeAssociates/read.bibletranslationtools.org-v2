@@ -58,5 +58,5 @@ const language = {
   translations: "Traducciones",
   wholeAlreadySaved: "Este recurso ya está guardado sin conexión.",
   wholeSavedAndOutOfDate: "Existe una nueva versión de este recurso"
-}
-export default language
+};
+export default language;

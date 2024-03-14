@@ -58,5 +58,5 @@ const language = {
   translations: "translations",
   wholeAlreadySaved: "This resource is already saved offline",
   wholeSavedAndOutOfDate: "A new version of this resource is available."
-}
-export default language
+};
+export default language;
