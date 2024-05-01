@@ -6,6 +6,8 @@ import {
   getHtmlWithinSpan
 } from "@lib/utils-ui";
 import { getCommentarySectionHtml } from "@lib/api";
+clickOutside //retain module to keep typescript from stripping out; 
+escapeOut //retain module; 
 
 const [pos, setPos] = createSignal({
   x: "0px",
@@ -47,11 +49,6 @@ function reactToScrollingWhenNoteIsOpen(amount: number) {
 }
 
 export function PreviewPane() {
-  // these are hacks to keep typescript from stripping away "unused imports"
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const clickout = clickOutside;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const escape = escapeOut;
   return (
     <Show when={showFootnote()}>
       <div

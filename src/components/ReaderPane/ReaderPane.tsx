@@ -6,7 +6,7 @@ import {
   batch,
   type Accessor
 } from "solid-js";
-import { SvgArrow } from "@components";
+import { SvgArrow } from "@components/Icons/Icons";
 import NavButtonLinks from "./NavButtons";
 import type { storeType } from "../ReaderWrapper/ReaderWrapper";
 import {
@@ -25,7 +25,7 @@ interface ReaderPaneProps {
   printWholeBook: Accessor<boolean>;
 }
 
-export default function ReaderPane(props: ReaderPaneProps) {
+export function ReaderPane(props: ReaderPaneProps) {
   // for footnote
   let textRef: HTMLDivElement | undefined;
 

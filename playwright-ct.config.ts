@@ -1,10 +1,11 @@
-import type { PlaywrightTestConfig } from "@playwright/experimental-ct-solid";
+import { defineConfig } from "@playwright/experimental-ct-solid";
 import { devices } from "@playwright/experimental-ct-solid";
 
+const env = process.env as Record<string, string>;
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
-const config: PlaywrightTestConfig = {
+export default defineConfig({
   testDir: "./tests",
   testIgnore: ["unit/**", "e2e/**"] /* ONLY RUN COMPONENT TESTS */,
 
@@ -15,11 +16,11 @@ const config: PlaywrightTestConfig = {
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
-  forbidOnly: !!process.env.CI,
+  forbidOnly: !!env.CI,
   /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
+  retries: env.CI ? 2 : 0,
   /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
+  workers: env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: "html",
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
@@ -56,6 +57,4 @@ const config: PlaywrightTestConfig = {
       }
     }
   ]
-};
-
-export default config;
+});

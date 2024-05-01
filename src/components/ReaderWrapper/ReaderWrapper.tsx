@@ -2,7 +2,9 @@ import type { i18nDictKeysType } from "@lib/i18n";
 import { createSignal, createMemo, Show, onMount, batch } from "solid-js";
 import { createStore, produce } from "solid-js/store";
 import { FUNCTIONS_ROUTES } from "@lib/routes";
-import { LoadingSpinner, ReaderMenu, ReaderPane } from "@components";
+import { LoadingSpinner } from "@components/Icons/Icons";
+import { ReaderMenu } from "@components/ReaderMenu/ReaderMenu";
+import { ReaderPane } from "@components/ReaderPane/ReaderPane";
 import { strFromU8, gunzipSync } from "fflate";
 
 import type {
@@ -16,7 +18,7 @@ import { CACHENAMES } from "@lib/contants";
 
 // parameter types at bottom of file due to verbosity.
 
-export default function ReaderWrapper(props: ReaderWrapperProps) {
+export function ReaderWrapper(props: ReaderWrapperProps) {
   //======= Reader App state =============
   // ideally, context is a more native fit than this prop passing for something that is only rendering children, but not possible with Astro and the way islands are implmented.  Just a tradeoff.
 

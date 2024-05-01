@@ -44,7 +44,7 @@ export function clickOutside(el: Element, accessor: () => any) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function escapeOut(el: Element, accessor: () => any) {
+export function escapeOut(_el: Element, accessor: () => any) {
   const onKeypress = (e: KeyboardEvent) => {
     e.key === "Escape" && accessor()?.();
   };

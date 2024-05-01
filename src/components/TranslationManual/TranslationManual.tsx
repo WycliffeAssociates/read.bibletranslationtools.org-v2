@@ -3,7 +3,7 @@ import type { tmProps } from "@src/customTypes/types";
 import { createSignal, Show } from "solid-js";
 import { TMNav } from "./TmNav";
 
-export default function TranslationManual(props: tmProps) {
+export  function TranslationManual(props: tmProps) {
   const [navIsOpen, setNavIsOpen] = createSignal(false);
 
   return (

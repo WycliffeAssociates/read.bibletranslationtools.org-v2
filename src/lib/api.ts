@@ -131,22 +131,6 @@ export async function checkForOrDownloadWholeRepo({
   }
 }
 
-export async function isValidRepo({
-  user,
-  repo
-}: baseApiInfo): Promise<boolean> {
-  if (typeof user !== "string" || typeof repo !== "string") return false;
-  const fetchUrl = FUNCTIONS_ROUTES.isValidRepo({ user, repo });
-  try {
-    const response = await fetch(fetchUrl);
-    const isValid = await response.text();
-    return !!(isValid == "true") || !!(isValid !== "false");
-  } catch (error) {
-    console.error(error);
-    return false;
-  }
-}
-
 export async function getCommentarySectionHtml({
   file,
   user,

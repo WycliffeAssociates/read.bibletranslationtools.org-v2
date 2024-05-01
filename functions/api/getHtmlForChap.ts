@@ -19,7 +19,11 @@ export const onRequestGet: PagesFunction = async (context) => {
   try {
     const baseUrl = env.PIPELINE_API_URL_BASE;
     const finalUrl = `${baseUrl}/${user}/${repo}/${bookKey}/${chapter}.html`;
+    console.log(`fetching ${finalUrl}`);
     const response = await fetch(finalUrl);
+    if (!response.ok) {
+      throw new Error(response.statusText);
+    }
 
     const newResp = new Response(response.body, {
       headers: getHeaders()

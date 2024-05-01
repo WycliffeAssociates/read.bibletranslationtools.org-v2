@@ -5,7 +5,7 @@ import {
   type Setter,
   createResource
 } from "solid-js";
-import { SvgSettings, SvgBook, SvgArrow } from "@components";
+import { SvgSettings, SvgBook, SvgArrow } from "@components/Icons/Icons";
 import { BookList } from "./BookList";
 import { ChapterList } from "./ChapterList";
 import {
@@ -15,13 +15,9 @@ import {
   getPortalSpot
 } from "@lib/utils-ui";
 import { Dialog } from "@kobalte/core";
-
 // https://github.com/solidjs/solid/discussions/845
-// these are hacks (name doesn't matter) to keep typescript from stripping away "unused imports", but these are used as custom solid directives below:
-// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-const clickout = clickOutside;
-// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-const escape = escapeOut;
+clickOutside //retain module to keep typescript from stripping out; 
+escapeOut //retain module; 
 
 import { translator, resolveTemplate } from "@solid-primitives/i18n";
 import type { Component } from "solid-js";
@@ -538,4 +534,5 @@ const ReaderMenu: Component<MenuProps> = (props) => {
     </div>
   );
 };
-export default ReaderMenu;
+
+export { ReaderMenu };

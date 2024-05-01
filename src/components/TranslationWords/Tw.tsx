@@ -8,14 +8,10 @@ import {
   positionPreviewPane
 } from "@lib/utils-ui";
 import { BeyondSmallNav, MobileTwNav } from "./TwNav";
+clickOutside //retain module to keep typescript from stripping out; 
+escapeOut //retain module; 
 
-// these are hacks to keep typescript from stripping away "unused imports" the actual names are unimportant; These are solid custom directives;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const clickout = clickOutside;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const escape = escapeOut;
-
-export default function TranslationWords(props: twProps) {
+export  function TranslationWords(props: twProps) {
   const [searchTerm, setSearchTerm] = createSignal("");
   const [sectionsHTML, setSectionsHTML] = createSignal({
     [props.initialPage]: props.initialHtml ? props.initialHtml : undefined

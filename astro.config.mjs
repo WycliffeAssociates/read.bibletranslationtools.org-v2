@@ -9,7 +9,7 @@ import cloudflare from "@astrojs/cloudflare";
 // https://astro.build/config
 import solidJs from "@astrojs/solid-js";
 // https://vite-pwa-org.netlify.app/frameworks/astro.html
-import AstroPWA from "@vite-pwa/astro";
+import AstroPWA from '@vite-pwa/astro'
 import { manifest } from "./manifest";
 import { visualizer } from "rollup-plugin-visualizer";
 const siteUrl = import.meta.env.PROD
