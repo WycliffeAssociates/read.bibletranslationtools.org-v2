@@ -79,10 +79,7 @@ test("fallback to default locale", async ({ page, context }) => {
 test("history url updating on ajax nav", async ({ page }) => {
   await page.goto("/WycliffeAssociates/en_ulb/");
   await page.waitForLoadState("networkidle");
-  await Promise.all([
-    // page.waitForResponse(/api/), //prefetch on page load calls the api or button click will.  Await either on click
-    page.getByRole("link", { name: "Navigate forwards one chapter" }).click()
-  ]);
+  await page.getByTestId("NavForwardBtn").click();
   await page.waitForSelector("#ch-2"); //ensure chapter 2 of ulb loaded after button click above
 
   expect(page.url()).toContain(
@@ -106,9 +103,7 @@ test("navigate next button hidden on last chapter", async ({ page }) => {
 });
 
 test("Test language change in header", async ({ page }) => {
-  await page.goto(
-    "http://localhost:3000/WycliffeAssociates/en_ulb/?book=John&chapter=3"
-  );
+  await page.goto("/WycliffeAssociates/en_ulb/?book=John&chapter=3");
   const currentLanguageBtn = page.locator("[data-js=languagePicker]");
   await currentLanguageBtn.click();
   const spBtn = page.locator('[data-lang="es"]');
@@ -117,9 +112,7 @@ test("Test language change in header", async ({ page }) => {
 });
 
 test.skip("Test hover of preview panes in desktop", async ({ page }) => {
-  await page.goto(
-    "http://localhost:3000/WycliffeAssociates/en_bc?book=mat&chapter=01"
-  );
+  await page.goto("/WycliffeAssociates/en_bc?book=mat&chapter=01");
   await page.mouse.move(200, 200, { steps: 5 });
   const hoverableLink = page.locator("a[href*='popup://messiah']").first();
   await hoverableLink.hover();

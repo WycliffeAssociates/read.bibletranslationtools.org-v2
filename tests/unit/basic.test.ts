@@ -4,7 +4,7 @@ import { getPreferredLangFromHeader } from "@lib/utils";
 import { FUNCTIONS_ROUTES } from "@lib/routes";
 import type { repoIndexObj } from "@customTypes/types";
 // Edit an assertion and save to see HMR in action
-const baseUrl = "http://localhost:3000";
+const baseUrl = "http://localhost:4321";
 const enUlbRepo = "read/WycliffeAssociates/en_ulb";
 test("default accept language fallback", () => {
   const request = new Request(`${baseUrl}/${enUlbRepo}`, {

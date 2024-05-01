@@ -59,7 +59,10 @@ export function ChapterList(props: ChapterProps) {
           <ul class="grid  h-[80vh] grid-cols-6 place-content-start gap-2 overflow-y-scroll pb-36 ">
             <For each={props.storeInterface.possibleChapters()}>
               {(book) => (
-                <li class="w-full text-center text-xl">
+                <li
+                  class="w-full text-center text-xl"
+                  data-testid="menuChapter"
+                >
                   <button
                     classList={{
                       "w-full p-3 hover:bg-gray-100 focus:outline-2 focus:outline-accent":

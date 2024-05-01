@@ -19,6 +19,7 @@ const siteUrl = import.meta.env.PROD
     : "";
 // https://astro.build/config
 export default defineConfig({
+
   site: siteUrl,
   output: "server",
   adapter: cloudflare({
@@ -51,6 +52,9 @@ export default defineConfig({
     })
   ],
   vite: {
+    ssr: {
+      noExternal: ['path-to-regexp'],
+      },
     plugins: [
       visualizer({
         // open: true,
