@@ -1,4 +1,3 @@
-const mode = import.meta.env.MODE;
 const devUrl = import.meta.env.PUBLIC_FUNCTIONS_API_BASE;
 let base: string | undefined;
 
@@ -24,51 +23,46 @@ interface commentaryIndividual extends repo {
 
 // these names need to align with the names of files in the functions folder.  They are cloudflare workers.
 export function setOriginUrl(origin: string) {
-  base =
-    import.meta.env.MODE === "development"
-      ? devUrl
-      : mode === "test"
-        ? devUrl
-        : mode === "ci"
-          ? devUrl
-          : `${origin}/api`;
+  // base =
+  //   import.meta.env.MODE === "development"
+  //     ? devUrl
+  //     : mode === "test"
+  //       ? devUrl
+  //       : mode === "ci"
+  //         ? devUrl
+  //         : `${origin}/api`;
+  base = `${origin}/api`;
 }
-function supplyBaseLocation() {
-  if (!import.meta.env.PROD) {
-    return devUrl;
-  } else if (typeof window !== "undefined" && import.meta.env.PROD) {
-    const clientBase = `${window.location.origin}/api`;
-    return clientBase;
-  } else if (import.meta.env.CI) {
-    console.log("using dev in ci");
-    return "http://127.0.0.1:8788/api";
+function supplyBaseLocation(): string {
+  if (base) return `${base}`;
+  if (typeof window !== "undefined") {
+    return `${window.location.origin}/api`;
   }
+  return "localhost:4321/api";
 }
 
 const FUNCTIONS_ROUTES = {
   getRepoIndex: ({ user, repo }: repo) => {
-    base = base || supplyBaseLocation();
-    return `${base}/repoIndex?user=${user}&repo=${repo}`;
+    return `${supplyBaseLocation()}/repoIndex?user=${user}&repo=${repo}`;
   },
   getRepoHtml: ({ user, repo, book, chapter }: getRepoHtmlType) => {
-    base = base || supplyBaseLocation();
-    return `${base}/getHtmlForChap?user=${user}&repo=${repo}&book=${book}&chapter=${chapter}`;
+    // todo: try to migrate just this one route
+    //
+    // base = "http://localhost:4321/api";
+    return `${supplyBaseLocation()}/getHtmlForChap?user=${user}&repo=${repo}&book=${book}&chapter=${chapter}`;
   },
   getHtmlForTw: ({ user, repo, navSection }: getNonBibleRepoHtmlType) => {
-    base = base || supplyBaseLocation();
-    return `${base}/getHtmlForTw?user=${user}&repo=${repo}&navSection=${navSection}`;
+    return `${supplyBaseLocation()}/getHtmlForTw?user=${user}&repo=${repo}&navSection=${navSection}`;
   },
   getHtmlForTm: ({ user, repo, navSection }: getNonBibleRepoHtmlType) => {
-    base = base || supplyBaseLocation();
-    return `${base}/getHtmlForTm?user=${user}&repo=${repo}&navSection=${navSection}`;
+    return `${supplyBaseLocation()}/getHtmlForTm?user=${user}&repo=${repo}&navSection=${navSection}`;
   },
   getHtmlForCommentaryIndividualSection: ({
     file,
     user,
     repo
   }: commentaryIndividual) => {
-    base = base || supplyBaseLocation();
-    return `${base}/getHtmlForCommentaryIndividualSection?user=${user}&repo=${repo}&file=${file}`;
+    return `${supplyBaseLocation()}/getHtmlForCommentaryIndividualSection?user=${user}&repo=${repo}&file=${file}`;
   },
   downloadUsfmSrc: ({
     user,
@@ -78,8 +72,8 @@ const FUNCTIONS_ROUTES = {
     book: string | undefined;
   }) => {
     if (!book) return;
-    base = base || supplyBaseLocation();
-    return `${base}/getUsfmSrcDownload?user=${user}&repo=${repo}&book=${book}`;
+
+    return `${supplyBaseLocation()}/getUsfmSrcDownload?user=${user}&repo=${repo}&book=${book}`;
   },
 
   getWholeBookJson: ({
@@ -87,8 +81,7 @@ const FUNCTIONS_ROUTES = {
     repo,
     book
   }: Pick<getRepoHtmlType, "book" | "repo" | "user">) => {
-    base = base || supplyBaseLocation();
-    return `${base}/getWholeBookJson?user=${user}&repo=${repo}&book=${book}`;
+    return `${supplyBaseLocation()}/getWholeBookJson?user=${user}&repo=${repo}&book=${book}`;
   },
   getWholeRepoDownload: ({
     user,
@@ -97,13 +90,11 @@ const FUNCTIONS_ROUTES = {
   }: repo & {
     method: "GET" | "HEAD";
   }) => {
-    base = base || supplyBaseLocation();
-    return `${base}/getWholeRepoDownload?user=${user}&repo=${repo}&method=${method}`;
+    return `${supplyBaseLocation()}/getWholeRepoDownload?user=${user}&repo=${repo}&method=${method}`;
   },
 
   printPdfRoute: () => {
-    base = base || supplyBaseLocation();
-    return `${base}/getPdf`;
+    return `${supplyBaseLocation()}/getPdf`;
   }
 };
 

@@ -1,11 +1,12 @@
 import type { IcfEnv } from "@customTypes/types";
-import { getHeaders, aTagHandler, allParamsAreValid } from "functions/shared";
+import type { APIRoute } from "astro";
+import { getHeaders, aTagHandler, allParamsAreValid } from "@lib/api";
 
-export const onRequestGet: PagesFunction = async (context) => {
-  const request: Request = context.request;
-  const env = context.env as IcfEnv & typeof context.env;
+export const GET: APIRoute = async (context) => {
+  const runtime = context.locals.runtime;
+  const env = runtime.env as IcfEnv;
+  const { url } = context;
 
-  const url = new URL(request.url);
   const user = url.searchParams?.get("user") as string; //invariants are checked below
   const repo = url.searchParams?.get("repo");
   const navSection = url.searchParams?.get("navSection");
@@ -33,7 +34,17 @@ export const onRequestGet: PagesFunction = async (context) => {
       headers: getHeaders()
     });
     const aHandler = new aTagHandler(user, "TW");
-    return new HTMLRewriter()
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let Rewriter: any =
+      typeof HTMLRewriter == "undefined" ? null : HTMLRewriter;
+    if (import.meta.env.DEV) {
+      const htmlRewriteDevModule = await import("htmlrewriter");
+      const module = htmlRewriteDevModule.HTMLRewriter;
+      Rewriter = module;
+    }
+
+    return new Rewriter()
       .on("a[data-is-rc-link]", aHandler)
       .on("a[href*='html']", aHandler)
       .on("img[src*='content.bibletranslationtools.org'", new imgTagHandler())

@@ -4,12 +4,14 @@ import {
   getHeaders,
   allParamsAreValid,
   aTagHandler
-} from "functions/shared";
+} from "@lib/api";
+import type { APIRoute } from "astro";
 
-export const onRequestGet: PagesFunction = async (context) => {
-  const request: Request = context.request;
-  const env = context.env as IcfEnv & typeof context.env;
-  const url = new URL(request.url);
+export const GET: APIRoute = async (context) => {
+  const runtime = context.locals.runtime;
+  const env = runtime.env as IcfEnv;
+  const { url } = context;
+
   const user = url.searchParams?.get("user") as string;
   const repo = url.searchParams?.get("repo") as string;
   const navSection = url.searchParams?.get("navSection");
@@ -33,15 +35,22 @@ export const onRequestGet: PagesFunction = async (context) => {
     const newResp = new Response(response.body, {
       headers: getHeaders()
     });
-    const htmlRewriter = new HTMLRewriter();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let Rewriter: any =
+      typeof HTMLRewriter == "undefined" ? null : HTMLRewriter;
+    if (import.meta.env.DEV) {
+      const htmlRewriteDevModule = await import("htmlrewriter");
+      Rewriter = new htmlRewriteDevModule.HTMLRewriter();
+    }
+
     const handler = new aTagHandler(user, "TM");
     // This line is to transform Hrefs inside the manual from absolute whatever.html into query parameters on the same origin such as
     // <a href="?section=intro#translate-terms">Terms to Know</a>
     possibleFiles &&
       possibleFiles.forEach((possible) => {
-        htmlRewriter.on(`a[href*='${possible}']`, handler);
+        Rewriter.on(`a[href*='${possible}']`, handler);
       });
-    return htmlRewriter.transform(newResp);
+    return Rewriter.transform(newResp);
   } catch (error) {
     console.error(error);
     return new Response(null, {

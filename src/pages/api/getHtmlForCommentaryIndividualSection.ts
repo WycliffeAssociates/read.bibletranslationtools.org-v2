@@ -1,11 +1,12 @@
 import type { IcfEnv } from "@customTypes/types";
-import { getHeaders, allParamsAreValid } from "functions/shared";
+import { getHeaders, allParamsAreValid } from "@lib/api";
+import type { APIRoute } from "astro";
 
-export const onRequestGet: PagesFunction = async (context) => {
-  const request: Request = context.request;
-  const env = context.env as IcfEnv & typeof context.env;
+export const GET: APIRoute = async (context) => {
+  const runtime = context.locals.runtime;
+  const env = runtime.env as IcfEnv;
+  const { url } = context;
 
-  const url = new URL(request.url);
   const file = url.searchParams?.get("file");
   const user = url.searchParams?.get("user");
   const repo = url.searchParams?.get("repo");

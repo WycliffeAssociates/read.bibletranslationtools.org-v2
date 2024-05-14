@@ -66,15 +66,11 @@ const initialDict = initialDictModule.default;
     {pwaInfo && <Fragment set:html={pwaInfo.webManifest.linkTag} />}
 
     <!-- LogRocket initialization -->
-    <script
-      is:inline
-      src="https://cdn.lr-ingest.com/LogRocket.min.js"
-      crossorigin="anonymous"></script>
     <script>
-      window.LogRocket &&
-        window.LogRocket.init("ct7zyg/bible-in-every-language", {
-          rootHostname: "bibleineverylanguage.org"
-        });
+      import LogRocket from "logrocket";
+      LogRocket.init("ct7zyg/bible-in-every-language", {
+        rootHostname: "bibleineverylanguage.org"
+      });
     </script>
     <!-- End LogRocket initialization -->
   </head>
@@ -95,7 +91,7 @@ const initialDict = initialDictModule.default;
     <!-- Cloudflare Web Analytics -->
     <script
       is:inline
-      defer
+      async
       src="https://static.cloudflareinsights.com/beacon.min.js"
       data-cf-beacon='{"token": "feb40c2dec594227888151cf163244d6"}'></script>
     <!-- End Cloudflare Web Analytics -->

@@ -9,7 +9,7 @@ import cloudflare from "@astrojs/cloudflare";
 // https://astro.build/config
 import solidJs from "@astrojs/solid-js";
 // https://vite-pwa-org.netlify.app/frameworks/astro.html
-import AstroPWA from '@vite-pwa/astro'
+import AstroPWA from "@vite-pwa/astro";
 import { manifest } from "./manifest";
 import { visualizer } from "rollup-plugin-visualizer";
 const siteUrl = import.meta.env.PROD
@@ -19,11 +19,13 @@ const siteUrl = import.meta.env.PROD
     : "";
 // https://astro.build/config
 export default defineConfig({
-
   site: siteUrl,
   output: "server",
   adapter: cloudflare({
-    mode: "directory"
+    platformProxy: {
+      enabled: true,
+      configPath: ".dev.vars"
+    }
   }),
   integrations: [
     tailwind(),
@@ -45,7 +47,7 @@ export default defineConfig({
         ]
       },
       devOptions: {
-        enabled: true,
+        enabled: false,
         type: "module"
         /* other options */
       }
@@ -53,10 +55,12 @@ export default defineConfig({
   ],
   vite: {
     ssr: {
-      noExternal: ['path-to-regexp'],
-      },
+      noExternal: ["path-to-regexp"]
+    },
     plugins: [
       visualizer({
+        brotliSize: true,
+        template: "treemap",
         // open: true,
         // goal:  ~100kib of HTML/CSS/Fonts (e.g. check network tab for amount loaded), and then ~300-350kib JS gzipped: see readme for link to article
         gzipSize: true
