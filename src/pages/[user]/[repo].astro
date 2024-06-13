@@ -185,7 +185,7 @@ const customFontFamily =
   customFont={customFont}
   customFontFamily={customFontFamily}
 >
-  <CommonWrapper resourceType={repoIndex.resourceType} client:only="solid-js">
+  <CommonWrapper resourceType={repoIndex.resourceType} client:load>
     <!-- #=============== BIBLE SCHEMA  ============= -->
     {
       repoProps.templateType === "BIBLE" && (
@@ -206,11 +206,7 @@ const customFontFamily =
     <!-- #=============== TW TEMPLATE  ============= -->
     {
       repoProps.templateType === "TW" && (
-        <TranslationWords
-          client:only="solid-js"
-          {...repoProps}
-          repoIndex={repoIndex}
-        />
+        <TranslationWords client:load {...repoProps} repoIndex={repoIndex} />
       )
     }
     <!-- #=============== TM TEMPLATE  ============= -->
@@ -218,7 +214,7 @@ const customFontFamily =
       repoProps.templateType === "TM" && (
         <div class="tm-wrapper  mx-auto h-full  max-w-[105ch] ">
           <TranslationManual
-            client:only="solid-js"
+            client:load
             initialHtml={repoProps.initialHtml}
             templateType={repoProps.templateType}
             initialPage={repoProps.initialPage}
