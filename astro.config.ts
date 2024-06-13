@@ -43,7 +43,7 @@ export default defineConfig({
         globIgnores: ["**/_worker.js/**"]
       },
       devOptions: {
-        enabled: false,
+        enabled: true,
         type: "module"
         /* other options */
       }

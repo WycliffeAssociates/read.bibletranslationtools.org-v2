@@ -1,4 +1,3 @@
-const devUrl = import.meta.env.PUBLIC_FUNCTIONS_API_BASE;
 let base: string | undefined;
 
 interface getRepoHtmlType {
