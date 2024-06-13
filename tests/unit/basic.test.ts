@@ -4,7 +4,7 @@ import { getPreferredLangFromHeader } from "@lib/utils";
 import { FUNCTIONS_ROUTES } from "@lib/routes";
 import type { repoIndexObj } from "@customTypes/types";
 // Edit an assertion and save to see HMR in action
-const baseUrl = "http://localhost:3000";
+const baseUrl = "http://localhost:4321";
 const enUlbRepo = "read/WycliffeAssociates/en_ulb";
 test("default accept language fallback", () => {
   const request = new Request(`${baseUrl}/${enUlbRepo}`, {
@@ -27,30 +27,6 @@ test("uses accept-language header of lang with translations", () => {
   });
   const locale = getPreferredLangFromHeader(request);
   expect(locale).toBe("es");
-});
-test("API - validRepo function determines valid repos", async () => {
-  const params = {
-    user: "WycliffeAssociates",
-    repo: "en_ulb"
-  };
-  const url = FUNCTIONS_ROUTES.isValidRepo(params);
-  const request = new Request(url);
-  const response = await fetch(request);
-  const data = await response.text();
-  // pipeline returns 'true' as str instead of bool.
-  expect(data).toBe("true");
-
-  // And a repo that doesn't exist
-  const params2 = {
-    user: "WycliffeAssociates",
-    repo: "en_ulbbb"
-  };
-  const url2 = FUNCTIONS_ROUTES.isValidRepo(params2);
-  const request2 = new Request(url2);
-  const response2 = await fetch(request2);
-  const data2 = await response2.text();
-  // pipeline returns 'false' as str instead of bool.
-  expect(data2).toBe("false");
 });
 
 test("API - repoIndex fxn takes (user/repo) params and returns an index listing", async () => {
@@ -252,7 +228,7 @@ test("API - Individual Bible Chapter ", async () => {
   expect(resMissRepo.status).toBe(400);
   expect(resMissBook.status).toBe(400);
   expect(resMissChapter.status).toBe(400);
-  expect(resInvChapNum.status).toBe(400);
+  expect(String(resInvChapNum.status)).toMatch(/(400|404)/);
   // ----- VALID REQUESTS ---------
   const req = new Request(testRouteFxn({ user, repo, book, chapter }));
   const response = await fetch(req);

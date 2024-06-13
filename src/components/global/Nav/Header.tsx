@@ -1,7 +1,7 @@
 import type { i18nDictKeysType } from "@lib/i18n";
 import { resolveTemplate, translator } from "@solid-primitives/i18n";
 import { MobileMenuOpen, HamburgerSvg } from "./MenuButtons";
-import { LoadingSpinner } from "@components";
+import { LoadingSpinner } from "@components/Icons/Icons";
 import { Index, createSignal, Show, lazy, Suspense } from "solid-js";
 import { addDict } from "./I18nContext";
 const LanguageChoices = lazy(() => import("./LanguageChoices"));
@@ -21,6 +21,8 @@ export function Header(props: HeaderProps) {
   // full signature
   const [dict, setDict] = createSignal(props.initialDict);
   const [dictsFetched, setDictsFetched] = createSignal({
+    // Ignore due to seeding intial state. Props not changing from server sent props
+    // eslint-disable-next-line solid/reactivity
     [props.preferredLocale]: props.initialDict
   });
   // t is tracked here

@@ -8,13 +8,13 @@ export interface Props {
   customFontFamily?: string | null;
 }
 // imports
-import { pwaInfo } from "virtual:pwa-info";
+import {pwaInfo} from "virtual:pwa-info";
 import "../styles/global.css";
-import { Nav } from "@components";
-import { getPreferredLangFromHeader } from "@lib/utils";
+import Nav from "@components/global/Nav/Nav.astro";
+import {getPreferredLangFromHeader} from "@lib/utils";
 
 // data
-const { title, use100vh, textDir, repoUrl, customFont, customFontFamily } =
+const {title, use100vh, textDir, repoUrl, customFont, customFontFamily} =
   Astro.props;
 
 const preferredLocale = getPreferredLangFromHeader(Astro.request);
@@ -57,29 +57,20 @@ const initialDict = initialDictModule.default;
     <title>{title}</title>
     <meta name="description" content="A site to read rendered USFM" />
     <script src="/src/pwa.ts"></script>
-    {
-      // Astor pwa used to work with just the virtual script, but it wasn't for me during some builds, so going ahead and  making sure to put manifest link here in prod.  As long as the build process spits out manifest.webmanifest, this should be fine.
-      import.meta.env.PROD && pwaInfo && (
-        <Fragment set:html={pwaInfo.webManifest.linkTag} />
-      )
-    }
     {pwaInfo && <Fragment set:html={pwaInfo.webManifest.linkTag} />}
 
     <!-- LogRocket initialization -->
-    <script
-      src="https://cdn.lr-ingest.com/LogRocket.min.js"
-      crossorigin="anonymous"></script>
     <script>
-      window.LogRocket &&
-        window.LogRocket.init("ct7zyg/bible-in-every-language", {
-          rootHostname: "bibleineverylanguage.org"
-        });
+      import LogRocket from "logrocket";
+      LogRocket.init("ct7zyg/bible-in-every-language", {
+        rootHostname: "bibleineverylanguage.org"
+      });
     </script>
     <!-- End LogRocket initialization -->
   </head>
   <body
     style={customFont && customFontFamily
-      ? { "font-family": customFontFamily }
+      ? {"font-family": customFontFamily}
       : null}
     class={customFont && customFontFamily && "usingCustomFont"}
   >
@@ -93,7 +84,8 @@ const initialDict = initialDictModule.default;
     </div>
     <!-- Cloudflare Web Analytics -->
     <script
-      defer
+      is:inline
+      async
       src="https://static.cloudflareinsights.com/beacon.min.js"
       data-cf-beacon='{"token": "feb40c2dec594227888151cf163244d6"}'></script>
     <!-- End Cloudflare Web Analytics -->

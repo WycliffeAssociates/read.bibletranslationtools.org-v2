@@ -3,9 +3,10 @@ import {
   Show,
   batch,
   type Setter,
-  createResource
+  createResource,
+  Suspense
 } from "solid-js";
-import { SvgSettings, SvgBook, SvgArrow } from "@components";
+import { SvgSettings, SvgBook, SvgArrow } from "@components/Icons/Icons";
 import { BookList } from "./BookList";
 import { ChapterList } from "./ChapterList";
 import {
@@ -15,13 +16,9 @@ import {
   getPortalSpot
 } from "@lib/utils-ui";
 import { Dialog } from "@kobalte/core";
-
 // https://github.com/solidjs/solid/discussions/845
-// these are hacks (name doesn't matter) to keep typescript from stripping away "unused imports", but these are used as custom solid directives below:
-// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-const clickout = clickOutside;
-// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-const escape = escapeOut;
+clickOutside; //retain module to keep typescript from stripping out;
+escapeOut; //retain module;
 
 import { translator, resolveTemplate } from "@solid-primitives/i18n";
 import type { Component } from "solid-js";
@@ -284,7 +281,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
   }
 
   return (
-    <div class="mx-auto  bg-white">
+    <div class="mx-auto bg-white">
       <div
         class="mx-auto w-full"
         on:changelanguage={(
@@ -300,10 +297,10 @@ const ReaderMenu: Component<MenuProps> = (props) => {
           use:escapeOut={() => setMenuIsOpen(false)}
           class="mx-auto flex w-full flex-wrap items-center bg-[--clrBackground]"
         >
-          <div class="relative mx-auto flex w-full max-w-[75ch] items-center  justify-between gap-3  bg-white p-3 text-varBase sm:px-8 print:hidden ">
-            <div class="flex w-full justify-between overflow-hidden  rounded-lg bg-white outline outline-1 outline-gray-300 focus-within:outline-2 focus-within:outline-accent">
+          <div class="relative mx-auto flex w-full max-w-[75ch] items-center justify-between gap-3 bg-white p-3 text-varBase sm:px-8 print:hidden">
+            <div class="flex w-full justify-between overflow-hidden rounded-lg bg-white outline outline-1 outline-gray-300 focus-within:outline-2 focus-within:outline-accent">
               <button
-                class="flex h-12 w-full flex-grow items-center justify-between rounded-md  hover:bg-gray-100 ltr:pl-4 rtl:pr-4"
+                class="flex h-12 w-full flex-grow items-center justify-between rounded-md hover:bg-gray-100 ltr:pl-4 rtl:pr-4"
                 onClick={() => togglePanel()}
               >
                 <span class="flex items-center">
@@ -314,7 +311,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                 </span>
 
                 <span
-                  class="menuNumberInput w-[5ch] border-l border-gray-200  py-2 text-center "
+                  class="menuNumberInput w-[5ch] border-l border-gray-200 py-2 text-center"
                   data-testid="chapterNavigation"
                 >
                   {props.storeInterface.getStoreVal("currentChapter")}
@@ -339,12 +336,12 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                   style={{
                     top: topAmount()
                   }}
-                  class="fixed left-1/2  z-50 w-full max-w-[calc(75ch+2rem)] -translate-x-1/2 transform text-varBase"
+                  class="fixed left-1/2 z-50 w-full max-w-[calc(75ch+2rem)] -translate-x-1/2 transform text-varBase"
                   data-title="dialog__positioner"
                 >
                   <Dialog.Content class="" data-title="dialog__content">
                     {/* ===============  shared   =============   */}
-                    <div class="bg-white ">
+                    <div class="bg-white">
                       <div class="border-netural-200 flex content-center border-b p-4">
                         <Dialog.CloseButton
                           class=""
@@ -374,7 +371,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                           {/* Books */}
                           <div class="border-netural-200 w-2/5 border-r">
                             <div class="w-full">
-                              <div class="mt-2  pt-2">
+                              <div class="mt-2 pt-2">
                                 <div class="">
                                   <label for="" class="relative block p-4">
                                     <input
@@ -389,7 +386,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                                       placeholder={t("searchBooks")}
                                       value={searchQuery()}
                                     />
-                                    <span class="absolute top-1/2 inline-block w-6 transform ltr:left-8 ltr:-translate-y-1/2 rtl:right-8  rtl:translate-y-1/2">
+                                    <span class="absolute top-1/2 inline-block w-6 transform ltr:left-8 ltr:-translate-y-1/2 rtl:right-8 rtl:translate-y-1/2">
                                       <IconMagnifyingGlass />
                                     </span>
                                   </label>
@@ -420,16 +417,16 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                       {/* ===============  mobile menu   =============   */}
                       <div
                         id="mobileMenu"
-                        class=" z-10 h-full   w-full  overflow-y-scroll bg-white sm:hidden "
+                        class="z-10 h-full w-full overflow-y-scroll bg-white sm:hidden"
                       >
-                        <ul class="flex justify-between ">
+                        <ul class="flex justify-between">
                           <li class="w-full text-center">
                             <button
                               class={`${
                                 mobileTabOpen() == "book"
                                   ? "w-full border-b-2 border-b-accent font-bold text-accent"
                                   : "underline"
-                              }  py-3 text-xl capitalize`}
+                              } py-3 text-xl capitalize`}
                               onClick={() => {
                                 setMobileTabOpen("book");
                               }}
@@ -467,7 +464,7 @@ const ReaderMenu: Component<MenuProps> = (props) => {
                                 placeholder={t("searchBooks")}
                                 value={searchQuery()}
                               />
-                              <span class="absolute top-1/2 inline-block w-6 transform ltr:left-8 ltr:-translate-y-1/2 rtl:right-8  rtl:translate-y-1/2">
+                              <span class="absolute top-1/2 inline-block w-6 transform ltr:left-8 ltr:-translate-y-1/2 rtl:right-8 rtl:translate-y-1/2">
                                 <IconMagnifyingGlass />
                               </span>
                             </label>
@@ -504,32 +501,34 @@ const ReaderMenu: Component<MenuProps> = (props) => {
 
             {/* //!END table and up menu */}
             <div class="w-1/5 print:hidden">
-              <div class=" relative w-max rounded-md ltr:ml-auto rtl:mr-auto ">
+              <div class="relative w-max rounded-md ltr:ml-auto rtl:mr-auto">
                 <button
-                  class="rounded   px-5  py-2 text-slate-700  hover:bg-gray-100 focus:outline-2 focus:outline-accent"
+                  class="rounded px-5 py-2 text-slate-700 hover:bg-gray-100 focus:outline-2 focus:outline-accent"
                   aria-label={t("openSettings")}
                   onClick={manageOpenSettings}
                 >
                   <SvgSettings classNames="" />
                 </button>
-                <Show when={savedInServiceWorker() && settingsAreOpen()}>
-                  <Settings
-                    settingsAreOpen={settingsAreOpen}
-                    setSettingsOpen={setSettingsAreOpen}
-                    topAmount={topAmount}
-                    repoIndex={props.repoIndex}
-                    storeInterface={props.storeInterface}
-                    savedInServiceWorker={savedInServiceWorker}
-                    user={props.user}
-                    repo={props.repositoryName}
-                    refetchSwResponses={refetch}
-                    setPrintWholeBook={props.setPrintWholeBook}
-                    downloadSourceUsfmArr={props.storeInterface.getStoreVal(
-                      "downloadLinks"
-                    )}
-                    t={t}
-                  />
-                </Show>
+                <Suspense>
+                  <Show when={savedInServiceWorker() && settingsAreOpen()}>
+                    <Settings
+                      settingsAreOpen={settingsAreOpen}
+                      setSettingsOpen={setSettingsAreOpen}
+                      topAmount={topAmount}
+                      repoIndex={props.repoIndex}
+                      storeInterface={props.storeInterface}
+                      savedInServiceWorker={savedInServiceWorker}
+                      user={props.user}
+                      repo={props.repositoryName}
+                      refetchSwResponses={refetch}
+                      setPrintWholeBook={props.setPrintWholeBook}
+                      downloadSourceUsfmArr={props.storeInterface.getStoreVal(
+                        "downloadLinks"
+                      )}
+                      t={t}
+                    />
+                  </Show>
+                </Suspense>
               </div>
             </div>
           </div>
@@ -538,4 +537,5 @@ const ReaderMenu: Component<MenuProps> = (props) => {
     </div>
   );
 };
-export default ReaderMenu;
+
+export { ReaderMenu };

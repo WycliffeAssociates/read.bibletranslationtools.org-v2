@@ -14,7 +14,6 @@
     "noErrorTruncation": true,
     "types": ["astro/client", "@cloudflare/workers-types"],
     "paths": {
-      "@components": ["src/components"],
       "@components/*": ["src/components/*"],
       "@layouts/*": ["src/layouts/*"],
       "@assets/*": ["src/assets/*"],
@@ -24,5 +23,6 @@
       "@src/*": ["src/*"]
     }
   },
-  "include": ["./**/*", "node_modules/vite-plugin-pwa/client.d.ts", "src/**/*"]
+  "include": ["./**/*", "node_modules/vite-plugin-pwa/client.d.ts", "src/**/*"],
+  "exclude": ["functions/[[path]].js", "./dist/**/*",]
 }

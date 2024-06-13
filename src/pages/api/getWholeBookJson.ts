@@ -1,11 +1,13 @@
 import type { IcfEnv } from "@customTypes/types";
-import { getHeaders, allParamsAreValid } from "functions/shared";
+import { getHeaders, allParamsAreValid } from "@lib/api";
+import type { APIRoute } from "astro";
 
-export const onRequestGet: PagesFunction = async (context) => {
-  const request: Request = context.request;
-  const env = context.env as IcfEnv & typeof context.env;
-  const url = new URL(request.url);
-  const user = url.searchParams?.get("user") as string;
+export const GET: APIRoute = async (context) => {
+  const runtime = context.locals.runtime;
+  const env = runtime.env as IcfEnv;
+  const { url } = context;
+
+  const user = url.searchParams?.get("user");
   const repo = url.searchParams?.get("repo");
   const book = url.searchParams?.get("book"); //type guard in if statement beneath; Cast here to satisfy typescript that I'm going to ensure that they are valid params
 

@@ -192,7 +192,7 @@ export function OfflineSection(props: IOfflineSection) {
       <Show when={saveProgress().isSaving}>
         <Progress.Root
           value={saveProgress().amountNum}
-          class="flex w-full flex-col gap-2 "
+          class="flex w-full flex-col gap-2"
           data-title="progress"
         >
           <div
@@ -209,7 +209,7 @@ export function OfflineSection(props: IOfflineSection) {
             </Progress.Label>
           </div>
           <Progress.Track
-            class="block  h-2 rounded-full bg-accent/10"
+            class="block h-2 rounded-full bg-accent/10"
             data-title="progress__track"
           >
             <Progress.Fill
@@ -444,7 +444,7 @@ async function saveSingleBookToSwCache({
       // add to api
       const { apiReq, apiRes } = getApiUrlAndResponse({
         bookSlug,
-        chapter: currentChapter,
+        chapter: chapter.number,
         content,
         lastRendered: repoIndex.lastRendered,
         repo,
