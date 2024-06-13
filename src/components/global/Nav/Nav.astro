@@ -1,22 +1,22 @@
 ---
 const linkBase = "https://bibleineverylanguage.org";
-import type { i18nDictKeysType } from "@lib/i18n";
+import type {i18nDictKeysType} from "@lib/i18n";
 export interface Props {
   preferredLocale: i18nDictKeysType;
   initialDict: Record<string, string>;
   repoUrl: string;
 }
 const menu = ["processes", "resources", "translations", "tools", "support"];
-const { preferredLocale, initialDict, repoUrl } = Astro.props;
+const {preferredLocale, initialDict, repoUrl} = Astro.props;
 import Logo from "@images/logo.png";
 import LogoWebP from "@images/logo.webp";
-import { Header } from "./Header";
+import {Header} from "./Header";
 ---
 
 <!-- using astro file for sever work and for client directive;  -->
 <div>
   <Header
-    client:load
+    client:only="solid-js"
     logo={Logo.src}
     logoWebP={LogoWebP.src}
     menuItems={menu}

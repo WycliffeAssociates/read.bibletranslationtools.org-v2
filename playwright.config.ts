@@ -12,7 +12,7 @@ const env = process.env as Record<string, string>;
  */
 const config: PlaywrightTestConfig = {
   testDir: "./tests",
-  testIgnore: "unit/**" /* covered by vitest for utils */,
+  testIgnore: ["unit/**", "component/**"] /* covered by vitest for utils */,
   /* Maximum time one test can run for. */
   timeout: 30 * 1000,
   expect: {

@@ -30,8 +30,11 @@ export default defineConfig({
     /* Port to use for Playwright component endpoint. */
     ctPort: 3100,
     ctViteConfig: {
+      root: ".",
       resolve: {
-        alias: {}
+        alias: {
+          // src: path.resolve("src")
+        }
       }
     }
   },

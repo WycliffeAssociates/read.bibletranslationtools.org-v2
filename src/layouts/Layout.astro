@@ -57,12 +57,6 @@ const initialDict = initialDictModule.default;
     <title>{title}</title>
     <meta name="description" content="A site to read rendered USFM" />
     <script src="/src/pwa.ts"></script>
-    {
-      // Astor pwa used to work with just the virtual script, but it wasn't for me during some builds, so going ahead and  making sure to put manifest link here in prod.  As long as the build process spits out manifest.webmanifest, this should be fine.
-      import.meta.env.PROD && pwaInfo && (
-        <Fragment set:html={pwaInfo.webManifest.linkTag} />
-      )
-    }
     {pwaInfo && <Fragment set:html={pwaInfo.webManifest.linkTag} />}
 
     <!-- LogRocket initialization -->
