@@ -175,6 +175,10 @@ const customFontFamily =
   typeof repoIndex.appMeta?.fontFamily == "string"
     ? repoIndex.appMeta?.fontFamily
     : null;
+
+if (!repoIndex.repoUrl) {
+  repoIndex.repoUrl = `${import.meta.env.PUBLIC_WACS_URL}/${user}/${repo}`;
+}
 ---
 
 <Layout

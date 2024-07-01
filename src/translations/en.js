@@ -57,6 +57,7 @@ const language = {
   updateResource: "Update Resource",
   translations: "translations",
   wholeAlreadySaved: "This resource is already saved offline",
-  wholeSavedAndOutOfDate: "A new version of this resource is available."
+  wholeSavedAndOutOfDate: "A new version of this resource is available.",
+  wacsSource: "See Source"
 };
 export default language;

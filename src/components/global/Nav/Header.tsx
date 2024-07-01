@@ -86,7 +86,7 @@ export function Header(props: HeaderProps) {
     <nav class="w-full bg-darkAccent py-5 font-sans print:hidden">
       <div class="relative mx-auto flex max-w-[75ch] items-center justify-between px-4 text-varBase text-white">
         {/* https://developer.mozilla.org/en-US/docs/Learn/HTML/Multimedia_and_embedding/Responsive_images#use_modern_image_formats_boldly */}
-        <picture>
+        <picture class="flex-shrink-0">
           <source srcset={props.logoWebP} type="image/webp" />
           <source srcset={props.logo} type="image/jpeg" />
           <img
@@ -117,7 +117,7 @@ export function Header(props: HeaderProps) {
           data-js="mobileMenu"
           class={`${
             mobileMenuOpen() ? "block" : "hidden"
-          } absolute left-0  right-0 top-full  z-50 w-full flex-col bg-darkAccent pt-5 md:static md:flex md:w-auto md:flex-row`}
+          } absolute left-0 right-0 top-full z-50 w-full flex-col bg-darkAccent pt-5 lg:static lg:flex lg:w-auto lg:flex-row lg:flex-wrap`}
         >
           <ul class="flex flex-col lg:flex-row ltr:pl-4 rtl:pr-4">
             <Index each={props.menuItems}>
@@ -131,6 +131,9 @@ export function Header(props: HeaderProps) {
                 );
               }}
             </Index>
+            <li class="my-2 capitalize hover:text-secondary focus:text-secondary md:mx-4 md:my-0">
+              <a href={`${props.repoUrl}`}>{t("wacsSource")}</a>
+            </li>
           </ul>
 
           {/* LANGUAGE PICKER PART OF MENU BUT ADJACENT TO THE NAV PARTS */}
@@ -157,7 +160,7 @@ export function Header(props: HeaderProps) {
             <Show when={languagePickerOpen()}>
               <Suspense
                 fallback={
-                  <div class="absolute left-0 top-full z-20  grid w-full place-content-center bg-darkAccent  py-2 pr-2 text-center lg:left-[unset] lg:right-0 lg:mt-5 lg:w-52 rtl:lg:-right-full">
+                  <div class="absolute left-0 top-full z-20 grid w-full place-content-center bg-darkAccent py-2 pr-2 text-center lg:left-[unset] lg:right-0 lg:mt-5 lg:w-52 rtl:lg:-right-full">
                     <LoadingSpinner />
                   </div>
                 }
