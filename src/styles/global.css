@@ -199,6 +199,11 @@ body.noscroll {
   color: var(--color-accent);
   text-decoration: underline;
 }
+.theText sup {
+  top: -0.75em;
+  margin-inline-end: -4px;
+  margin-inline-start: 4px;
+}
 .tm-wrapper .theText ul {
   list-style-type: disc;
   list-style-position: inside;
@@ -236,13 +241,13 @@ body.noscroll {
 /* .theText h2:has(~ h1) {
   font-size: var(--font-size-xl);
 } */
-
+/* 
 .header {
   margin-top: 1em;
   font-size: 1.5rem;
   font-weight: bold;
   display: inline-block;
-}
+} */
 
 .acrostic-heading {
   display: block;
@@ -270,7 +275,7 @@ body.noscroll {
 
 /* Footnotes */
 .footnotecaller {
-  font-size: 0.5rem;
+  font-size: 0.5em;
   vertical-align: top;
 }
 a[href*="footnote-target"] {
@@ -279,11 +284,11 @@ a[href*="footnote-target"] {
   margin: -0.5rem;
 }
 .footnotes {
-  font-size: 0.75rem;
+  font-size: 0.75em;
 }
 
 .footnote-header {
-  font-size: 1.2rem;
+  font-size: 1.2em;
 }
 
 .footnote-alternate-translation {
@@ -299,7 +304,7 @@ a[href*="footnote-target"] {
 }
 
 .chaptermarker {
-  font-size: 1.5rem;
+  font-size: 1.5em;
   font-weight: bold;
   display: block;
   float: left;
@@ -351,7 +356,7 @@ a[href*="footnote-target"] {
 }
 
 .versemarker {
-  font-size: 0.7rem;
+  font-size: 0.6em;
 }
 
 [class^="poetry-"] .versemarker {
@@ -372,7 +377,7 @@ a[href*="footnote-target"] {
 /* Section */
 .sectionhead-1 {
   margin-top: 2em;
-  font-size: 1.2rem;
+  font-size: 1.2em;
   font-weight: bold;
   display: block;
   text-align: center;
@@ -381,14 +386,14 @@ a[href*="footnote-target"] {
 
 .sectionhead-2 {
   margin-top: 1em;
-  font-size: 1.1rem;
+  font-size: 1.1em;
   font-weight: bold;
   display: block;
 }
 
 .sectionhead-3 {
   margin-top: 1em;
-  font-size: 1.05rem;
+  font-size: 1.05em;
   font-weight: bold;
   display: block;
 }
@@ -428,7 +433,7 @@ a[href*="footnote-target"] {
 .small-caps {
   text-transform: uppercase;
   letter-spacing: 1px;
-  font-size: 0.75rem;
+  font-size: 0.75em;
 }
 
 .center-paragraph {
@@ -439,10 +444,6 @@ a[href*="footnote-target"] {
   font-style: italic;
   font-size: 85%;
   margin-bottom: 1em;
-}
-
-.word-entry {
-  font-size: 1rem;
 }
 
 .cross-ref-quote {
