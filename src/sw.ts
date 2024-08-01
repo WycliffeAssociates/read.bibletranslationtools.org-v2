@@ -62,8 +62,8 @@ class CacheNetworkRace extends Strategy {
       const fetchAndCachePutDone = handler.fetchAndCachePut(request);
       const cacheMatchDone = handler.cacheMatch(request);
 
-      cacheMatchDone.then((response) => response && resolve(response));
       fetchAndCachePutDone.then(resolve);
+      cacheMatchDone.then((response) => response && resolve(response));
 
       // Reject if both network and cache error or find no response.
       Promise.allSettled([fetchAndCachePutDone, cacheMatchDone]).then(
@@ -159,10 +159,16 @@ class variableCacheOrNetwork extends Strategy {
 
 //@ DEV DON'T CACHE
 if (import.meta.env.DEV) {
+  const precacheUrls = self.__WB_MANIFEST;
+  console.log({ precacheUrls });
   // DEV... For testing the variableCacheNet strategy as desired
   // Can just return true
+
   registerRoute(
-    ({ request }) => {
+    ({ request, sameOrigin }) => {
+      console.log(
+        `request: ${request.url} sameOrigin: ${sameOrigin} and destination ${request.destination}`
+      );
       if (request.mode == "navigate") return true;
     },
     // new NetworkFirst({
@@ -180,36 +186,73 @@ if (import.meta.env.DEV) {
   );
 
   //----- HTML DOCS ----
-  registerRoute(
-    ({ request, url }) => {
-      const isSameOrigin = self.origin === url.origin;
-      const isDoc = request.destination === "document";
+  // registerRoute(
+  //   ({ request, url }) => {
+  //     const isSameOrigin = self.origin === url.origin;
+  //     const isDoc = request.destination === "document";
 
-      if (isSameOrigin && isDoc && !url.href?.includes("sw.js")) {
+  //     if (isSameOrigin && isDoc && !url.href?.includes("sw.js")) {
+  //       return true;
+  //     }
+  //     return false;
+  //   },
+  //   new variableCacheOrNetwork({
+  //     cacheName: CACHENAMES.lrPagesCache,
+  //     plugins: [
+  //       new CacheableResponsePlugin({
+  //         statuses: [200]
+  //       }),
+  //       new ExpirationPlugin({
+  //         purgeOnQuotaError: true,
+  //         maxEntries: 50000
+  //       })
+  //     ]
+  //   })
+  // );
+}
+
+// @ PROD ROUTES
+if (import.meta.env.PROD) {
+  const precacheUrls = self.__WB_MANIFEST;
+  console.log({ precacheUrls });
+  precacheAndRoute(precacheUrls);
+
+  async function backupCachePrecacheUrls() {
+    const cache = await caches.open(CACHENAMES.static);
+    const withLeadingSlash = precacheUrls.map((pcEntry) => {
+      if (typeof pcEntry === "string") {
+        return pcEntry.startsWith("/") ? pcEntry : `/${pcEntry}`;
+      } else {
+        return pcEntry.url.startsWith("/") ? pcEntry.url : `/${pcEntry.url}`;
+      }
+    });
+
+    await cache.addAll(withLeadingSlash);
+  }
+
+  backupCachePrecacheUrls();
+  // static js/cs. If we get an old html from cache that references css or js that has changed, this should cover it since the precache urls would have changed with hashed files
+  registerRoute(
+    ({ request, sameOrigin }) => {
+      if (!sameOrigin) return false;
+      if (request.destination == "script" || request.destination == "style") {
         return true;
       }
-      return false;
+      // if (request.mode == "navigate") return true;
     },
-    new variableCacheOrNetwork({
-      cacheName: CACHENAMES.lrPagesCache,
+    new CacheFirst({
+      cacheName: CACHENAMES.static,
       plugins: [
         new CacheableResponsePlugin({
           statuses: [200]
         }),
         new ExpirationPlugin({
           purgeOnQuotaError: true,
-          maxEntries: 50000
+          maxEntries: 250
         })
       ]
     })
   );
-}
-
-// @ PROD ROUTES
-if (import.meta.env.PROD) {
-  const precacheUrls = self.__WB_MANIFEST;
-
-  precacheAndRoute(precacheUrls);
 
   //----- HTML DOCS ----
   registerRoute(

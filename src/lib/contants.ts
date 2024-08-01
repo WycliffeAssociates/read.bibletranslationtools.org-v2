@@ -92,5 +92,6 @@ const htmlCacheVersion = 1;
 export const CACHENAMES = {
   complete: "row-completes",
   lrApi: "live-reader-api",
-  lrPagesCache: `lr-pages-${htmlCacheVersion}`
+  lrPagesCache: `lr-pages-${htmlCacheVersion}`,
+  static: "lr-pages-static"
 };
