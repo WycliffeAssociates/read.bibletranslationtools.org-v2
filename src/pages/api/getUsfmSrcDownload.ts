@@ -3,7 +3,7 @@ import { bibleBookSortOrder } from "@lib/contants";
 import type { IcfEnv } from "@customTypes/types";
 import type { APIRoute } from "astro";
 
-export const GET: APIRoute = async (context) => {
+export const POST: APIRoute = async (context) => {
   const runtime = context.locals.runtime;
   const env = runtime.env as IcfEnv;
   const { url } = context;

@@ -45,9 +45,6 @@ const FUNCTIONS_ROUTES = {
     return `${supplyBaseLocation()}/repoIndex?user=${user}&repo=${repo}`;
   },
   getRepoHtml: ({ user, repo, book, chapter }: getRepoHtmlType) => {
-    // todo: try to migrate just this one route
-    //
-    // base = "http://localhost:4321/api";
     return `${supplyBaseLocation()}/getHtmlForChap?user=${user}&repo=${repo}&book=${book}&chapter=${chapter}`;
   },
   getHtmlForTw: ({ user, repo, navSection }: getNonBibleRepoHtmlType) => {
