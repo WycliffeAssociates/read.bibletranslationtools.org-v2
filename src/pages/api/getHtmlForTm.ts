@@ -37,7 +37,7 @@ export const GET: APIRoute = async (context) => {
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let Rewriter: any =
-      typeof HTMLRewriter == "undefined" ? null : HTMLRewriter;
+      typeof HTMLRewriter == "undefined" ? null : new HTMLRewriter();
     if (import.meta.env.DEV) {
       const htmlRewriteDevModule = await import("htmlrewriter");
       Rewriter = new htmlRewriteDevModule.HTMLRewriter();
