@@ -8,10 +8,10 @@ import {
   positionPreviewPane
 } from "@lib/utils-ui";
 import { BeyondSmallNav, MobileTwNav } from "./TwNav";
-clickOutside //retain module to keep typescript from stripping out; 
-escapeOut //retain module; 
+clickOutside; //retain module to keep typescript from stripping out;
+escapeOut; //retain module;
 
-export  function TranslationWords(props: twProps) {
+export function TranslationWords(props: twProps) {
   const [searchTerm, setSearchTerm] = createSignal("");
   const [sectionsHTML, setSectionsHTML] = createSignal({
     [props.initialPage]: props.initialHtml ? props.initialHtml : undefined
@@ -180,7 +180,7 @@ export  function TranslationWords(props: twProps) {
           use:clickOutside={() => setShowPreviewPane(false)}
           use:escapeOut={() => setShowPreviewPane(false)}
           id="previewPane"
-          class="theText absolute z-30 mx-auto max-h-[50vh]  w-1/2 overflow-y-scroll border border-accent bg-white p-2 shadow  shadow-neutral-500 lg:w-2/5 "
+          class="tw-view theText absolute z-30 mx-auto max-h-[50vh] w-1/2 overflow-y-scroll border border-accent bg-white p-2 shadow shadow-neutral-500 lg:w-2/5"
           style={{ left: pos().x, top: pos().y }}
         >
           <div class="relative h-full w-full">
@@ -207,20 +207,20 @@ export  function TranslationWords(props: twProps) {
           <div class="p-6" innerHTML={previewPaneHtml()} />
         </div>
       </Show>
-      <div class="theTextWrapper mx-auto h-full  max-w-[105ch] bg-white px-2 sm:pl-4 sm:pr-0 print:h-min print:overflow-y-visible">
-        <div class="relative h-full gap-8   overflow-y-scroll sm:flex">
+      <div class="theTextWrapper mx-auto h-full max-w-[105ch] bg-white px-2 sm:pl-4 sm:pr-0 print:h-min print:overflow-y-visible">
+        <div class="relative h-full gap-8 overflow-y-scroll sm:flex">
           <div
-            class="theText tw-theText h-full w-full max-w-[75ch] scroll-pt-16 overflow-y-scroll pt-16  sm:w-4/5 sm:scroll-pt-0  sm:pt-0"
+            class="theText tw-theText h-full w-full max-w-[75ch] scroll-pt-16 overflow-y-scroll pt-16 sm:w-4/5 sm:scroll-pt-0 sm:pt-0"
             innerHTML={sectionsHTML()[activeSection()]}
           />
-          <div class=" sm:hidden">
+          <div class="sm:hidden">
             <MobileTwNav
               filteredWords={filteredWords}
               fetchSectionAndNav={fetchSectionAndNav}
               searchWords={searchWords}
             />
           </div>
-          <div class="customScrollBar sticky right-0 top-0 ml-auto  hidden h-full w-1/5 overflow-y-auto sm:block print:hidden">
+          <div class="customScrollBar sticky right-0 top-0 ml-auto hidden h-full w-1/5 overflow-y-auto sm:block print:hidden">
             <BeyondSmallNav
               filteredWords={filteredWords}
               fetchSectionAndNav={fetchSectionAndNav}
