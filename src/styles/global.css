@@ -205,12 +205,12 @@ body.noscroll {
   margin-inline-start: 4px;
 }
 .tm-wrapper .theText ul,
-.tw-view.theText ul {
+.tw-theText ul {
   list-style-type: disc;
   list-style-position: inside;
 }
 .tm-wrapper .theText ol,
-.tw-view.theText ol {
+.tw-theText ol {
   list-style-type: decimal;
   list-style-position: outside;
 }

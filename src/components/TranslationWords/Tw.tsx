@@ -180,7 +180,7 @@ export function TranslationWords(props: twProps) {
           use:clickOutside={() => setShowPreviewPane(false)}
           use:escapeOut={() => setShowPreviewPane(false)}
           id="previewPane"
-          class="tw-view theText absolute z-30 mx-auto max-h-[50vh] w-1/2 overflow-y-scroll border border-accent bg-white p-2 shadow shadow-neutral-500 lg:w-2/5"
+          class="tw-theText theText absolute z-30 mx-auto max-h-[50vh] w-1/2 overflow-y-scroll border border-accent bg-white p-2 shadow shadow-neutral-500 lg:w-2/5"
           style={{ left: pos().x, top: pos().y }}
         >
           <div class="relative h-full w-full">
