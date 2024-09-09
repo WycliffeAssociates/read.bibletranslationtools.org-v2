@@ -63,11 +63,11 @@ export default function Settings(props: settingsProps) {
             top: props.topAmount()
           }}
           data-title="dialog__settings__content"
-          class="fixed right-0 top-0  z-[60] max-h-[90vh] max-w-sm transform  animate-[fadeOut_.25s_ease-in-out_forwards] overflow-scroll bg-white px-4 pb-10 pt-3 data-[expanded]:animate-[fadeIn_.25s_ease-in-out_forwards]  print:hidden"
+          class="fixed right-0 top-0 z-[60] max-h-[90vh] max-w-sm transform animate-[fadeOut_.25s_ease-in-out_forwards] overflow-scroll bg-white px-4 pb-40 pt-3 data-[expanded]:animate-[fadeIn_.25s_ease-in-out_forwards] print:hidden"
         >
           <div
             data-title="dialog__header"
-            class="relative  mb-8 flex items-center justify-between"
+            class="relative mb-8 flex items-center justify-between"
           >
             <Dialog.Title
               data-title="dialog__title"
@@ -77,7 +77,7 @@ export default function Settings(props: settingsProps) {
             </Dialog.Title>
             <Dialog.CloseButton
               data-title="dialog__close-button"
-              class="border-gray block rounded-md border border-gray-200  p-3 px-4 text-darkAccent hover:bg-gray-100 focus:outline-2 focus:outline-accent ltr:ml-auto rtl:mr-auto"
+              class="border-gray block rounded-md border border-gray-200 p-3 px-4 text-darkAccent hover:bg-gray-100 focus:outline-2 focus:outline-accent ltr:ml-auto rtl:mr-auto"
             >
               <IconClose />
             </Dialog.CloseButton>
