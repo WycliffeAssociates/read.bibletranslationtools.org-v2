@@ -17,12 +17,12 @@ export function ChapterList(props: ChapterProps) {
       <Show when={props.isMobile}>
         <div class="w-full">
           <div class="w-full">
-            <h2 class="mt-2 text-2xl capitalize ltr:ml-2 rtl:mr-2 ">
+            <h2 class="mt-2 text-2xl capitalize ltr:ml-2 rtl:mr-2">
               {props.t("chapters")}
             </h2>
             <div class="mt-2 w-full border-t border-neutral-200 pt-2">
               <div class="p-2">
-                <ul class="grid max-h-[75vh] grid-cols-6 justify-start  gap-2 overflow-y-auto  pb-36">
+                <ul class="grid max-h-[75vh] grid-cols-6 justify-start gap-2 overflow-y-auto pb-36">
                   <For each={props.storeInterface.possibleChapters()}>
                     {(book) => (
                       <li
@@ -56,7 +56,7 @@ export function ChapterList(props: ChapterProps) {
       </Show>
       <Show when={!props.isMobile}>
         <div class="flex-grow p-2">
-          <ul class="grid  h-[80vh] grid-cols-6 place-content-start gap-2 overflow-y-scroll pb-36 ">
+          <ul class="grid h-[80vh] grid-cols-6 place-content-start gap-2 overflow-y-scroll pb-36">
             <For each={props.storeInterface.possibleChapters()}>
               {(book) => (
                 <li

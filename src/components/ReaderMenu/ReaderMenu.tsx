@@ -176,8 +176,9 @@ const ReaderMenu: Component<MenuProps> = (props) => {
     // validate
     if (
       !chapter ||
-      (Number(chapter) &&
-        Number(chapter) > Number(props.storeInterface.maxChapter()))
+      !props.storeInterface
+        .possibleChapters()
+        ?.some((c) => Number(c.number) === Number(chapter))
     ) {
       return;
     }

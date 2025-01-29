@@ -188,15 +188,6 @@ export function ReaderWrapper(props: ReaderWrapperProps) {
 
     return (currentChap && currentChap.content) || undefined;
   });
-  const maxChapter = createMemo(() => {
-    if (!readerStore.text) return;
-    const bookObj = readerStore.text.find((storeBook) => {
-      return storeBook.slug == readerStore.menuBook;
-    });
-
-    const last = bookObj && bookObj.chapters.length;
-    return last;
-  });
   const menuBookNames = createMemo(() => {
     const val = readerStore.text?.map((book) => {
       return {
@@ -262,7 +253,6 @@ export function ReaderWrapper(props: ReaderWrapperProps) {
     getChapObjFromGivenBook,
     HTML,
     wholeBookHtml,
-    maxChapter,
     menuBookNames,
     possibleChapters,
     fetchHtml,
@@ -350,7 +340,7 @@ export function ReaderWrapper(props: ReaderWrapperProps) {
         onScroll={notifyPreviewPaneOfScroll}
         id="readerWrapper"
         data-js="scrollToTop"
-        class=" mx-auto grid max-h-full w-full overflow-hidden bg-[--clrBackground] bg-gray-100  md:justify-center print:!block print:overflow-visible"
+        class="mx-auto grid max-h-full w-full overflow-hidden bg-[--clrBackground] bg-gray-100 md:justify-center print:!block print:overflow-visible"
       >
         <div class="sticky top-0 z-40 w-full">
           <ReaderMenu
@@ -372,7 +362,7 @@ export function ReaderWrapper(props: ReaderWrapperProps) {
           printWholeBook={printWholeBook}
         />
       </div>
-      <div class="relative mx-auto  max-w-[105ch]" id="menuPortalMount" />
+      <div class="relative mx-auto max-w-[105ch]" id="menuPortalMount" />
     </Show>
   );
 }
@@ -475,7 +465,6 @@ export interface storeType {
     chap: number | string
   ): bibleChapObj | undefined;
   HTML: Accessor<string | undefined>;
-  maxChapter: Accessor<number | undefined>;
   menuBookNames: Accessor<
     | {
         label: string;
